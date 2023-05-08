@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
-import Row from "./Row";
 import { TableFrame } from "./Table-styled";
-
-const staticTestData = {
-  columnNum: 10,
-  rowNum: 10,
-};
+import ColumnRuler from "./ColumnRuler";
 
 const Table = () => {
-  return <TableFrame>table</TableFrame>;
+  return (
+    <TableFrame>
+      <ColumnRuler />
+
+      {/* <RowRuler></RowRuler> */}
+    </TableFrame>
+  );
 };
 
 export default Table;
