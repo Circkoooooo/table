@@ -28,7 +28,7 @@ export const getColumnLabel = (columnCount: number): string[] => {
     prefixes: [] as number[],
   };
 
-  // 遍历columnCount次，push的内容为 A B .... Z AA AB AC .... AAA ...
+  // 遍历columnCount次，push的内容为 A B .... Z AA AB AC .... BA ..ZZ ...AAA AAB ...
   for (let i = asciiLimit[0]; i < asciiLimit[0] + columnCount; i++) {
     const tempArr: number[] = [];
     const limitCount = asciiLimit[1] - asciiLimit[0] + 1;
