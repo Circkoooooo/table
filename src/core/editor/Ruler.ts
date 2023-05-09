@@ -6,10 +6,10 @@
  * @param asciiMax
  * @returns
  */
-export function getLoopValue(currentIndex: number, asciiLMin: number, asciiMax: number) {
-  const loopValue = (currentIndex - asciiLMin) % (asciiMax - asciiLMin + 1);
+export function getLoopValue(currentIndex: number, asciiMin: number, asciiMax: number) {
+  const loopValue = (currentIndex - asciiMin) % (asciiMax - asciiMin + 1);
 
-  return String.fromCharCode(loopValue + asciiLMin);
+  return String.fromCharCode(loopValue + asciiMin);
 }
 
 /**
