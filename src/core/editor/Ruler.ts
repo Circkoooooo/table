@@ -7,10 +7,68 @@
  * @returns
  */
 export function getLoopValue(currentIndex: number, asciiLMin: number, asciiMax: number) {
-  asciiMax = asciiMax + 1;
-  const loopValue = (currentIndex - asciiMax) % (asciiMax - asciiLMin);
+  const loopValue = (currentIndex - asciiLMin) % (asciiMax - asciiLMin + 1);
 
-  return String.fromCharCode((loopValue < 0 ? loopValue + asciiMax - asciiLMin : loopValue) + asciiLMin);
+  return String.fromCharCode(loopValue + asciiLMin);
+}
+
+/**
+ * 对数组中的值从后往前进行自增进位
+ * 如果是空数组[]，则传入最小的值minPrefixCode，否则对最后的值进行自增，最后一个值如果大于maxPrefixCode则将它置为minPrefixCode，向前进位。
+ *
+ * 例如当minPrefixCode=65，maxPrefixCode=90。用=>来表示这个函数的调用
+ * 那么当prefixArray为如下值的时候，经过处理后prefixArray中的值变化如下
+ * prefixArray=[65]  =>  [66]
+ * prefixArray=[90]     =>  [65,65]
+ * prefixArray=[65,65]  =>  [65,66]
+ * prefixArray=[]       =>  [65]
+ * prefixArray=[90,90]  =>  [65,65,65]
+ *
+ * @param prefixArray
+ * @param minPrefixCode
+ * @param maxPrefixCode
+ */
+function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) {
+  if (prefixArray.length === 0) {
+    prefixArray[0] = minPrefixCode;
+  } else {
+    if (prefixArray.length === 1) {
+      if (prefixArray[0] + 1 > maxPrefixCode) {
+        prefixArray[0] = minPrefixCode;
+        prefixArray.unshift(minPrefixCode);
+      } else {
+        prefixArray[0]++;
+      }
+    } else {
+      for (let i = prefixArray.length - 1, carry = false, count = 0; i >= 0; i--, count++) {
+        //最后一个索引
+        if (count === 0) {
+          if (prefixArray[i] + 1 > maxPrefixCode) {
+            prefixArray[i] = minPrefixCode;
+            carry = true;
+          } else {
+            prefixArray[i]++;
+          }
+        } else {
+          if (carry) {
+            carry = false;
+
+            if (prefixArray[i] + 1 > maxPrefixCode) {
+              prefixArray[i] = minPrefixCode;
+
+              if (count === prefixArray.length - 1) {
+                prefixArray.unshift(minPrefixCode);
+              } else {
+                carry = true;
+              }
+            } else {
+              prefixArray[i]++;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -22,52 +80,28 @@ export const getColumnLabel = (columnCount: number): string[] => {
   const result: string[] = [];
 
   const previousPrefixCode = {
-    isNextLoopPrefixAdd: false, //在下一轮的时候增加前缀索引的值的变量
-    isCountAdd: false, //前缀数量增加的锁，自增完就变true，直到下一次需要再次使用
-    count: 0,
     prefixes: [] as number[],
+    needAddPrefix: false,
   };
 
   // 遍历columnCount次，push的内容为 A B .... Z AA AB AC .... BA ..ZZ ...AAA AAB ...
   for (let i = asciiLimit[0]; i < asciiLimit[0] + columnCount; i++) {
-    const tempArr: number[] = [];
-    const limitCount = asciiLimit[1] - asciiLimit[0] + 1;
-    const currentLoopCode = getLoopValue(i, asciiLimit[0], asciiLimit[1]).charCodeAt(0);
+    const currentLoopValue = ((i - asciiLimit[0]) % (asciiLimit[1] - asciiLimit[0] + 1)) + asciiLimit[0];
 
-    tempArr.push(i);
+    //判断是否存在要在赋值`needAddPrefix`变量之前，因为这是在下一轮循环中判断的。
+    //如果有前缀标记，处理前缀数组
+    if (previousPrefixCode.needAddPrefix) {
+      previousPrefixCode.needAddPrefix = false;
+      resolvePrefixArray(previousPrefixCode.prefixes, asciiLimit[0], asciiLimit[1]);
+    }
 
-    // 判断条件成立的时候，意味着需要前缀数目要多一位。也就是从 A 变成 AA
-    if (Math.floor((i - asciiLimit[0]) / limitCount) >= previousPrefixCode.count + 1) {
-      const currentIndex = Math.floor(previousPrefixCode.count / limitCount) % limitCount; //当前前缀位置对应的索引。0-26循环，count每26次currentIndex加一
-
-      if (previousPrefixCode.isNextLoopPrefixAdd) {
-        previousPrefixCode.isNextLoopPrefixAdd = false;
-        previousPrefixCode.prefixes[currentIndex] = previousPrefixCode.prefixes[currentIndex] + 1;
-      }
-
-      //如果当前索引位置没有值，则设置一个初始的值
-      if (!previousPrefixCode.prefixes[currentIndex]) {
-        previousPrefixCode.prefixes[currentIndex] = asciiLimit[0];
-      } else {
-        previousPrefixCode.isCountAdd = false;
-
-        //为了在这一轮不立即自增前缀，用isNextLoopPrefixAdd来保留自增轮次
-        if (currentLoopCode === asciiLimit[1]) {
-          previousPrefixCode.isNextLoopPrefixAdd = true;
-        }
-      }
-
-      //TODO:实现当前缀有2个以上的时候，前面的ZA 通过计算变成恰当的值
-
-      //在当前位置的值到循环最后的时候，把前缀数目增加。这时候还要计算count前面所有的值的结果。
-      if (!previousPrefixCode.isCountAdd && previousPrefixCode.prefixes[currentIndex] === asciiLimit[1]) {
-        previousPrefixCode.isCountAdd = true;
-        previousPrefixCode.count++;
-      }
+    //判断是否为最后一个值，如果是，记录前缀标记
+    if (currentLoopValue === asciiLimit[1]) {
+      previousPrefixCode.needAddPrefix = true;
     }
 
     //组合前缀和当前索引
-    result.push(...tempArr.map((item) => previousPrefixCode.prefixes.map((item) => String.fromCharCode(item)).join("") + getLoopValue(item, asciiLimit[0], asciiLimit[1])));
+    result.push(previousPrefixCode.prefixes.map((item) => String.fromCharCode(item)).join("") + String.fromCharCode(currentLoopValue));
   }
   return result;
 };

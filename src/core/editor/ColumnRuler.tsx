@@ -16,7 +16,7 @@ const ColumnRuler: React.FC<ColumnRulerProps> = ({ columnCount = 10 }) => {
 
   //init
   const initConfig = useCallback(() => {
-    const columnArr = getColumnLabel(1000);
+    const columnArr = getColumnLabel(25000);
     const tempConfig: ColumnRulerConfigs = {
       columnCount,
       columnArr,
