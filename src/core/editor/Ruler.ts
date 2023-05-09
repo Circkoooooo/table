@@ -33,19 +33,19 @@ function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPre
     prefixArray[0] = minPrefixCode;
   } else {
     if (prefixArray.length === 1) {
-      if (prefixArray[0] + 1 > maxPrefixCode) {
+      if (prefixArray[0] === maxPrefixCode) {
         prefixArray[0] = minPrefixCode;
         prefixArray.unshift(minPrefixCode);
       } else {
         prefixArray[0]++;
       }
     } else {
-      for (let i = prefixArray.length - 1, carry = false, count = 0; i >= 0; i--, count++) {
+      for (let i = prefixArray.length - 1, carry = false; i >= 0; i--) {
         //最后一个索引
-        if (count === 0) {
-          if (prefixArray[i] + 1 > maxPrefixCode) {
-            prefixArray[i] = minPrefixCode;
+        if (i === prefixArray.length - 1) {
+          if (prefixArray[i] === maxPrefixCode) {
             carry = true;
+            prefixArray[i] = minPrefixCode;
           } else {
             prefixArray[i]++;
           }
@@ -53,13 +53,12 @@ function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPre
           if (carry) {
             carry = false;
 
-            if (prefixArray[i] + 1 > maxPrefixCode) {
+            if (prefixArray[i] === maxPrefixCode) {
+              carry = true;
               prefixArray[i] = minPrefixCode;
 
-              if (count === prefixArray.length - 1) {
+              if (i === 0) {
                 prefixArray.unshift(minPrefixCode);
-              } else {
-                carry = true;
               }
             } else {
               prefixArray[i]++;
