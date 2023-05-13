@@ -1,21 +1,37 @@
 import styled from "styled-components";
 
 interface CellProps {
-  cellColumnIndex: number;
+  top?: boolean;
+  right?: boolean;
+  bottom?: boolean;
+  left?: boolean;
+  transparent?: boolean;
 }
 
 // 表格最外层容器
-export const TableFrame = styled.div`
-  /* min-width: 100%; */
-  /* min-height: 100%; */
-  padding: 5px;
-`;
+export const TableFrame = styled.div``;
 
 // 单元格
-export const Cell = styled.div<CellProps>`
-  width: 100px;
-  display: inline-block;
-  border-color: rgba(0, 0, 0, 0.15);
-  border-width: 2px 2px 2px ${(props) => (props.cellColumnIndex === 0 ? "2px" : "0px")};
-  border-style: solid;
-`;
+export const Cell = styled.div<CellProps>(({ top, right, bottom, left }) => {
+  const DEFAULT_BORDER_WIDTH = 1;
+  const CLEAR_BORDER_WIDTH = 0;
+
+  const borderWidth = [
+    `${top ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+    `${right ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+    `${bottom ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+    `${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+  ];
+
+  return {
+    width: "100px",
+    height: "30px",
+    lineHeight: "30px",
+    display: "inline-block",
+    "border-color": "rgba(0,0,0,0.15)",
+    "border-width": borderWidth.join(" "),
+    "border-style": "solid",
+    textAlign: "center",
+    "vertical-align": "top",
+  };
+});
