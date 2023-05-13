@@ -1,4 +1,4 @@
-import { getColumnLabel, getLoopValue } from "../Ruler";
+import { getLabel, getLoopValue } from "../Ruler";
 
 test("loop value", () => {
   const arr = [];
@@ -17,7 +17,7 @@ test("loop value", () => {
 });
 
 test("creating column label", () => {
-  expect(getColumnLabel(25000)).toMatchSnapshot();
+  expect(getLabel(25000, "A", "Z")).toMatchSnapshot();
 });
 
 export {};

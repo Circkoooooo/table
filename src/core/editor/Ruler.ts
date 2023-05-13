@@ -71,13 +71,26 @@ function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPre
 }
 
 /**
- * 获取列编号
+ * 生成ascii码区间内符合A - Z .. AA - AZ .. AAA AAB - ZZZ ...规则的取值数组
  *
  */
-export const getColumnLabel = (columnCount: number): string[] => {
-  const asciiLimit = [65, 90];
+export const getLabel = (columnCount: number, asciiMin: number | string, asciiMax: number | string): string[] => {
+  const asciiLimit: number[] = [];
   const result: string[] = [];
 
+  if (typeof asciiMin === "number") {
+    asciiLimit.push(asciiMin);
+  } else if (typeof asciiMin === "string") {
+    asciiLimit.push(asciiMin.charCodeAt(0));
+  }
+
+  if (typeof asciiMax === "number") {
+    asciiLimit.push(asciiMax);
+  } else if (typeof asciiMax === "string") {
+    asciiLimit.push(asciiMax.charCodeAt(0));
+  }
+
+  //前缀
   const previousPrefixCode = {
     prefixes: [] as number[],
     needAddPrefix: false,
@@ -105,8 +118,10 @@ export const getColumnLabel = (columnCount: number): string[] => {
   return result;
 };
 
-export const getRowLabel = (): string[] => {
+export const getRowLabel = (count: number, offset = 0): string[] => {
   const result: string[] = [];
+
+  result.push(...Array.from({ length: count }, (val, key) => key + 1 + offset).map((item) => item.toString()));
 
   return result;
 };
