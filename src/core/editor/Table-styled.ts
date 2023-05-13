@@ -5,7 +5,6 @@ interface CellProps {
   right?: boolean;
   bottom?: boolean;
   left?: boolean;
-  transparent?: boolean;
   dark?: boolean;
 }
 
@@ -29,12 +28,13 @@ export const Cell = styled.div<CellProps>(({ top, right, bottom, left, dark }) =
     "border-color": "rgba(0,0,0,0.15)",
     "border-width": borderWidth.join(" "),
     "border-style": "solid",
-    "background-color": dark ? "rgba(0,0,0,0.05)" : "#fff",
+    "background-color": dark ? "#f0f0f0" : "#fff",
     textAlign: "center",
     "vertical-align": "top",
     "user-select": "none",
   };
 });
+
 // data最外层容器
 export const TableFrame = styled.div`
   white-space: nowrap;
@@ -43,9 +43,14 @@ export const TableFrame = styled.div`
 export const TableRowHeader = styled.div`
   display: inline-flex;
   flex-direction: column;
+  position: sticky;
+  left: 0;
 `;
 
-export const TableColumnHeader = styled.div``;
+export const TableColumnHeader = styled.div`
+  position: sticky;
+  top: 0;
+`;
 
 export const TableRowAndDataFrame = styled.div`
   display: flex;

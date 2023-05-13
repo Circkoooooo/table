@@ -1,5 +1,5 @@
 import { Cell, TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowHeader } from "./Table-styled";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { getLabel, getRowLabel } from "./Ruler";
 
 interface ColumnRulerProps {
@@ -9,40 +9,69 @@ interface ColumnRulerProps {
 const tables = [
   [1, 2, 3, 4, 5, 6],
   [3, 4, 5, 6, 7, 8],
+  [1, 2, 3, 4, 5, 6],
+  [3, 4, 5, 6, 7, 8],
   [4, 5, 6, 7, 8, 8],
   [1, 2, 3, 4, 5, 6],
   [3, 4, 5, 6, 7, 8],
   [4, 5, 6, 7, 8, 8],
+  [1, 2, 3, 4, 5, 6],
+  [3, 4, 5, 6, 7, 8],
+  [4, 5, 6, 7, 8, 8],
+  [1, 2, 3, 4, 5, 6],
+  [3, 4, 5, 6, 7, 8],
+  [4, 5, 6, 7, 8, 8],
+  [1, 2, 3, 4, 5, 6],
+  [3, 4, 5, 6, 7, 8],
+  [4, 5, 6, 7, 8, 8],
+  [1, 2, 3, 4, 5, 6],
 ];
 
-const Table: React.FC<ColumnRulerProps> = ({ columnCount = tables[0].length || 26 }) => {
-  const [tableAddition, setTableAddition] = useState({
-    rowLabels: getRowLabel(26 < tables.length ? tables.length : 26, 0),
-    columnLables: getLabel(26 < columnCount ? columnCount : 26, "A", "Z"),
-  });
+const Table: React.FC<ColumnRulerProps> = () => {
+  const [tableAddition, setTableAddition] = useState<{
+    rowLabels: string[];
+    columnLabels: string[];
+  }>({ rowLabels: [], columnLabels: [] });
 
   const [targetTables, setTargetTables] = useState<(number | undefined)[][]>(tables);
 
-  const buildMaskTables = () => {
+  /**
+   * 获取当前数据状态下的的label
+   */
+  const getCurrentTableAddition = () => {
+    return {
+      rowLabels: getRowLabel(26 < tables.length ? tables.length : 26, 0),
+      columnLabels: tables[0] !== undefined ? getLabel(26 < tables[0].length ? tables[0].length : 26, "A", "Z") : [],
+    };
+  };
+
+  /**
+   * 根据table的行数和列数生成填充0的表格，然后把table中的内容复制过来
+   */
+  const buildMaskTables = useCallback(() => {
     return Array.from({ length: tableAddition.rowLabels.length }, (v, row) => {
-      return Array.from({ length: tableAddition.columnLables.length }, (v, column) => {
+      return Array.from({ length: tableAddition.columnLabels.length }, (v, column) => {
         if (row < tables.length && column < tables[row].length) {
           return tables[row][column];
         }
       });
     });
-  };
+  }, [tableAddition.rowLabels.length, tableAddition.columnLabels.length]);
 
   useEffect(() => {
     setTargetTables(buildMaskTables());
-  }, []);
+
+    if (tableAddition.rowLabels.length !== tables.length || tableAddition.columnLabels.length !== tables[0].length) {
+      setTableAddition(getCurrentTableAddition());
+    }
+  }, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length]);
 
   //列表头
   const RenderColumnHeader = () => {
     return (
       <>
-        <Cell top left right transparent></Cell>
-        {tableAddition.columnLables.map((value, index) => {
+        <Cell top left right></Cell>
+        {tableAddition.columnLabels.map((value, index) => {
           return (
             <Cell right top dark key={value}>
               {value}
@@ -83,7 +112,7 @@ const Table: React.FC<ColumnRulerProps> = ({ columnCount = tables[0].length || 2
           return (
             <TableDataRow key={tableAddition.rowLabels[row]}>
               {item.map((value, column) => {
-                const key = `${tableAddition.columnLables[column]}-${tableAddition.rowLabels[row]}`;
+                const key = `${tableAddition.columnLabels[column]}-${tableAddition.rowLabels[row]}`;
                 if (row !== tableAddition.rowLabels.length - 1) {
                   return (
                     <Cell right top key={key}>
