@@ -33,7 +33,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
     columnLabels: string[];
   }>({ rowLabels: [], columnLabels: [] });
 
-  const [targetTables, setTargetTables] = useState<(number | undefined)[][]>(tables);
+  const [targetTables, setTargetTables] = useState<(number | undefined)[][]>();
 
   /**
    * 获取当前数据状态下的的label
@@ -54,6 +54,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
         if (row < tables.length && column < tables[row].length) {
           return tables[row][column];
         }
+        return undefined;
       });
     });
   }, [tableAddition.rowLabels.length, tableAddition.columnLabels.length]);
@@ -108,28 +109,29 @@ const Table: React.FC<ColumnRulerProps> = () => {
   const RenderTableData = () => {
     return (
       <>
-        {targetTables.map((item, row) => {
-          return (
-            <TableDataRow key={tableAddition.rowLabels[row]}>
-              {item.map((value, column) => {
-                const key = `${tableAddition.columnLabels[column]}-${tableAddition.rowLabels[row]}`;
-                if (row !== tableAddition.rowLabels.length - 1) {
-                  return (
-                    <Cell right top key={key}>
-                      {value}
-                    </Cell>
-                  );
-                } else {
-                  return (
-                    <Cell right top bottom key={key}>
-                      {value}
-                    </Cell>
-                  );
-                }
-              })}
-            </TableDataRow>
-          );
-        })}
+        {targetTables &&
+          targetTables.map((item, row) => {
+            return (
+              <TableDataRow key={tableAddition.rowLabels[row]}>
+                {item.map((value, column) => {
+                  const key = `${tableAddition.columnLabels[column]}-${tableAddition.rowLabels[row]}`;
+                  if (row !== tableAddition.rowLabels.length - 1) {
+                    return (
+                      <Cell right top key={key}>
+                        {value}
+                      </Cell>
+                    );
+                  } else {
+                    return (
+                      <Cell right top bottom key={key}>
+                        {value}
+                      </Cell>
+                    );
+                  }
+                })}
+              </TableDataRow>
+            );
+          })}
       </>
     );
   };
