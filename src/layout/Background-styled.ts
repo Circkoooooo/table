@@ -36,4 +36,5 @@ export const Aside = styled.div`
 export const Content = styled.div`
   overflow: auto;
   margin: 5px;
+  display: flex;
 `;
