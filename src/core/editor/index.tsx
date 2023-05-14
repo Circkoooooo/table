@@ -1,6 +1,7 @@
 import { Cell, TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowHeader } from "./Table-styled";
 import React, { useCallback, useEffect, useState } from "react";
 import { getLabel, getRowLabel } from "./Ruler";
+import { arrToKv } from "../../tools/arrToKv";
 
 interface ColumnRulerProps {
   columnCount?: number;
@@ -88,19 +89,17 @@ const Table: React.FC<ColumnRulerProps> = () => {
     return (
       <TableRowHeader>
         {tableAddition.rowLabels.map((value, index) => {
+          const props = [];
           if (index !== tableAddition.rowLabels.length - 1) {
-            return (
-              <Cell right left top dark key={value}>
-                {value}
-              </Cell>
-            );
+            props.push("right", "left", "top", "dark");
           } else {
-            return (
-              <Cell right left top bottom dark key={value}>
-                {value}
-              </Cell>
-            );
+            props.push("right", "left", "top", "bottom", "dark");
           }
+          return (
+            <Cell {...arrToKv(props)} key={value}>
+              {value}
+            </Cell>
+          );
         })}
       </TableRowHeader>
     );
@@ -115,19 +114,19 @@ const Table: React.FC<ColumnRulerProps> = () => {
               <TableDataRow key={tableAddition.rowLabels[row]}>
                 {item.map((value, column) => {
                   const key = `${tableAddition.columnLabels[column]}-${tableAddition.rowLabels[row]}`;
+                  const props = [];
+
                   if (row !== tableAddition.rowLabels.length - 1) {
-                    return (
-                      <Cell right top key={key}>
-                        {value}
-                      </Cell>
-                    );
+                    props.push("right", "top");
                   } else {
-                    return (
-                      <Cell right top bottom key={key}>
-                        {value}
-                      </Cell>
-                    );
+                    props.push("right", "top", "bottom");
                   }
+
+                  return (
+                    <Cell {...arrToKv(props)} key={key}>
+                      {value}
+                    </Cell>
+                  );
                 })}
               </TableDataRow>
             );
