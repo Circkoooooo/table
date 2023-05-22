@@ -196,10 +196,6 @@ const Table: React.FC<ColumnRulerProps> = () => {
 										props.push("right", "top", "bottom")
 									}
 
-									console.log(currentSelectCell.current)
-									if (currentSelectCell.current) {
-									}
-
 									return (
 										<Cell
 											attrs={{
