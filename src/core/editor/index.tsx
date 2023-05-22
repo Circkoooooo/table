@@ -1,4 +1,4 @@
-import { TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowHeader } from "./Table-styled"
+import { TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowAndDataRowFlex, TableRowHeader } from "./Table-styled"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { getLabel, getRowLabel } from "./Ruler"
 import { arrToObject } from "../../tools/arrToObject"
@@ -72,7 +72,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		})
 	}, [tableAddition.rowLabels.length, tableAddition.columnLabels.length])
 
-	const handleCellClick = ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
+	const handleCellMouseDown = ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
 		if (!targetTables || targetTables.length <= row || targetTables[row].length <= column) {
 			throw new Error("Error, it seems that the table has not been rendered.")
 		}
@@ -82,7 +82,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
 		target.focus()
 
-		//record current selected target cell.
+		//record current selected target cell without updating.
 		currentSelectCell.current = {
 			selectRowIndex: row,
 			selectColumnIndex: column,
@@ -134,7 +134,6 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	const RenderColumnHeader = useCallback(() => {
 		return (
 			<>
-				<Cell attrs={{ ...arrToObject(["top", "left", "right"]) }}></Cell>
 				{tableAddition.columnLabels.map((value, index) => {
 					return (
 						<Cell attrs={{ ...arrToObject(["right", "top", "dark"]) }} key={value}>
@@ -149,7 +148,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	//行表头和行列功能格
 	const RenderRowHeader = useCallback(() => {
 		return (
-			<TableRowHeader>
+			<>
 				{tableAddition.rowLabels.map((value, index) => {
 					const props = []
 					if (index !== tableAddition.rowLabels.length - 1) {
@@ -164,7 +163,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 						</Cell>
 					)
 				})}
-			</TableRowHeader>
+			</>
 		)
 	}, [tableAddition.rowLabels])
 
@@ -180,8 +179,8 @@ const Table: React.FC<ColumnRulerProps> = () => {
 									const props = []
 
 									const eventProps = {
-										onClick: (event: React.MouseEvent<HTMLDivElement>) =>
-											handleCellClick({
+										onMouseDown: (event: React.MouseEvent<HTMLDivElement>) =>
+											handleCellMouseDown({
 												event,
 												row,
 												column,
@@ -218,15 +217,19 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	return (
 		<TableFrame>
 			<TableColumnHeader>
+				<Cell attrs={{ ...arrToObject(["top", "left", "right"]) }}></Cell>
 				<RenderColumnHeader />
 			</TableColumnHeader>
+
 			<TableRowAndDataFrame>
-				<TableRowHeader>
-					<RenderRowHeader />
-				</TableRowHeader>
-				<TableDataFrame>
-					<RenderTableData />
-				</TableDataFrame>
+				<TableRowAndDataRowFlex>
+					<TableRowHeader>
+						<RenderRowHeader />
+					</TableRowHeader>
+					<TableDataFrame>
+						<RenderTableData />
+					</TableDataFrame>
+				</TableRowAndDataRowFlex>
 			</TableRowAndDataFrame>
 		</TableFrame>
 	)

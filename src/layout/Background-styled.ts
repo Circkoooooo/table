@@ -21,9 +21,10 @@ export const Header = styled.div`
 
 export const Main = styled.div`
 	width: 100%;
+	height: 100%;
 	flex: 1;
-	overflow: hidden;
 	display: flex;
+	overflow: hidden;
 `
 
 export const Aside = styled.div`
@@ -34,7 +35,7 @@ export const Aside = styled.div`
 `
 
 export const Content = styled.div`
-	overflow: auto;
 	margin: 5px;
 	display: flex;
+	overflow: hidden;
 `
