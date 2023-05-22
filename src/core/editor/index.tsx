@@ -1,227 +1,239 @@
-import { TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowHeader } from "./Table-styled";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { getLabel, getRowLabel } from "./Ruler";
-import { arrToObject } from "../../tools/arrToObject";
-import Cell from "./Cell";
+import { TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowHeader } from "./Table-styled"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { getLabel, getRowLabel } from "./Ruler"
+import { arrToObject } from "../../tools/arrToObject"
+import Cell from "./Cell"
 
 interface ColumnRulerProps {
-  columnCount?: number;
+	columnCount?: number
 }
 
 interface CurrentSelectCellInfo {
-  selectRowIndex: number;
-  selectColumnIndex: number;
-  newTargetTable?: AbstractTableElementType[][];
+	selectRowIndex: number
+	selectColumnIndex: number
+	newTargetTable?: AbstractTableElementType[][]
 }
 
-type AbstractTableElementType = string | number | undefined | null;
+type AbstractTableElementType = string | number | undefined | null
 
-const [EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE] = ["contentEditable", "true"];
+const [EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE] = ["contentEditable", "true"]
 
 const tables: AbstractTableElementType[][] = [
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [4, 5, 6, 7, 8, 8],
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [4, 5, 6, 7, 8, 8],
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [4, 5, 6, 7, 8, 8],
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [4, 5, 6, 7, 8, 8],
-  [1, 2, 3, 4, 5, 6],
-  [3, 4, 5, 6, 7, 8],
-  [4, 5, 6, 7, 8, 8],
-  [1, 2, 3, 4, 5, 6],
-];
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[4, 5, 6, 7, 8, 8],
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[4, 5, 6, 7, 8, 8],
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[4, 5, 6, 7, 8, 8],
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[4, 5, 6, 7, 8, 8],
+	[1, 2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7, 8],
+	[4, 5, 6, 7, 8, 8],
+	[1, 2, 3, 4, 5, 6],
+]
 
 const Table: React.FC<ColumnRulerProps> = () => {
-  const [tableAddition, setTableAddition] = useState<{
-    rowLabels: string[];
-    columnLabels: string[];
-  }>({ rowLabels: [], columnLabels: [] });
+	const [tableAddition, setTableAddition] = useState<{
+		rowLabels: string[]
+		columnLabels: string[]
+	}>({ rowLabels: [], columnLabels: [] })
 
-  const [targetTables, setTargetTables] = useState<AbstractTableElementType[][]>();
-  const currentSelectCell = useRef<CurrentSelectCellInfo | null>(null); //click后记录
+	const [targetTables, setTargetTables] = useState<AbstractTableElementType[][]>()
+	const currentSelectCell = useRef<CurrentSelectCellInfo | null>(null) //click后记录
 
-  /**
-   * 获取当前数据状态下的的label
-   */
-  const getCurrentTableAddition = () => {
-    return {
-      rowLabels: getRowLabel(26 < tables.length ? tables.length : 26, 0),
-      columnLabels: tables[0] !== undefined ? getLabel(26 < tables[0].length ? tables[0].length : 26, "A", "Z") : [],
-    };
-  };
+	/**
+	 * 获取当前数据状态下的的label
+	 */
+	const getCurrentTableAddition = () => {
+		return {
+			rowLabels: getRowLabel(26 < tables.length ? tables.length : 26, 0),
+			columnLabels: tables[0] !== undefined ? getLabel(26 < tables[0].length ? tables[0].length : 26, "A", "Z") : [],
+		}
+	}
 
-  /**
-   * 根据table的行数和列数生成填充0的表格，然后把table中的内容复制过来
-   */
-  const buildMaskTables = useCallback(() => {
-    return Array.from({ length: tableAddition.rowLabels.length }, (v, row) => {
-      return Array.from({ length: tableAddition.columnLabels.length }, (v, column) => {
-        if (row < tables.length && column < tables[row].length) {
-          return tables[row][column];
-        }
-        return undefined;
-      });
-    });
-  }, [tableAddition.rowLabels.length, tableAddition.columnLabels.length]);
+	/**
+	 * 根据table的行数和列数生成填充0的表格，然后把table中的内容复制过来
+	 */
+	const buildMaskTables = useCallback(() => {
+		return Array.from({ length: tableAddition.rowLabels.length }, (v, row) => {
+			return Array.from({ length: tableAddition.columnLabels.length }, (v, column) => {
+				if (row < tables.length && column < tables[row].length) {
+					return tables[row][column]
+				}
+				return undefined
+			})
+		})
+	}, [tableAddition.rowLabels.length, tableAddition.columnLabels.length])
 
-  const handleCellClick = ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
-    if (!targetTables || targetTables.length <= row || targetTables[row].length <= column) {
-      throw new Error("Error, it seems that the table has not been rendered.");
-    }
+	const handleCellClick = ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
+		if (!targetTables || targetTables.length <= row || targetTables[row].length <= column) {
+			throw new Error("Error, it seems that the table has not been rendered.")
+		}
 
-    //focus target
-    const target = event.currentTarget;
-    target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE);
-    target.focus();
+		//focus target
+		const target = event.currentTarget
+		target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
+		target.focus()
 
-    //record current selected target cell.
-    currentSelectCell.current = {
-      selectRowIndex: row,
-      selectColumnIndex: column,
-    };
-  };
+		//record current selected target cell.
+		currentSelectCell.current = {
+			selectRowIndex: row,
+			selectColumnIndex: column,
+		}
+	}
 
-  const handleCellBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    const target = event.currentTarget;
+	const handleCellBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+		const target = event.currentTarget
 
-    if (target.hasAttribute(EDIT_ATTRIBUTE)) {
-      const target = event.currentTarget;
+		if (target.hasAttribute(EDIT_ATTRIBUTE)) {
+			const target = event.currentTarget
 
-      target.removeAttribute(EDIT_ATTRIBUTE);
-    }
+			target.removeAttribute(EDIT_ATTRIBUTE)
+		}
 
-    currentSelectCell.current?.newTargetTable && updateTargetTable(currentSelectCell.current.newTargetTable);
-  };
+		currentSelectCell.current?.newTargetTable && updateTargetTable(currentSelectCell.current.newTargetTable)
+	}
 
-  const handleCellInput = (target: HTMLElement) => {
-    if (!currentSelectCell.current || !targetTables) return;
+	const handleCellInput = (target: HTMLElement) => {
+		if (!currentSelectCell.current || !targetTables) return
 
-    const { selectRowIndex, selectColumnIndex } = currentSelectCell.current;
-    const tempTargetTables = [...targetTables]; //对所有数组重新改变引用，引起useState的更新
+		const { selectRowIndex, selectColumnIndex } = currentSelectCell.current
+		const tempTargetTables = [...targetTables] //对所有数组重新改变引用，引起useState的更新
 
-    tempTargetTables[selectRowIndex][selectColumnIndex] = target.innerText;
-    currentSelectCell.current.newTargetTable = tempTargetTables; //记录最新修改的值
-  };
+		tempTargetTables[selectRowIndex][selectColumnIndex] = target.innerText
+		currentSelectCell.current.newTargetTable = tempTargetTables //记录最新修改的值
+	}
 
-  /**
-   * 对表格内容进行更新
-   * 1. 更新state
-   * 2. 清除ref为null
-   */
-  const updateTargetTable = (newTargetTable: AbstractTableElementType[][]) => {
-    setTargetTables(newTargetTable);
-    currentSelectCell.current = null;
-    console.log("update", newTargetTable);
-  };
+	/**
+	 * 对表格内容进行更新
+	 * 1. 更新state
+	 * 2. 清除ref为null
+	 */
+	const updateTargetTable = (newTargetTable: AbstractTableElementType[][]) => {
+		setTargetTables(newTargetTable)
+		currentSelectCell.current = null
+		console.log("update", newTargetTable)
+	}
 
-  useEffect(() => {
-    setTargetTables(buildMaskTables());
+	useEffect(() => {
+		setTargetTables(buildMaskTables())
 
-    if (tableAddition.rowLabels.length !== tables.length || tableAddition.columnLabels.length !== tables[0].length) {
-      setTableAddition(getCurrentTableAddition());
-    }
-  }, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length]);
+		if (tableAddition.rowLabels.length !== tables.length || tableAddition.columnLabels.length !== tables[0].length) {
+			setTableAddition(getCurrentTableAddition())
+		}
+	}, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length])
 
-  //列表头
-  const RenderColumnHeader = useCallback(() => {
-    return (
-      <>
-        <Cell attrs={{ ...arrToObject(["top", "left", "right"]) }}></Cell>
-        {tableAddition.columnLabels.map((value, index) => {
-          return (
-            <Cell attrs={{ ...arrToObject(["right", "top", "dark"]) }} key={value}>
-              {value}
-            </Cell>
-          );
-        })}
-      </>
-    );
-  }, [tableAddition.columnLabels]);
+	//列表头
+	const RenderColumnHeader = useCallback(() => {
+		return (
+			<>
+				<Cell attrs={{ ...arrToObject(["top", "left", "right"]) }}></Cell>
+				{tableAddition.columnLabels.map((value, index) => {
+					return (
+						<Cell attrs={{ ...arrToObject(["right", "top", "dark"]) }} key={value}>
+							{value}
+						</Cell>
+					)
+				})}
+			</>
+		)
+	}, [tableAddition.columnLabels])
 
-  //行表头和行列功能格
-  const RenderRowHeader = useCallback(() => {
-    return (
-      <TableRowHeader>
-        {tableAddition.rowLabels.map((value, index) => {
-          const props = [];
-          if (index !== tableAddition.rowLabels.length - 1) {
-            props.push("right", "left", "top", "dark");
-          } else {
-            props.push("right", "left", "top", "bottom", "dark");
-          }
+	//行表头和行列功能格
+	const RenderRowHeader = useCallback(() => {
+		return (
+			<TableRowHeader>
+				{tableAddition.rowLabels.map((value, index) => {
+					const props = []
+					if (index !== tableAddition.rowLabels.length - 1) {
+						props.push("right", "left", "top", "dark")
+					} else {
+						props.push("right", "left", "top", "bottom", "dark")
+					}
 
-          return (
-            <Cell attrs={{ ...arrToObject(props) }} key={value}>
-              {value}
-            </Cell>
-          );
-        })}
-      </TableRowHeader>
-    );
-  }, [tableAddition.rowLabels]);
+					return (
+						<Cell attrs={{ ...arrToObject(props) }} key={value}>
+							{value}
+						</Cell>
+					)
+				})}
+			</TableRowHeader>
+		)
+	}, [tableAddition.rowLabels])
 
-  const RenderTableData = () => {
-    return (
-      <>
-        {targetTables &&
-          targetTables.map((item, row) => {
-            return (
-              <TableDataRow key={tableAddition.rowLabels[row]}>
-                {item.map((value, column) => {
-                  const key = `${tableAddition.columnLabels[column]}${tableAddition.rowLabels[row]}`;
-                  const props = [];
-                  const eventProps = {
-                    key,
-                    onClick: (event: React.MouseEvent<HTMLDivElement>) => handleCellClick({ event, row, column }),
-                    onInput: (event: React.FormEvent<HTMLDivElement>) => handleCellInput(event.currentTarget),
-                    onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event),
-                  };
+	const RenderTableData = () => {
+		return (
+			<>
+				{targetTables &&
+					targetTables.map((item, row) => {
+						return (
+							<TableDataRow key={tableAddition.rowLabels[row]}>
+								{item.map((value, column) => {
+									const key = `${tableAddition.columnLabels[column]}${tableAddition.rowLabels[row]}`
+									const props = []
 
-                  if (row !== tableAddition.rowLabels.length - 1) {
-                    props.push("right", "top");
-                  } else {
-                    props.push("right", "top", "bottom");
-                  }
+									const eventProps = {
+										onClick: (event: React.MouseEvent<HTMLDivElement>) =>
+											handleCellClick({
+												event,
+												row,
+												column,
+											}),
+										onInput: (event: React.FormEvent<HTMLDivElement>) => handleCellInput(event.currentTarget),
+										onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event),
+									}
 
-                  if (currentSelectCell.current) {
-                  }
+									if (row !== tableAddition.rowLabels.length - 1) {
+										props.push("right", "top")
+									} else {
+										props.push("right", "top", "bottom")
+									}
 
-                  return (
-                    <Cell attrs={{ ...arrToObject(props) }} {...eventProps}>
-                      {value}
-                    </Cell>
-                  );
-                })}
-              </TableDataRow>
-            );
-          })}
-      </>
-    );
-  };
+									console.log(currentSelectCell.current)
+									if (currentSelectCell.current) {
+									}
 
-  return (
-    <TableFrame>
-      <TableColumnHeader>
-        <RenderColumnHeader />
-      </TableColumnHeader>
-      <TableRowAndDataFrame>
-        <TableRowHeader>
-          <RenderRowHeader />
-        </TableRowHeader>
-        <TableDataFrame>
-          <RenderTableData />
-        </TableDataFrame>
-      </TableRowAndDataFrame>
-    </TableFrame>
-  );
-};
+									return (
+										<Cell
+											attrs={{
+												...arrToObject(props),
+												...eventProps,
+											}}
+											key={key}
+										>
+											{value}
+										</Cell>
+									)
+								})}
+							</TableDataRow>
+						)
+					})}
+			</>
+		)
+	}
 
-export default Table;
+	return (
+		<TableFrame>
+			<TableColumnHeader>
+				<RenderColumnHeader />
+			</TableColumnHeader>
+			<TableRowAndDataFrame>
+				<TableRowHeader>
+					<RenderRowHeader />
+				</TableRowHeader>
+				<TableDataFrame>
+					<RenderTableData />
+				</TableDataFrame>
+			</TableRowAndDataFrame>
+		</TableFrame>
+	)
+}
+
+export default Table
