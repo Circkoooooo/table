@@ -7,9 +7,9 @@
  * @returns
  */
 export function getLoopValue(currentIndex: number, asciiMin: number, asciiMax: number) {
-  const loopValue = (currentIndex - asciiMin) % (asciiMax - asciiMin + 1);
+	const loopValue = (currentIndex - asciiMin) % (asciiMax - asciiMin + 1)
 
-  return String.fromCharCode(loopValue + asciiMin);
+	return String.fromCharCode(loopValue + asciiMin)
 }
 
 /**
@@ -29,45 +29,45 @@ export function getLoopValue(currentIndex: number, asciiMin: number, asciiMax: n
  * @param maxPrefixCode
  */
 function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) {
-  if (prefixArray.length === 0) {
-    prefixArray[0] = minPrefixCode;
-  } else {
-    if (prefixArray.length === 1) {
-      if (prefixArray[0] === maxPrefixCode) {
-        prefixArray[0] = minPrefixCode;
-        prefixArray.unshift(minPrefixCode);
-      } else {
-        prefixArray[0]++;
-      }
-    } else {
-      for (let i = prefixArray.length - 1, carry = false; i >= 0; i--) {
-        //最后一个索引
-        if (i === prefixArray.length - 1) {
-          if (prefixArray[i] === maxPrefixCode) {
-            carry = true;
-            prefixArray[i] = minPrefixCode;
-          } else {
-            prefixArray[i]++;
-          }
-        } else {
-          if (carry) {
-            carry = false;
+	if (prefixArray.length === 0) {
+		prefixArray[0] = minPrefixCode
+	} else {
+		if (prefixArray.length === 1) {
+			if (prefixArray[0] === maxPrefixCode) {
+				prefixArray[0] = minPrefixCode
+				prefixArray.unshift(minPrefixCode)
+			} else {
+				prefixArray[0]++
+			}
+		} else {
+			for (let i = prefixArray.length - 1, carry = false; i >= 0; i--) {
+				//最后一个索引
+				if (i === prefixArray.length - 1) {
+					if (prefixArray[i] === maxPrefixCode) {
+						carry = true
+						prefixArray[i] = minPrefixCode
+					} else {
+						prefixArray[i]++
+					}
+				} else {
+					if (carry) {
+						carry = false
 
-            if (prefixArray[i] === maxPrefixCode) {
-              carry = true;
-              prefixArray[i] = minPrefixCode;
+						if (prefixArray[i] === maxPrefixCode) {
+							carry = true
+							prefixArray[i] = minPrefixCode
 
-              if (i === 0) {
-                prefixArray.unshift(minPrefixCode);
-              }
-            } else {
-              prefixArray[i]++;
-            }
-          }
-        }
-      }
-    }
-  }
+							if (i === 0) {
+								prefixArray.unshift(minPrefixCode)
+							}
+						} else {
+							prefixArray[i]++
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -75,53 +75,53 @@ function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPre
  *
  */
 export const getLabel = (columnCount: number, asciiMin: number | string, asciiMax: number | string): string[] => {
-  const asciiLimit: number[] = [];
-  const result: string[] = [];
+	const asciiLimit: number[] = []
+	const result: string[] = []
 
-  if (typeof asciiMin === "number") {
-    asciiLimit.push(asciiMin);
-  } else if (typeof asciiMin === "string") {
-    asciiLimit.push(asciiMin.charCodeAt(0));
-  }
+	if (typeof asciiMin === "number") {
+		asciiLimit.push(asciiMin)
+	} else if (typeof asciiMin === "string") {
+		asciiLimit.push(asciiMin.charCodeAt(0))
+	}
 
-  if (typeof asciiMax === "number") {
-    asciiLimit.push(asciiMax);
-  } else if (typeof asciiMax === "string") {
-    asciiLimit.push(asciiMax.charCodeAt(0));
-  }
+	if (typeof asciiMax === "number") {
+		asciiLimit.push(asciiMax)
+	} else if (typeof asciiMax === "string") {
+		asciiLimit.push(asciiMax.charCodeAt(0))
+	}
 
-  //前缀
-  const previousPrefixCode = {
-    prefixes: [] as number[],
-    needAddPrefix: false,
-  };
+	//前缀
+	const previousPrefixCode = {
+		prefixes: [] as number[],
+		needAddPrefix: false,
+	}
 
-  // 遍历columnCount次，push的内容为 A B .... Z AA AB AC .... BA ..ZZ ...AAA AAB ...
-  for (let i = asciiLimit[0]; i < asciiLimit[0] + columnCount; i++) {
-    const currentLoopValue = ((i - asciiLimit[0]) % (asciiLimit[1] - asciiLimit[0] + 1)) + asciiLimit[0];
+	// 遍历columnCount次，push的内容为 A B .... Z AA AB AC .... BA ..ZZ ...AAA AAB ...
+	for (let i = asciiLimit[0]; i < asciiLimit[0] + columnCount; i++) {
+		const currentLoopValue = ((i - asciiLimit[0]) % (asciiLimit[1] - asciiLimit[0] + 1)) + asciiLimit[0]
 
-    //判断是否存在要在赋值`needAddPrefix`变量之前，因为这是在下一轮循环中判断的。
-    //如果有前缀标记，处理前缀数组
-    if (previousPrefixCode.needAddPrefix) {
-      previousPrefixCode.needAddPrefix = false;
-      resolvePrefixArray(previousPrefixCode.prefixes, asciiLimit[0], asciiLimit[1]);
-    }
+		//判断是否存在要在赋值`needAddPrefix`变量之前，因为这是在下一轮循环中判断的。
+		//如果有前缀标记，处理前缀数组
+		if (previousPrefixCode.needAddPrefix) {
+			previousPrefixCode.needAddPrefix = false
+			resolvePrefixArray(previousPrefixCode.prefixes, asciiLimit[0], asciiLimit[1])
+		}
 
-    //判断是否为最后一个值，如果是，记录前缀标记
-    if (currentLoopValue === asciiLimit[1]) {
-      previousPrefixCode.needAddPrefix = true;
-    }
+		//判断是否为最后一个值，如果是，记录前缀标记
+		if (currentLoopValue === asciiLimit[1]) {
+			previousPrefixCode.needAddPrefix = true
+		}
 
-    //组合前缀和当前索引
-    result.push(previousPrefixCode.prefixes.map((item) => String.fromCharCode(item)).join("") + String.fromCharCode(currentLoopValue));
-  }
-  return result;
-};
+		//组合前缀和当前索引
+		result.push(previousPrefixCode.prefixes.map((item) => String.fromCharCode(item)).join("") + String.fromCharCode(currentLoopValue))
+	}
+	return result
+}
 
 export const getRowLabel = (count: number, offset = 0): string[] => {
-  const result: string[] = [];
+	const result: string[] = []
 
-  result.push(...Array.from({ length: count }, (val, key) => key + 1 + offset).map((item) => item.toString()));
+	result.push(...Array.from({ length: count }, (val, key) => key + 1 + offset).map((item) => item.toString()))
 
-  return result;
-};
+	return result
+}

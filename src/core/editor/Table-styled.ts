@@ -1,65 +1,73 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components"
 
-interface CellProps {
-  top?: boolean;
-  right?: boolean;
-  bottom?: boolean;
-  left?: boolean;
-  dark?: boolean;
+export interface CellStyledProps {
+	top?: boolean
+	right?: boolean
+	bottom?: boolean
+	left?: boolean
+	dark?: boolean
+	isFocus?: boolean
 }
 
 // 单元格
-export const Cell = styled.div<CellProps>(({ top, right, bottom, left, dark }) => {
-  const DEFAULT_BORDER_WIDTH = 1;
-  const CLEAR_BORDER_WIDTH = 0;
+export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, left, dark, isFocus }) => {
+	const DEFAULT_BORDER_WIDTH = 1
+	const CLEAR_BORDER_WIDTH = 0
+	const borderWidth = [
+		`${top ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+		`${right ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+		`${bottom ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+		`${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+	]
 
-  const borderWidth = [
-    `${top ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
-    `${right ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
-    `${bottom ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
-    `${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
-  ];
+	return css`
+		z-index: 0;
+		position: relative;
+		width: 100px;
+		height: 30px;
+		line-height: 30px;
+		display: inline-block;
+		border-width: ${borderWidth.join(" ")};
+		border-color: rgba(0, 0, 0, 0.15);
+		background-color: ${dark ? "#f0f0f0" : "#fff"};
+		border-style: solid;
+		text-align: center;
+		vertical-align: top;
+		user-select: none;
 
-  return {
-    width: "100px",
-    height: "30px",
-    lineHeight: "30px",
-    display: "inline-block",
-    "border-color": "rgba(0,0,0,0.15)",
-    "border-width": borderWidth.join(" "),
-    "border-style": "solid",
-    "background-color": dark ? "#f0f0f0" : "#fff",
-    textAlign: "center",
-    "vertical-align": "top",
-    "user-select": "none",
-  };
-});
+		&:focus {
+			outline: none;
+		}
+	`
+})
 
 // data最外层容器
 export const TableFrame = styled.div`
-  white-space: nowrap;
-`;
+	white-space: nowrap;
+`
 
 export const TableRowHeader = styled.div`
-  display: inline-flex;
-  flex-direction: column;
-  position: sticky;
-  left: 0;
-`;
+	display: inline-flex;
+	flex-direction: column;
+	position: sticky;
+	left: 0;
+	z-index: 1;
+`
 
 export const TableColumnHeader = styled.div`
-  position: sticky;
-  top: 0;
-`;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+`
 
 export const TableRowAndDataFrame = styled.div`
-  display: flex;
-`;
+	display: flex;
+`
 
 export const TableDataFrame = styled.div`
-  display: inline-block;
-`;
+	display: inline-block;
+`
 
 export const TableDataRow = styled.div`
-  display: flex;
-`;
+	display: flex;
+`
