@@ -136,7 +136,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 			<>
 				{tableAddition.columnLabels.map((value, index) => {
 					return (
-						<Cell attrs={{ ...arrToObject(["right", "top", "dark"]) }} key={value}>
+						<Cell attrs={{ ...arrToObject(["right", "top", "bottom", "dark"]) }} key={value}>
 							{value}
 						</Cell>
 					)
@@ -152,9 +152,12 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				{tableAddition.rowLabels.map((value, index) => {
 					const props = []
 					if (index !== tableAddition.rowLabels.length - 1) {
-						props.push("right", "left", "top", "dark")
+						props.push("right", "left", "dark")
 					} else {
-						props.push("right", "left", "top", "bottom", "dark")
+						props.push("right", "left", "bottom", "dark")
+					}
+					if (index !== 0) {
+						props.push("top")
 					}
 
 					return (
@@ -190,9 +193,13 @@ const Table: React.FC<ColumnRulerProps> = () => {
 									}
 
 									if (row !== tableAddition.rowLabels.length - 1) {
-										props.push("right", "top")
+										props.push("right")
 									} else {
-										props.push("right", "top", "bottom")
+										props.push("right", "bottom")
+									}
+
+									if (row !== 0) {
+										props.push("top")
 									}
 
 									return (
@@ -217,7 +224,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	return (
 		<TableFrame>
 			<TableColumnHeader>
-				<Cell attrs={{ ...arrToObject(["top", "left", "right"]) }}></Cell>
+				<Cell attrs={{ ...arrToObject(["top", "left", "bottom", "right"]) }}></Cell>
 				<RenderColumnHeader />
 			</TableColumnHeader>
 
