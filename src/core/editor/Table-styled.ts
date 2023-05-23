@@ -6,11 +6,12 @@ export interface CellStyledProps {
 	bottom?: boolean
 	left?: boolean
 	dark?: boolean
-	isFocus?: boolean
+	lineRight?: boolean
+	lineBottom?: boolean
 }
 
 // 单元格
-export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, left, dark, isFocus }) => {
+export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, left, dark }) => {
 	const DEFAULT_BORDER_WIDTH = 1
 	const CLEAR_BORDER_WIDTH = 0
 	const borderWidth = [
@@ -20,23 +21,41 @@ export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, lef
 		`${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
 	]
 
+	const BORDER_COLOR = `rgba(0, 0, 0, 0.15)`
+	const BORDER_WIDTH = `${borderWidth.join(" ")}`
+	const BACKGROUND_COLOR = `${dark ? "#f0f0f0" : "#fff"}`
+
+	const HEIGHT = `${top && bottom ? "31px" : "30px"}`
+
 	return css`
 		z-index: 0;
 		position: relative;
 		width: 100px;
-		height: 30px;
-		line-height: 30px;
+		height: ${HEIGHT};
+		line-height: ${HEIGHT};
 		display: inline-block;
-		border-width: ${borderWidth.join(" ")};
-		border-color: rgba(0, 0, 0, 0.15);
-		background-color: ${dark ? "#f0f0f0" : "#fff"};
-		border-style: solid;
+
+		background-color: ${BACKGROUND_COLOR};
 		text-align: center;
 		vertical-align: top;
 		user-select: none;
 
+		box-sizing: content-box;
 		&:focus {
 			outline: none;
+		}
+
+		&::before {
+			box-sizing: border-box;
+			content: "";
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			border-width: ${BORDER_WIDTH};
+			border-color: ${BORDER_COLOR};
+			border-style: solid;
+			position: absolute;
 		}
 	`
 })
