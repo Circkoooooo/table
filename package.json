@@ -69,7 +69,7 @@
 		"start": "node scripts/start.js",
 		"build": "node scripts/build.js",
 		"test": "node scripts/test.js",
-		"test:coverage": "node scripts/test.js --coverage",
+		"test:coverage": "npx jest --coverage",
 		"lint": "npx prettier --write ."
 	},
 	"eslintConfig": {

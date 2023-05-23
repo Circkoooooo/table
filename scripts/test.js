@@ -44,8 +44,4 @@ if (!process.env.CI && argv.indexOf("--watchAll") === -1 && argv.indexOf("--watc
   argv.push(hasSourceControl ? "--watch" : "--watchAll");
 }
 
-if (argv.indexOf("--coverage") !== -1) {
-  argv.push("--coverage");
-}
-
 jest.run(argv);
