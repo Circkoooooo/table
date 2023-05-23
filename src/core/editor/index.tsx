@@ -134,9 +134,16 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	const RenderColumnHeader = useCallback(() => {
 		return (
 			<>
+				<Cell attrs={{ ...arrToObject(["top", "left", "lineRight"]) }}></Cell>
 				{tableAddition.columnLabels.map((value, index) => {
+					const props = ["left", "rop", "top", "dark", "lineRight"]
+
+					if (index === tableAddition.columnLabels.length - 1) {
+						props.push("right")
+					}
+
 					return (
-						<Cell attrs={{ ...arrToObject(["right", "top", "bottom", "dark"]) }} key={value}>
+						<Cell attrs={{ ...arrToObject(props) }} key={value}>
 							{value}
 						</Cell>
 					)
@@ -152,13 +159,12 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				{tableAddition.rowLabels.map((value, index) => {
 					const props = []
 					if (index !== tableAddition.rowLabels.length - 1) {
-						props.push("right", "left", "dark")
+						props.push("left", "dark")
 					} else {
-						props.push("right", "left", "bottom", "dark")
+						props.push("left", "bottom", "dark")
 					}
-					if (index !== 0) {
-						props.push("top")
-					}
+
+					props.push("top", "lineBottom")
 
 					return (
 						<Cell attrs={{ ...arrToObject(props) }} key={value}>
@@ -193,14 +199,16 @@ const Table: React.FC<ColumnRulerProps> = () => {
 									}
 
 									if (row !== tableAddition.rowLabels.length - 1) {
-										props.push("right")
+										props.push("left")
 									} else {
-										props.push("right", "bottom")
+										props.push("left", "bottom")
 									}
 
-									if (row !== 0) {
-										props.push("top")
+									if (column === item.length - 1) {
+										props.push("right")
 									}
+
+									props.push("top")
 
 									return (
 										<Cell
@@ -224,7 +232,6 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	return (
 		<TableFrame>
 			<TableColumnHeader>
-				<Cell attrs={{ ...arrToObject(["top", "left", "bottom", "right"]) }}></Cell>
 				<RenderColumnHeader />
 			</TableColumnHeader>
 
