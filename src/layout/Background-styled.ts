@@ -38,4 +38,5 @@ export const Content = styled.div`
 	margin: 5px;
 	display: flex;
 	overflow: hidden;
+	position: relative;
 `
