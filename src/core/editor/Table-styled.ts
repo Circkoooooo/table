@@ -10,6 +10,12 @@ export interface CellStyledProps {
 	lineBottom?: boolean
 }
 
+export interface HintBorderProps {
+	rowIndex: number
+	columnIndex: number
+	isNeedShow: boolean
+}
+
 //layout z-index level :  TableFrame:3 -> TableColumnHeader,TableRowAndDataFrame,TableRowHeader:2 -> TableDataRow:1 -> Cell:0
 
 // 单元格
@@ -101,3 +107,19 @@ export const TableDataRow = styled.div`
 	display: flex;
 	z-index: 1;
 `
+
+export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnIndex, isNeedShow }) => {
+	return css`
+		position: absolute;
+		border: 2px solid blue;
+		left: ${columnIndex * 100}px;
+		top: ${rowIndex * 30}px;
+		transition-property: left, top, width, height;
+		transition: ease-in-out 0.15s;
+		zindex: 1;
+		width: 101px;
+		height: 31px;
+		pointerevents: none;
+		display: ${isNeedShow ? "block" : "none"};
+	`
+})
