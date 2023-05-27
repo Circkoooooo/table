@@ -115,11 +115,12 @@ export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnI
 		left: ${columnIndex * 100}px;
 		top: ${rowIndex * 30}px;
 		transition-property: left, top, width, height;
-		transition: ease-in-out 0.15s;
+		transition-timing-function: ease-in-out;
+		transition-duration: 0.15s;
 		zindex: 1;
 		width: 101px;
 		height: 31px;
-		pointerevents: none;
+		pointer-events: none;
 		display: ${isNeedShow ? "block" : "none"};
 	`
 })

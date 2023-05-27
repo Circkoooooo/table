@@ -89,6 +89,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				currentSelectCell.current?.oldSelectSell?.blur()
 				currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
 
+				console.log(currentSelectCell.current?.selectRowIndex, row, currentSelectCell.current?.selectColumnIndex, column)
 				if (currentSelectCell.current?.selectRowIndex === row && currentSelectCell.current.selectColumnIndex === column) {
 					target.focus()
 				}
