@@ -12,8 +12,14 @@ interface ColumnRulerProps {
 interface CurrentSelectCellInfo {
 	selectRowIndex: number
 	selectColumnIndex: number
+	pointerRowIndex?: number
+	pointerColumnIndex?: number
 	oldSelectSell?: HTMLDivElement
 	newTargetTable?: AbstractTableElementType[][]
+}
+
+interface MouseEventRecord {
+	isMouseDown: boolean
 }
 
 type AbstractTableElementType = string | number | undefined | null
@@ -31,6 +37,9 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	const [targetTables, setTargetTables] = useState<AbstractTableElementType[][]>()
 	const currentSelectCell = useRef<CurrentSelectCellInfo | null>(null) //click后记录
 	const hintBorder = useRef<HintBorderRef>(null)
+	const mouseEventRecord = useRef<MouseEventRecord>({
+		isMouseDown: false,
+	})
 
 	/**
 	 * 获取当前数据状态下的的label
@@ -56,10 +65,21 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		})
 	}, [tableAddition.rowLabels.length, tableAddition.columnLabels.length])
 
-	const { handleCellMouseDown, handleCellBlur, handleCellInput } = (function () {
+	const handleMouseEventRocord = {
+		setMouseDown: () => {
+			mouseEventRecord.current.isMouseDown = true
+		},
+		cancelMouseDown: () => {
+			mouseEventRecord.current.isMouseDown = false
+		},
+	}
+
+	const { handleCellMouseDown, handleCellBlur, handleCellInput, handleCellMouseEnter } = (function () {
 		return {
 			handleCellMouseDown: ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
 				event.preventDefault()
+				handleMouseEventRocord.setMouseDown()
+
 				if (!targetTables || targetTables.length <= row || targetTables[row].length <= column) {
 					throw new Error("Error, it seems that the table has not been rendered.")
 				}
@@ -70,7 +90,6 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				currentSelectCell.current?.oldSelectSell?.blur()
 				currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
 
-				console.log(currentSelectCell.current?.selectRowIndex, row, currentSelectCell.current?.selectColumnIndex, column)
 				if (currentSelectCell.current?.selectRowIndex === row && currentSelectCell.current.selectColumnIndex === column) {
 					target.focus()
 				}
@@ -80,11 +99,16 @@ const Table: React.FC<ColumnRulerProps> = () => {
 					...currentSelectCell.current,
 					selectRowIndex: row,
 					selectColumnIndex: column,
+					pointerRowIndex: row,
+					pointerColumnIndex: column,
 				}
 
+				//update hintBorder without updating of current component.
 				hintBorder.current?.changeIndex(row, column)
 			},
-			handleCellBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+			handleCellBlur: (event: React.FocusEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
+				if (currentSelectCell.current?.selectRowIndex === rowIndex && currentSelectCell.current.selectColumnIndex === columnIndex) return
+
 				const target = event.currentTarget
 
 				if (target.hasAttribute(EDIT_ATTRIBUTE)) {
@@ -103,6 +127,20 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 				tempTargetTables[selectRowIndex][selectColumnIndex] = target.innerText
 				currentSelectCell.current.newTargetTable = tempTargetTables //记录最新修改的值
+			},
+			handleCellMouseEnter: (row: number, column: number) => {
+				const { isMouseDown } = mouseEventRecord.current
+				if (!isMouseDown || currentSelectCell.current === null) return
+
+				const { pointerRowIndex, pointerColumnIndex } = currentSelectCell.current
+				if (row === pointerRowIndex && pointerColumnIndex === column) return
+
+				currentSelectCell.current.pointerRowIndex = row
+				currentSelectCell.current.pointerColumnIndex = column
+
+				hintBorder.current?.changePointerIndex(row, column)
+				//trigger blur if select multiple cells.
+				currentSelectCell.current.oldSelectSell?.blur()
 			},
 		}
 	})()
@@ -185,6 +223,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 								const key = `${tableAddition.columnLabels[column]}${tableAddition.rowLabels[row]}`
 								const props = []
 
+								//bint events to Cell
 								const eventProps = {
 									onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
 										handleCellMouseDown({
@@ -194,7 +233,8 @@ const Table: React.FC<ColumnRulerProps> = () => {
 										})
 									},
 									onInput: (event: React.FormEvent<HTMLDivElement>) => handleCellInput(event.currentTarget),
-									onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event),
+									onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event, row, column),
+									onMouseEnter: () => handleCellMouseEnter(row, column),
 								}
 
 								if (row !== tableAddition.rowLabels.length - 1) {
@@ -230,7 +270,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 	return (
 		<>
-			<TableFrame>
+			<TableFrame onMouseUp={handleMouseEventRocord.cancelMouseDown}>
 				<TableColumnHeader>
 					<RenderColumnHeader />
 				</TableColumnHeader>

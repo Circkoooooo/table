@@ -8,25 +8,40 @@ interface HintBorderProps {
 
 export interface HintBorderRef {
 	changeIndex: (rowIndex: number, columnIndex: number) => void
+	changePointerIndex: (pointerRowIndex: number, pointerColumnIndex: number) => void
 }
 
 const HintBorder = React.forwardRef<HintBorderRef, HintBorderProps>(({ maxRowIndex, maxColumnIndex }, ref) => {
 	const [index, setIndex] = useState({
 		rowIndex: -1,
 		columnIndex: -1,
+		pointerRowIndex: -1,
+		pointerColumnIndex: -1,
 	})
+
 	const [isNeedShow, setIsNeedShow] = useState<boolean>(false)
 
 	const changeIndex = (rowIndex: number, columnIndex: number) => {
 		setIndex({
+			...index,
 			rowIndex,
 			columnIndex,
+			pointerRowIndex: rowIndex,
+			pointerColumnIndex: columnIndex,
+		})
+	}
+	const changePointerIndex = (pointerRowIndex: number, pointerColumnIndex: number) => {
+		setIndex({
+			...index,
+			pointerRowIndex,
+			pointerColumnIndex,
 		})
 	}
 
 	useImperativeHandle(ref, () => {
 		return {
 			changeIndex,
+			changePointerIndex,
 		}
 	})
 
@@ -36,6 +51,7 @@ const HintBorder = React.forwardRef<HintBorderRef, HintBorderProps>(({ maxRowInd
 		} else {
 			setIsNeedShow(false)
 		}
+		console.log(index)
 	}, [index, maxRowIndex, maxColumnIndex])
 
 	return (
@@ -44,6 +60,8 @@ const HintBorder = React.forwardRef<HintBorderRef, HintBorderProps>(({ maxRowInd
 				isNeedShow,
 				rowIndex: index.rowIndex,
 				columnIndex: index.columnIndex,
+				pointerRowIndex: index.pointerRowIndex,
+				pointerColumnIndex: index.pointerColumnIndex,
 			}}
 		/>
 	)

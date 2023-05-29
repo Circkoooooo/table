@@ -13,6 +13,8 @@ export interface CellStyledProps {
 export interface HintBorderProps {
 	rowIndex: number
 	columnIndex: number
+	pointerRowIndex: number
+	pointerColumnIndex: number
 	isNeedShow: boolean
 }
 
@@ -108,18 +110,36 @@ export const TableDataRow = styled.div`
 	z-index: 1;
 `
 
-export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnIndex, isNeedShow }) => {
+export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnIndex, pointerRowIndex, pointerColumnIndex, isNeedShow }) => {
+	const DEFAULT_WIDTH = 101
+	const DEFAULT_HEIGHT = 31
+
+	let offsetRowIndex = 0
+	let offsetColumnIndex = 0
+	let targetWidth = 0
+	let targetHeight = 0
+
+	if (pointerColumnIndex - columnIndex < 0) {
+		offsetColumnIndex = pointerColumnIndex - columnIndex
+	}
+	targetWidth = pointerColumnIndex - columnIndex === 0 ? DEFAULT_WIDTH : (Math.abs(pointerColumnIndex - columnIndex) + 1) * (DEFAULT_WIDTH - 1) + 1
+
+	if (pointerRowIndex - rowIndex < 0) {
+		offsetRowIndex = pointerRowIndex - rowIndex
+	}
+	targetHeight = pointerRowIndex - rowIndex === 0 ? DEFAULT_HEIGHT : (Math.abs(pointerRowIndex - rowIndex) + 1) * (DEFAULT_HEIGHT - 1) + 1
+
 	return css`
 		position: absolute;
 		border: 2px solid blue;
-		left: ${columnIndex * 100}px;
-		top: ${rowIndex * 30}px;
+		left: ${(columnIndex + offsetColumnIndex) * 100}px;
+		top: ${(rowIndex + offsetRowIndex) * 30}px;
 		transition-property: left, top, width, height;
-		transition-timing-function: ease-in-out;
-		transition-duration: 0.15s;
+		transition-timing-function: ease-out;
+		transition-duration: 0.05s;
 		zindex: 1;
-		width: 101px;
-		height: 31px;
+		width: ${targetWidth}px;
+		height: ${targetHeight}px;
 		pointer-events: none;
 		display: ${isNeedShow ? "block" : "none"};
 	`
