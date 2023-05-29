@@ -20,26 +20,7 @@ type AbstractTableElementType = string | number | undefined | null
 
 const [EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE] = ["contentEditable", "true"]
 
-const tables: AbstractTableElementType[][] = [
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[4, 5, 6, 7, 8, 8],
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[4, 5, 6, 7, 8, 8],
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[4, 5, 6, 7, 8, 8],
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[4, 5, 6, 7, 8, 8],
-	[1, 2, 3, 4, 5, 6],
-	[3, 4, 5, 6, 7, 8],
-	[4, 5, 6, 7, 8, 8],
-	[1, 2, 3, 4, 5, 6],
-]
+const tables: AbstractTableElementType[][] = [[]]
 
 const Table: React.FC<ColumnRulerProps> = () => {
 	const [tableAddition, setTableAddition] = useState<{
