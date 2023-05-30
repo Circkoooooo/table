@@ -86,14 +86,16 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 				if (!isContinue || currentSelectCell.current?.selectRowIndex === undefined || !currentSelectCell.current?.selectColumnIndex === undefined) {
 					//focus target
+
 					const target = event.currentTarget
-					target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
-					currentSelectCell.current?.oldSelectSell?.blur()
-					currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
 
 					if (currentSelectCell.current?.selectRowIndex === row && currentSelectCell.current.selectColumnIndex === column) {
+						target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
 						target.focus()
+					} else {
+						currentSelectCell.current?.oldSelectSell?.blur()
 					}
+					currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
 
 					//record current selected target cell without updating.
 					currentSelectCell.current = {
@@ -116,12 +118,10 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				}
 			},
 			handleCellBlur: (event: React.FocusEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
-				if (currentSelectCell.current?.selectRowIndex === rowIndex && currentSelectCell.current.selectColumnIndex === columnIndex) return
-				const target = event.currentTarget
+				const target = currentSelectCell.current?.oldSelectSell
 
-				if (target.hasAttribute(EDIT_ATTRIBUTE)) {
+				if (target && target.hasAttribute(EDIT_ATTRIBUTE)) {
 					const target = event.currentTarget
-
 					target.removeAttribute(EDIT_ATTRIBUTE)
 				}
 
