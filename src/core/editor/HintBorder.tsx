@@ -51,7 +51,6 @@ const HintBorder = React.forwardRef<HintBorderRef, HintBorderProps>(({ maxRowInd
 		} else {
 			setIsNeedShow(false)
 		}
-		console.log(index)
 	}, [index, maxRowIndex, maxColumnIndex])
 
 	return (

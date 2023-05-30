@@ -74,9 +74,9 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		},
 	}
 
-	const { handleCellMouseDown, handleCellBlur, handleCellInput, handleCellMouseEnter } = (function () {
+	const handleCellEventFunction = function () {
 		return {
-			handleCellMouseDown: ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
+			handleCellMouseDown: ({ event, row, column, isContinue = false }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number; isContinue?: boolean }) => {
 				event.preventDefault()
 				handleMouseEventRecord.setMouseDown()
 
@@ -84,31 +84,39 @@ const Table: React.FC<ColumnRulerProps> = () => {
 					throw new Error("Error, it seems that the table has not been rendered.")
 				}
 
-				//focus target
-				const target = event.currentTarget
-				target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
-				currentSelectCell.current?.oldSelectSell?.blur()
-				currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
+				if (!isContinue || currentSelectCell.current?.selectRowIndex === undefined || !currentSelectCell.current?.selectColumnIndex === undefined) {
+					//focus target
+					const target = event.currentTarget
+					target.setAttribute(EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE)
+					currentSelectCell.current?.oldSelectSell?.blur()
+					currentSelectCell.current && (currentSelectCell.current.oldSelectSell = target)
 
-				if (currentSelectCell.current?.selectRowIndex === row && currentSelectCell.current.selectColumnIndex === column) {
-					target.focus()
+					if (currentSelectCell.current?.selectRowIndex === row && currentSelectCell.current.selectColumnIndex === column) {
+						target.focus()
+					}
+
+					//record current selected target cell without updating.
+					currentSelectCell.current = {
+						...currentSelectCell.current,
+						selectRowIndex: row,
+						selectColumnIndex: column,
+						pointerRowIndex: row,
+						pointerColumnIndex: column,
+					}
+					//update hintBorder without updating of current component.
+					hintBorder.current?.changeIndex(row, column)
+				} else {
+					//record current selected target cell without updating.
+					currentSelectCell.current = {
+						...currentSelectCell.current,
+						pointerRowIndex: row,
+						pointerColumnIndex: column,
+					}
+					hintBorder.current?.changePointerIndex(row, column)
 				}
-
-				//record current selected target cell without updating.
-				currentSelectCell.current = {
-					...currentSelectCell.current,
-					selectRowIndex: row,
-					selectColumnIndex: column,
-					pointerRowIndex: row,
-					pointerColumnIndex: column,
-				}
-
-				//update hintBorder without updating of current component.
-				hintBorder.current?.changeIndex(row, column)
 			},
 			handleCellBlur: (event: React.FocusEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
 				if (currentSelectCell.current?.selectRowIndex === rowIndex && currentSelectCell.current.selectColumnIndex === columnIndex) return
-
 				const target = event.currentTarget
 
 				if (target.hasAttribute(EDIT_ATTRIBUTE)) {
@@ -143,7 +151,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 				currentSelectCell.current.oldSelectSell?.blur()
 			},
 		}
-	})()
+	}
 
 	/**
 	 * 对表格内容进行更新
@@ -161,6 +169,16 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 		if (tableAddition.rowLabels.length !== tables.length || tableAddition.columnLabels.length !== tables[0].length) {
 			setTableAddition(getCurrentTableAddition())
+		}
+
+		window.addEventListener("contextmenu", (event) => {
+			event.preventDefault()
+		})
+
+		return () => {
+			window.removeEventListener("contextmenu", (event) => {
+				event.preventDefault()
+			})
 		}
 	}, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length])
 
@@ -213,6 +231,8 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	const RenderTableData = () => {
 		if (!targetTables) return null
 
+		const { handleCellMouseDown, handleCellMouseEnter, handleCellInput, handleCellBlur } = handleCellEventFunction()
+
 		return (
 			<>
 				{/* {targetTables && */}
@@ -226,12 +246,26 @@ const Table: React.FC<ColumnRulerProps> = () => {
 								//bind events to Cell
 								const eventProps = {
 									onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
+										const { button, buttons, shiftKey } = event.nativeEvent
+										let isShift = false
+
+										//return if not is left mouse.
+										if (button !== 0 && buttons !== 1) {
+											return
+										}
+
+										if (shiftKey) {
+											isShift = true
+										}
+
 										handleCellMouseDown({
 											event,
 											row,
 											column,
+											isContinue: isShift,
 										})
 									},
+
 									onInput: (event: React.FormEvent<HTMLDivElement>) => handleCellInput(event.currentTarget),
 									onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event, row, column),
 									onMouseEnter: () => handleCellMouseEnter(row, column),
