@@ -65,7 +65,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		})
 	}, [tableAddition.rowLabels.length, tableAddition.columnLabels.length])
 
-	const handleMouseEventRocord = {
+	const handleMouseEventRecord = {
 		setMouseDown: () => {
 			mouseEventRecord.current.isMouseDown = true
 		},
@@ -78,7 +78,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		return {
 			handleCellMouseDown: ({ event, row, column }: { event: React.MouseEvent<HTMLDivElement>; row: number; column: number }) => {
 				event.preventDefault()
-				handleMouseEventRocord.setMouseDown()
+				handleMouseEventRecord.setMouseDown()
 
 				if (!targetTables || targetTables.length <= row || targetTables[row].length <= column) {
 					throw new Error("Error, it seems that the table has not been rendered.")
@@ -223,7 +223,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 								const key = `${tableAddition.columnLabels[column]}${tableAddition.rowLabels[row]}`
 								const props = []
 
-								//bint events to Cell
+								//bind events to Cell
 								const eventProps = {
 									onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
 										handleCellMouseDown({
@@ -270,7 +270,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 	return (
 		<>
-			<TableFrame onMouseUp={handleMouseEventRocord.cancelMouseDown}>
+			<TableFrame onMouseUp={handleMouseEventRecord.cancelMouseDown}>
 				<TableColumnHeader>
 					<RenderColumnHeader />
 				</TableColumnHeader>
