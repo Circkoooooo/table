@@ -18,8 +18,6 @@ export interface HintBorderProps {
 	isNeedShow: boolean
 }
 
-//layout z-index level :  TableFrame:3 -> TableColumnHeader,TableRowAndDataFrame,TableRowHeader:2 -> TableDataRow:1 -> Cell:0
-
 // 单元格
 export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, left, dark }) => {
 	const DEFAULT_BORDER_WIDTH = 1
@@ -86,7 +84,7 @@ export const TableColumnHeader = styled.div`
 export const TableRowAndDataFrame = styled.div`
 	display: flex;
 	flex: 1;
-	z-index: 2;
+	z-index: 1;
 `
 export const TableRowAndDataRowFlex = styled.div`
 	display: flex;
