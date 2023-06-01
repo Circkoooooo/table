@@ -1,38 +1,26 @@
-import { TableColumnHeader, TableDataFrame, TableDataRow, TableFrame, TableRowAndDataFrame, TableRowAndDataRowFlex, TableRowHeader } from "./Table-styled"
+import { TableColumnHeader, TableDataFrame, TableFrame, TableRowAndDataFrame, TableRowAndDataRowFlex, TableRowHeader } from "./Table-styled"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { getLabel, getRowLabel } from "./Ruler"
 import { arrToObject } from "../../tools/arrToObject"
 import Cell from "./Cell"
 import HintBorder, { HintBorderRef } from "./HintBorder"
+import { AbstractTableElementType, CurrentSelectCellInfo, TableAddition } from "./types"
+import RenderTableData from "./RenderTableData"
 
 interface ColumnRulerProps {
 	columnCount?: number
-}
-
-interface CurrentSelectCellInfo {
-	selectRowIndex: number
-	selectColumnIndex: number
-	pointerRowIndex?: number
-	pointerColumnIndex?: number
-	oldSelectSell?: HTMLDivElement
-	newTargetTable?: AbstractTableElementType[][]
 }
 
 interface MouseEventRecord {
 	isMouseDown: boolean
 }
 
-type AbstractTableElementType = string | number | undefined | null
-
 const [EDIT_ATTRIBUTE, EDIT_ATTRIBUTE_VALUE] = ["contentEditable", "true"]
 
 const tables: AbstractTableElementType[][] = [[]]
 
 const Table: React.FC<ColumnRulerProps> = () => {
-	const [tableAddition, setTableAddition] = useState<{
-		rowLabels: string[]
-		columnLabels: string[]
-	}>({ rowLabels: [], columnLabels: [] })
+	const [tableAddition, setTableAddition] = useState<TableAddition>({ rowLabels: [], columnLabels: [] })
 
 	const [targetTables, setTargetTables] = useState<AbstractTableElementType[][]>()
 	const currentSelectCell = useRef<CurrentSelectCellInfo | null>(null) //click后记录
@@ -228,80 +216,6 @@ const Table: React.FC<ColumnRulerProps> = () => {
 		)
 	}, [tableAddition.rowLabels])
 
-	const RenderTableData = () => {
-		if (!targetTables) return null
-
-		const { handleCellMouseDown, handleCellMouseEnter, handleCellInput, handleCellBlur } = handleCellEventFunction()
-
-		return (
-			<>
-				{/* {targetTables && */}
-				{targetTables.map((item, row) => {
-					return (
-						<TableDataRow key={tableAddition.rowLabels[row]}>
-							{item.map((value, column) => {
-								const key = `${tableAddition.columnLabels[column]}${tableAddition.rowLabels[row]}`
-								const props = []
-
-								//bind events to Cell
-								const eventProps = {
-									onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
-										const { button, buttons, shiftKey } = event.nativeEvent
-										let isShift = false
-
-										//return if not is left mouse.
-										if (button !== 0 && buttons !== 1) {
-											return
-										}
-
-										if (shiftKey) {
-											isShift = true
-										}
-
-										handleCellMouseDown({
-											event,
-											row,
-											column,
-											isContinue: isShift,
-										})
-									},
-
-									onInput: (event: React.FormEvent<HTMLDivElement>) => handleCellInput(event.currentTarget),
-									onBlur: (event: React.FocusEvent<HTMLDivElement>) => handleCellBlur(event, row, column),
-									onMouseEnter: () => handleCellMouseEnter(row, column),
-								}
-
-								if (row !== tableAddition.rowLabels.length - 1) {
-									props.push("left")
-								} else {
-									props.push("left", "bottom")
-								}
-
-								if (column === item.length - 1) {
-									props.push("right")
-								}
-
-								props.push("top")
-
-								return (
-									<Cell
-										attrs={{
-											...arrToObject(props),
-											...eventProps,
-										}}
-										key={key}
-									>
-										{value}
-									</Cell>
-								)
-							})}
-						</TableDataRow>
-					)
-				})}
-			</>
-		)
-	}
-
 	return (
 		<>
 			<TableFrame onMouseUp={handleMouseEventRecord.cancelMouseDown}>
@@ -315,7 +229,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 							<RenderRowHeader />
 						</TableRowHeader>
 						<TableDataFrame>
-							<RenderTableData />
+							<RenderTableData targetTables={targetTables} tableAddition={tableAddition} handleCellEvent={handleCellEventFunction} />
 							<HintBorder
 								ref={hintBorder}
 								{...{
