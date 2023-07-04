@@ -159,14 +159,13 @@ const Table: React.FC<ColumnRulerProps> = () => {
 			setTableAddition(getCurrentTableAddition())
 		}
 
-		window.addEventListener("contextmenu", (event) => {
+		const contextMenuListenerCallback = (event: MouseEvent) => {
 			event.preventDefault()
-		})
+		}
+		window.addEventListener("contextmenu", contextMenuListenerCallback)
 
 		return () => {
-			window.removeEventListener("contextmenu", (event) => {
-				event.preventDefault()
-			})
+			window.removeEventListener("contextmenu", contextMenuListenerCallback)
 		}
 	}, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length])
 
