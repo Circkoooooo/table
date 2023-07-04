@@ -73,6 +73,7 @@ export const TableFrame = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
+	width: 100%;
 `
 
 export const TableColumnHeader = styled.div`
@@ -135,7 +136,7 @@ export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnI
 		transition-property: left, top, width, height;
 		transition-timing-function: ease-out;
 		transition-duration: 0.05s;
-		zindex: 1;
+		z-index: 1;
 		width: ${targetWidth}px;
 		height: ${targetHeight}px;
 		pointer-events: none;

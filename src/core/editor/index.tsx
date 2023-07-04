@@ -21,8 +21,14 @@ const tables: AbstractTableElementType[][] = [[]]
 
 const Table: React.FC<ColumnRulerProps> = () => {
 	const [tableAddition, setTableAddition] = useState<TableAddition>({ rowLabels: [], columnLabels: [] })
-
 	const [targetTables, setTargetTables] = useState<AbstractTableElementType[][]>()
+
+	const [screenCalcInfo, setScreenCalcInfo] = useState({
+		isCalc: false,
+		columnCalcNumber: 0,
+		rowCalcNumber: 0,
+	})
+	const tableFrame = useRef<HTMLDivElement>(null)
 	const currentSelectCell = useRef<CurrentSelectCellInfo | null>(null) //click后记录
 	const hintBorder = useRef<HintBorderRef>(null)
 	const mouseEventRecord = useRef<MouseEventRecord>({
@@ -31,11 +37,12 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 	/**
 	 * 获取当前数据状态下的的label
+	 * columnCalcNumber
 	 */
-	const getCurrentTableAddition = () => {
+	const getCurrentTableAddition = (rowCalcNumber: number, columnCalcNumber: number) => {
 		return {
-			rowLabels: getRowLabel(26 < tables.length ? tables.length : 26, 0),
-			columnLabels: tables[0] !== undefined ? getLabel(26 < tables[0].length ? tables[0].length : 26, "A", "Z") : [],
+			rowLabels: getRowLabel(rowCalcNumber < tables.length ? tables.length : rowCalcNumber, 0),
+			columnLabels: tables[0] !== undefined ? getLabel(columnCalcNumber < tables[0].length ? tables[0].length : columnCalcNumber, "A", "Z") : [],
 		}
 	}
 
@@ -153,21 +160,36 @@ const Table: React.FC<ColumnRulerProps> = () => {
 	}
 
 	useEffect(() => {
-		setTargetTables(buildMaskTables())
+		const { isCalc } = screenCalcInfo
 
-		if (tableAddition.rowLabels.length !== tables.length || tableAddition.columnLabels.length !== tables[0].length) {
-			setTableAddition(getCurrentTableAddition())
+		//渲染表格框架
+		setTargetTables(buildMaskTables())
+		if (!isCalc) {
+			const height = tableFrame.current?.clientHeight || 0
+			const width = tableFrame.current?.clientWidth || 0
+
+			setScreenCalcInfo({
+				columnCalcNumber: Math.round((width - (tableAddition.rowLabels.length + 1) * 100) / 100),
+				rowCalcNumber: Math.round((height - (tableAddition.columnLabels.length + 1) * 30) / 30),
+				isCalc: true,
+			})
 		}
 
+		//填充表格内容数据
+		setTableAddition(getCurrentTableAddition(screenCalcInfo.rowCalcNumber, screenCalcInfo.columnCalcNumber))
+
+		////绑定监听函数
+		//阻止默认菜单
 		const contextMenuListenerCallback = (event: MouseEvent) => {
 			event.preventDefault()
 		}
+
 		window.addEventListener("contextmenu", contextMenuListenerCallback)
 
 		return () => {
 			window.removeEventListener("contextmenu", contextMenuListenerCallback)
 		}
-	}, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length])
+	}, [buildMaskTables, tableAddition.columnLabels.length, tableAddition.rowLabels.length, screenCalcInfo])
 
 	//列表头
 	const RenderColumnHeader = useCallback(() => {
@@ -217,7 +239,7 @@ const Table: React.FC<ColumnRulerProps> = () => {
 
 	return (
 		<>
-			<TableFrame onMouseUp={handleMouseEventRecord.cancelMouseDown}>
+			<TableFrame onMouseUp={handleMouseEventRecord.cancelMouseDown} ref={tableFrame}>
 				<TableColumnHeader>
 					<RenderColumnHeader />
 				</TableColumnHeader>
