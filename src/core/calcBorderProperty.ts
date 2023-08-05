@@ -1,4 +1,4 @@
-import { CellData } from "./CellData"
+import { CellData } from "./cellDataHandler"
 
 const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: number) => {
 	return cellData.map((row, rowIndex) => {

@@ -13,3 +13,15 @@ export type TableAddition = {
 	rowLabels: string[]
 	columnLabels: string[]
 }
+
+export namespace TableMouseItemCallback {
+	export type TableMousedownItemCallbackParams = {
+		rowIndex: number
+		columnIndex: number
+	}
+
+	export type TableMousemoveItemCallbackParams = {
+		rowIndex: number
+		columnIndex: number
+	}
+}

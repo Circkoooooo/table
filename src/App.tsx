@@ -1,7 +1,7 @@
 import React from "react"
 import "./App.css"
 import Background from "./layout/Background"
-import Table from "./core/editor"
+import Table from "./core"
 
 function App() {
 	return (

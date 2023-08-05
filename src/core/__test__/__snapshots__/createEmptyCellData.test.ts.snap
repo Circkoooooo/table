@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`m * n matrix 1`] = `
+Array [
+  Array [
+    null,
+    null,
+    null,
+  ],
+  Array [
+    null,
+    null,
+    null,
+  ],
+]
+`;

@@ -1,18 +1,4 @@
 /**
- * 在min和max中循环，根据currentIndex来返回对应索引的ascii字符。例如asciiMin为65，当索引为0的时候也就是返回ascii65所对应的字符。超过asciiMax的时候
- * 会从asciiMin开始循环。
- * @param currentIndex
- * @param asciiLMin
- * @param asciiMax
- * @returns
- */
-export function getLoopValue(currentIndex: number, asciiMin: number, asciiMax: number) {
-	const loopValue = (currentIndex - asciiMin) % (asciiMax - asciiMin + 1)
-
-	return String.fromCharCode(loopValue + asciiMin)
-}
-
-/**
  * 对数组中的值从后往前进行自增进位
  * 如果是空数组[]，则传入最小的值minPrefixCode，否则对最后的值进行自增，最后一个值如果大于maxPrefixCode则将它置为minPrefixCode，向前进位。
  *
@@ -74,7 +60,7 @@ function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPre
  * 生成ascii码区间内符合A - Z .. AA - AZ .. AAA AAB - ZZZ ...规则的取值数组
  *
  */
-export const getLabel = (columnCount: number, asciiMin: number | string, asciiMax: number | string): string[] => {
+export const getColumnLabel = (columnCount: number, asciiMin: number | string, asciiMax: number | string): string[] => {
 	const asciiLimit: number[] = []
 	const result: string[] = []
 
