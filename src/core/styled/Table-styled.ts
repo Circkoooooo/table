@@ -29,7 +29,7 @@ export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, lef
 		`${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
 	]
 
-	const HEIGHT = `${top && bottom ? "31px" : "30px"}`
+	const HEIGHT = `${top && bottom ? "30px" : "30px"}`
 	const BORDER_COLOR = `rgba(0, 0, 0, 0.15)`
 	const BORDER_WIDTH = `${borderWidth.join(" ")}`
 	const BACKGROUND_COLOR = `${dark ? "#f0f0f0" : "#fff"}`
@@ -69,6 +69,7 @@ export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, lef
 
 // data最外层容器
 export const TableFrame = styled.div`
+	position: relative;
 	white-space: nowrap;
 	display: flex;
 	flex-direction: column;
