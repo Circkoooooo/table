@@ -24,13 +24,12 @@ const TableMain = () => {
 		mousedownIndex: null,
 		mousemoveIndex: null,
 	})
-
-	const emptyCellData = createEmptyCellData({
+	const emptyRulerCellData = createEmptyCellData({
 		rowNum: 26,
 		columnNum: 26,
 	})
 
-	const withRulerCellData = createRulerCellData(emptyCellData)
+	const withRulerCellData = createRulerCellData(emptyRulerCellData)
 
 	/**
 	 * mouse down on cells, record the index.
@@ -38,9 +37,6 @@ const TableMain = () => {
 	 * when mousedown, set mousedown and mousemove index.
 	 */
 	const handleMousedown = ({ rowIndex, columnIndex }: TableMouseItemCallback.TableMousedownItemCallbackParams) => {
-		//exclude the table head
-		if (rowIndex === 0 || columnIndex === 0) return
-
 		setInteractionInfoRecord({
 			...interactionInfoRecord,
 			isMousedown: true,
@@ -48,7 +44,10 @@ const TableMain = () => {
 				rowIndex,
 				columnIndex,
 			},
-			mousemoveIndex: null,
+			mousemoveIndex: {
+				rowIndex,
+				columnIndex,
+			},
 		})
 	}
 
@@ -84,20 +83,10 @@ const TableMain = () => {
 			isRender: false,
 		} as { isRender: false }
 
-		if (mousedownIndex === null) return noBorder
+		if (mousedownIndex === null || mousemoveIndex === null) return noBorder
 
-		if (mousemoveIndex === null) {
-			return {
-				isRender: true,
-				borderWidth: 100,
-				borderHeight: 30,
-				offsetLeft: mousedownIndex.columnIndex * 100,
-				offsetTop: mousedownIndex.rowIndex * 30,
-			}
-		}
-
+		//Exclude the unexpected index.
 		if (mousedownIndex.rowIndex < 0 || mousedownIndex.rowIndex > rowLength || mousedownIndex.columnIndex < 0 || mousedownIndex.columnIndex > columnLength) return noBorder
-		if (mousemoveIndex.rowIndex < 0 || mousemoveIndex.rowIndex > rowLength || mousemoveIndex.columnIndex < 0 || mousemoveIndex.columnIndex > columnLength) return noBorder
 
 		const { rowIndex: mousedownRowIndex, columnIndex: mousedownColumnIndex } = mousedownIndex
 		const { rowIndex: mousemoveRowIndex, columnIndex: mousemoveColumnIndex } = mousemoveIndex
@@ -107,6 +96,49 @@ const TableMain = () => {
 		const rowStartIndex = mousedownRowIndex < mousemoveRowIndex ? mousedownRowIndex : mousemoveRowIndex
 		const columnStartIndex = mousedownColumnIndex < mousemoveColumnIndex ? mousedownColumnIndex : mousemoveColumnIndex
 
+		//Click on a table head, render a border covers a row or column.
+		if (mousedownColumnIndex === 0 || mousedownRowIndex === 0) {
+			if (mousedownColumnIndex === 0 && mousedownRowIndex === 0) {
+				return {
+					isRender: true,
+					borderWidth: (withRulerCellData.data.length - 1) * 100,
+					borderHeight: withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30,
+					offsetLeft: 100,
+					offsetTop: 30,
+				}
+			}
+
+			if (mousedownColumnIndex === 0) {
+				return {
+					isRender: true,
+					borderWidth: (withRulerCellData.data.length - 1) * 100,
+					borderHeight: rowIndexOffset * 30,
+					offsetLeft: 100,
+					offsetTop: rowStartIndex * 30,
+				}
+			} else if (mousedownRowIndex === 0) {
+				return {
+					isRender: true,
+					borderWidth: columnIndexOffset * 100,
+					borderHeight: withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30,
+					offsetLeft: columnStartIndex * 100,
+					offsetTop: 30,
+				}
+			}
+		}
+
+		// Click on a element is not the head.
+		if (mousedownRowIndex === mousemoveRowIndex && mousedownColumnIndex === mousemoveColumnIndex) {
+			return {
+				isRender: true,
+				borderWidth: 100,
+				borderHeight: 30,
+				offsetLeft: mousedownIndex.columnIndex * 100,
+				offsetTop: mousedownIndex.rowIndex * 30,
+			}
+		}
+
+		// Different click-element and move-element, trigger the multiple selections.
 		return {
 			isRender: true,
 			borderWidth: columnIndexOffset * 100,

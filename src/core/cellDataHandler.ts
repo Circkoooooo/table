@@ -1,3 +1,4 @@
+import deepClone from "../tools/deepClone"
 import { getColumnLabel, getRowLabel } from "./ruler"
 
 interface FullTableEmptyDataParams {
@@ -24,27 +25,30 @@ export const createEmptyCellData = (params: FullTableEmptyDataParams): CellData 
  * @param emptyRulerCellData
  */
 export const createRulerCellData = (emptyRulerCellData: CellData) => {
+	const tempEmptyRulerCellData = deepClone(emptyRulerCellData)
+
 	const result = {
-		data: emptyRulerCellData,
+		data: tempEmptyRulerCellData,
 		info: {
-			rowLength: emptyRulerCellData.length,
-			columnLength: emptyRulerCellData[0] && emptyRulerCellData[0].length,
+			rowLength: tempEmptyRulerCellData.length,
+			columnLength: tempEmptyRulerCellData[0] && tempEmptyRulerCellData[0].length,
 		},
 	}
 
-	if (emptyRulerCellData.length === 0) return result
+	if (tempEmptyRulerCellData.length === 0) return result
 
-	const rowLength = emptyRulerCellData.length
-	const columnLength = emptyRulerCellData[0].length
+	const rowLength = tempEmptyRulerCellData.length
+	const columnLength = tempEmptyRulerCellData[0].length
 
 	const columnLabels = getColumnLabel(columnLength, 65, 90)
 	const rowLabels = getRowLabel(rowLength, 0)
 
-	const resolvedColumnCellData = [...emptyRulerCellData].map((item, i) => {
+	const resolvedColumnCellData = [...tempEmptyRulerCellData].map((item, i) => {
 		item.unshift(rowLabels[i])
 		return item
 	})
 
+	//inject one row into
 	const rulerCellData = [[null, ...columnLabels], ...resolvedColumnCellData]
 
 	return {
