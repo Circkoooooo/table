@@ -98,32 +98,38 @@ const TableMain = () => {
 
 		//Click on a table head, render a border covers a row or column.
 		if (mousedownColumnIndex === 0 || mousedownRowIndex === 0) {
+			let borderWidth = columnIndexOffset * 100,
+				borderHeight = rowIndexOffset * 30,
+				offsetLeft = columnStartIndex * 100,
+				offsetTop = rowStartIndex * 30
+
 			if (mousedownColumnIndex === 0 && mousedownRowIndex === 0) {
-				return {
-					isRender: true,
-					borderWidth: (withRulerCellData.data.length - 1) * 100,
-					borderHeight: withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30,
-					offsetLeft: 100,
-					offsetTop: 30,
+				borderWidth = (withRulerCellData.data.length - 1) * 100
+				borderHeight = withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30
+				offsetLeft = 100
+				offsetTop = 30
+			} else {
+				//fill a row
+				if (mousedownColumnIndex === 0) {
+					borderWidth = (withRulerCellData.data.length - 1) * 100
+					borderHeight = (mousemoveRowIndex === 0 ? rowIndexOffset - 1 : rowIndexOffset) * 30
+					offsetLeft = 100
+					offsetTop = (mousemoveRowIndex === 0 ? rowStartIndex + 1 : rowStartIndex) * 30
+				} else if (mousedownRowIndex === 0) {
+					//fill a column
+					borderWidth = (mousemoveColumnIndex === 0 ? columnIndexOffset - 1 : columnIndexOffset) * 100
+					borderHeight = withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30
+					offsetLeft = (mousemoveColumnIndex === 0 ? columnStartIndex + 1 : columnStartIndex) * 100
+					offsetTop = 30
 				}
 			}
 
-			if (mousedownColumnIndex === 0) {
-				return {
-					isRender: true,
-					borderWidth: (withRulerCellData.data.length - 1) * 100,
-					borderHeight: rowIndexOffset * 30,
-					offsetLeft: 100,
-					offsetTop: rowStartIndex * 30,
-				}
-			} else if (mousedownRowIndex === 0) {
-				return {
-					isRender: true,
-					borderWidth: columnIndexOffset * 100,
-					borderHeight: withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30,
-					offsetLeft: columnStartIndex * 100,
-					offsetTop: 30,
-				}
+			return {
+				isRender: true,
+				borderWidth,
+				borderHeight,
+				offsetLeft,
+				offsetTop,
 			}
 		}
 
@@ -139,12 +145,27 @@ const TableMain = () => {
 		}
 
 		// Different click-element and move-element, trigger the multiple selections.
+		let borderWidth = columnIndexOffset * 100,
+			borderHeight = rowIndexOffset * 30,
+			offsetLeft = columnStartIndex * 100,
+			offsetTop = rowStartIndex * 30
+
+		if (mousemoveRowIndex === 0) {
+			borderHeight = (rowIndexOffset - 1) * 30
+			offsetTop = (rowStartIndex + 1) * 30
+		}
+
+		if (mousemoveColumnIndex === 0) {
+			borderWidth = (columnIndexOffset - 1) * 100
+			offsetLeft = (columnStartIndex + 1) * 100
+		}
+
 		return {
 			isRender: true,
-			borderWidth: columnIndexOffset * 100,
-			borderHeight: rowIndexOffset * 30,
-			offsetLeft: columnStartIndex * 100,
-			offsetTop: rowStartIndex * 30,
+			borderWidth,
+			borderHeight,
+			offsetLeft,
+			offsetTop,
 		}
 	}
 
