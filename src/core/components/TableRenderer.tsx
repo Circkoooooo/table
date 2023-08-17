@@ -9,9 +9,13 @@ interface TableRendererProps {
 	mousedownItemCallback?: (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => void
 	mousemoveItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
 	mouseupItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
+	editIndex?: {
+		rowIndex: number
+		columnIndex: number
+	}
 }
 
-const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCallback, mousemoveItemCallback, mouseupItemCallback }) => {
+const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCallback, mousemoveItemCallback, mouseupItemCallback, editIndex }) => {
 	const borderProperty = calcBorderProperty(cellData, cellData.length, cellData[0] && cellData[0].length)
 
 	const mousedownItem = (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => {
@@ -34,6 +38,12 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 						{item.map((item, columnIndex) => (
 							<CellStyled
 								{...borderProperty[rowIndex][columnIndex]}
+								{...{
+									contentEditable:
+										(editIndex?.rowIndex === rowIndex && editIndex.columnIndex === columnIndex) === true
+											? editIndex?.rowIndex === rowIndex && editIndex.columnIndex === columnIndex
+											: undefined,
+								}}
 								key={`${rowIndex}-${columnIndex}`}
 								onMouseDown={() =>
 									mousedownItem({

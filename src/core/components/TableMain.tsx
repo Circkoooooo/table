@@ -7,11 +7,16 @@ import { TableMouseItemCallback } from "../types/types"
 type InteractionInfo = {
 	isMousedown: boolean
 	isMousemove: boolean
+	isEdit: boolean
 	mousedownIndex: {
 		rowIndex: number
 		columnIndex: number
 	} | null
 	mousemoveIndex: {
+		rowIndex: number
+		columnIndex: number
+	} | null
+	editIndex: {
 		rowIndex: number
 		columnIndex: number
 	} | null
@@ -21,9 +26,12 @@ const TableMain = () => {
 	const [interactionInfoRecord, setInteractionInfoRecord] = useState<InteractionInfo>({
 		isMousedown: false,
 		isMousemove: false,
+		isEdit: false,
 		mousedownIndex: null,
 		mousemoveIndex: null,
+		editIndex: null,
 	})
+
 	const emptyRulerCellData = createEmptyCellData({
 		rowNum: 26,
 		columnNum: 26,
@@ -37,7 +45,7 @@ const TableMain = () => {
 	 * when mousedown, set mousedown and mousemove index.
 	 */
 	const handleMousedown = ({ rowIndex, columnIndex }: TableMouseItemCallback.TableMousedownItemCallbackParams) => {
-		setInteractionInfoRecord({
+		const tempInteractionInfo = {
 			...interactionInfoRecord,
 			isMousedown: true,
 			mousedownIndex: {
@@ -48,7 +56,21 @@ const TableMain = () => {
 				rowIndex,
 				columnIndex,
 			},
-		})
+		}
+
+		const { mousedownIndex } = interactionInfoRecord
+		if (mousedownIndex && mousedownIndex.rowIndex === rowIndex && mousedownIndex.columnIndex === columnIndex) {
+			tempInteractionInfo.isEdit = true
+			tempInteractionInfo.editIndex = {
+				rowIndex,
+				columnIndex,
+			}
+		} else {
+			tempInteractionInfo.isEdit = false
+			tempInteractionInfo.editIndex = null
+		}
+
+		setInteractionInfoRecord(tempInteractionInfo)
 	}
 
 	//mouse moves over cells, record index.
@@ -177,6 +199,9 @@ const TableMain = () => {
 				mousedownItemCallback={(params) => handleMousedown(params)}
 				mousemoveItemCallback={(params) => handleMousemove(params)}
 				mouseupItemCallback={() => handleMouseup()}
+				{...{
+					editIndex: interactionInfoRecord.editIndex ?? undefined,
+				}}
 			/>
 		</>
 	)
