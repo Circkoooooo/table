@@ -10,6 +10,13 @@ export type CellDataElement = string | number | null
 
 export type CellData = CellDataElement[][]
 
+export interface WithRulerCellData {
+	data: CellData
+	info: {
+		rowLength: number
+		columnLength: number
+	}
+}
 /**
  * 根据row column数目返回一个矩阵 r * c
  * @param params
@@ -21,10 +28,10 @@ export const createEmptyCellData = (params: FullTableEmptyDataParams): CellData 
 }
 
 /**
- * 将数组处理成带label的
+ * 在空二维数组的基础上添加行标和列标（深克隆）
  * @param emptyRulerCellData
  */
-export const createRulerCellData = (emptyRulerCellData: CellData) => {
+export const createRulerCellData = (emptyRulerCellData: CellData): WithRulerCellData => {
 	const tempEmptyRulerCellData = deepClone(emptyRulerCellData)
 
 	const result = {
