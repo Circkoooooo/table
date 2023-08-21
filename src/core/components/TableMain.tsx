@@ -3,23 +3,15 @@ import { createEmptyCellData, createRulerCellData } from "../cellDataHandler"
 import TableBorder, { BorderProps } from "./TableBorder"
 import TableRenderer from "./TableRenderer"
 import { TableMouseItemCallback } from "../types/types"
+import { IndexType } from "../types/table"
 
 type InteractionInfo = {
 	isMousedown: boolean
 	isMousemove: boolean
 	isEdit: boolean
-	mousedownIndex: {
-		rowIndex: number
-		columnIndex: number
-	} | null
-	mousemoveIndex: {
-		rowIndex: number
-		columnIndex: number
-	} | null
-	editIndex: {
-		rowIndex: number
-		columnIndex: number
-	} | null
+	mousedownIndex: IndexType | null
+	mousemoveIndex: IndexType | null
+	editIndex: IndexType | null
 }
 
 const TableMain = () => {

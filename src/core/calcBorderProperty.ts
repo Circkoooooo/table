@@ -1,6 +1,13 @@
 import { CellData } from "./cellDataHandler"
 
-const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: number) => {
+export type BorderProperty = {
+	top?: boolean
+	right?: boolean
+	bottom?: boolean
+	left?: boolean
+}
+
+const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: number): BorderProperty[][] => {
 	return cellData.map((row, rowIndex) => {
 		return row.map((_, columnIndex) => {
 			const property = {

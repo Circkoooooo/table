@@ -1,18 +1,24 @@
 import React from "react"
-import calcBorderProperty from "../calcBorderProperty"
+import calcBorderProperty, { BorderProperty } from "../calcBorderProperty"
 import { CellData } from "../cellDataHandler"
 import { CellStyled } from "../styled/Table-styled"
 import { TableMouseItemCallback } from "../types/types"
+import { IndexType } from "../types/table"
+import isIndexEqual from "../Tools/Table/isIndexEqual"
+import isIndexTableBody from "../Tools/Table/isIndexTableBody"
 
 interface TableRendererProps {
 	cellData: CellData
 	mousedownItemCallback?: (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => void
 	mousemoveItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
 	mouseupItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
-	editIndex?: {
-		rowIndex: number
-		columnIndex: number
-	}
+	editIndex?: IndexType
+}
+
+type CellStyledProperty = {
+	key: string
+	borderProperty: BorderProperty
+	contentEditable?: boolean
 }
 
 const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCallback, mousemoveItemCallback, mouseupItemCallback, editIndex }) => {
@@ -30,6 +36,26 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 		mouseupItemCallback && mouseupItemCallback(params)
 	}
 
+	// Property of CellStyled Component.
+	const cellStyledProperty = (rowIndex: number, columnIndex: number): CellStyledProperty => {
+		const contentEditable =
+			(isIndexTableBody(cellData, rowIndex, columnIndex) &&
+				isIndexEqual(editIndex, {
+					rowIndex,
+					columnIndex,
+				})) ??
+			undefined
+
+		const property: CellStyledProperty = {
+			key: `${rowIndex}-${columnIndex}`,
+			borderProperty: { ...borderProperty[rowIndex][columnIndex] },
+		}
+
+		contentEditable && (property.contentEditable = contentEditable)
+
+		return property
+	}
+
 	return (
 		<>
 			{cellData &&
@@ -37,14 +63,7 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 					<div key={`${rowIndex}`}>
 						{item.map((item, columnIndex) => (
 							<CellStyled
-								{...borderProperty[rowIndex][columnIndex]}
-								{...{
-									contentEditable:
-										(editIndex?.rowIndex === rowIndex && editIndex.columnIndex === columnIndex) === true
-											? editIndex?.rowIndex === rowIndex && editIndex.columnIndex === columnIndex
-											: undefined,
-								}}
-								key={`${rowIndex}-${columnIndex}`}
+								{...cellStyledProperty(rowIndex, columnIndex)}
 								onMouseDown={() =>
 									mousedownItem({
 										rowIndex,

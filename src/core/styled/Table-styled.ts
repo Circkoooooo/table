@@ -1,13 +1,8 @@
 import styled, { css } from "styled-components"
+import { BorderProperty } from "../calcBorderProperty"
 
 export interface CellStyledProps {
-	top?: boolean
-	right?: boolean
-	bottom?: boolean
-	left?: boolean
-	dark?: boolean
-	lineRight?: boolean
-	lineBottom?: boolean
+	borderProperty: BorderProperty
 }
 
 export interface HintBorderProps {
@@ -19,7 +14,9 @@ export interface HintBorderProps {
 }
 
 // 单元格
-export const CellStyled = styled.div<CellStyledProps>(({ top, right, bottom, left, dark }) => {
+export const CellStyled = styled.div<CellStyledProps>(({ borderProperty }) => {
+	const { top, right, bottom, left } = borderProperty
+	const dark = false
 	const DEFAULT_BORDER_WIDTH = 1
 	const CLEAR_BORDER_WIDTH = 0
 	const borderWidth = [

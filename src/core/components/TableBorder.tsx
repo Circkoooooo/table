@@ -20,7 +20,7 @@ const BorderWrapper = styled.div<BorderWrapperProps>(({ width, height, offsetLef
 	`
 })
 
-interface BaseBorderProps {
+type BaseBorderProps = {
 	isRender: true
 	borderWidth: number
 	borderHeight: number
