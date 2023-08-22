@@ -1,5 +1,6 @@
-import { useCallback, useRef } from "react"
+/// <reference types="@types/node/timers"/>
 
+import { useCallback, useRef } from "react"
 export interface UseDebounceInputEvent<T> {
 	event: React.FormEvent<T>
 }
