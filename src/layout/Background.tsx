@@ -5,16 +5,17 @@ interface BackgroundProps {
 	HeaderSlot?: ReactNode
 	MainSlot?: ReactNode
 	AsideSlot?: ReactNode
+	onContextMenu: (mouseEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }
 
-const Background: React.FC<BackgroundProps> = ({ HeaderSlot, MainSlot, AsideSlot }) => {
+const Background: React.FC<BackgroundProps> = ({ HeaderSlot, MainSlot, AsideSlot, onContextMenu }) => {
 	return (
 		<>
-			<Body>
-				<Header>{HeaderSlot}</Header>
-				<Main>
+			<Body role="body" onContextMenu={(event) => onContextMenu(event)}>
+				<Header role="header">{HeaderSlot}</Header>
+				<Main role="main">
 					{AsideSlot && <Aside>{AsideSlot}</Aside>}
-					<Content>{MainSlot}</Content>
+					<Content role="content">{MainSlot}</Content>
 				</Main>
 			</Body>
 		</>

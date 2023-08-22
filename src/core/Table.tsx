@@ -1,20 +1,7 @@
 import { TableFrame } from "./styled/Table-styled"
 import { TableMain } from "./components/TableMain"
-import { useEffect } from "react"
 
 const Table = () => {
-	const contextMenuListenerCallback = (event: MouseEvent) => {
-		event.preventDefault()
-	}
-
-	useEffect(() => {
-		window.addEventListener("contextmenu", contextMenuListenerCallback)
-
-		return () => {
-			window.removeEventListener("contextmenu", contextMenuListenerCallback)
-		}
-	}, [])
-
 	return (
 		<TableFrame>
 			<TableMain />
