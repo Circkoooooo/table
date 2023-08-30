@@ -67,12 +67,6 @@
 		"test:coverage": "npx jest --coverage",
 		"lint": "npx prettier --write ."
 	},
-	"eslintConfig": {
-		"extends": [
-			"react-app",
-			"react-app/jest"
-		]
-	},
 	"browserslist": {
 		"production": [
 			">0.2%",
@@ -85,59 +79,6 @@
 			"last 1 safari version"
 		]
 	},
-	"jest": {
-		"roots": [
-			"<rootDir>/src"
-		],
-		"collectCoverageFrom": [
-			"src/**/*.{js,jsx,ts,tsx}",
-			"!src/**/*.d.ts"
-		],
-		"setupFiles": [
-			"react-app-polyfill/jsdom"
-		],
-		"testMatch": [
-			"<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-			"<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
-		],
-		"testEnvironment": "jsdom",
-		"transform": {
-			"^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
-			"^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-			"^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-		},
-		"transformIgnorePatterns": [
-			"[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-			"^.+\\.module\\.(css|sass|scss)$"
-		],
-		"modulePaths": [],
-		"moduleNameMapper": {
-			"^react-native$": "react-native-web",
-			"^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
-		},
-		"moduleFileExtensions": [
-			"web.js",
-			"js",
-			"web.ts",
-			"ts",
-			"web.tsx",
-			"tsx",
-			"json",
-			"web.jsx",
-			"jsx",
-			"node"
-		],
-		"watchPlugins": [
-			"jest-watch-typeahead/filename",
-			"jest-watch-typeahead/testname"
-		],
-		"resetMocks": true
-	},
-	"babel": {
-		"presets": [
-			"react-app"
-		]
-	},
 	"devDependencies": {
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/react": "^13.4.0",
@@ -146,6 +87,7 @@
 		"@types/node": "^16.18.25",
 		"@types/testing-library__jest-dom": "^6.0.0",
 		"@types/testing-library__user-event": "^4.2.0",
-		"prettier": "2.8.8"
+		"prettier": "2.8.8",
+		"ts-node": "^10.9.1"
 	}
 }
