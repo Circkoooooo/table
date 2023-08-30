@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react"
-import Table from "../Table"
+import Table from "../core/Table"
 
 describe("Table", () => {
 	it("snapshot", () => {
