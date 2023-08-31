@@ -1,4 +1,4 @@
-name: test and coverage
+name: Testing and coverage report
 
 on:
     push:
@@ -7,7 +7,7 @@ on:
         branches: [main]
 
 jobs:
-    build:
+    util-testing:
         runs-on: ubuntu-latest
 
         strategy:
@@ -20,7 +20,14 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm install -g pnpm
-            - run: pnpm install
-            - run: pnpm test
-            - run: pnpm test:coverage
+
+            - name: Use pnpm
+              run: |
+                  npm install -g pnpm
+                  pnpm install
+
+            - name: util test
+              run: pnpm test
+
+            - name: testing coverage
+              run: pnpm test:coverage
