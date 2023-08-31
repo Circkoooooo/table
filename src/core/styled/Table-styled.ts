@@ -2,7 +2,7 @@ import styled, { css } from "styled-components"
 import { BorderProperty } from "../calcBorderProperty"
 
 export interface CellStyledProps {
-	borderProperty: BorderProperty
+	$borderProperty: BorderProperty
 }
 
 export interface HintBorderProps {
@@ -14,8 +14,8 @@ export interface HintBorderProps {
 }
 
 // 单元格
-export const CellStyled = styled.div<CellStyledProps>(({ borderProperty }) => {
-	const { top, right, bottom, left } = borderProperty
+export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
+	const { top, right, bottom, left } = $borderProperty
 	const dark = false
 	const DEFAULT_BORDER_WIDTH = 1
 	const CLEAR_BORDER_WIDTH = 0
