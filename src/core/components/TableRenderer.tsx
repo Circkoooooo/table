@@ -1,5 +1,5 @@
-import React from "react"
-import calcBorderProperty, { BorderProperty } from "../calcBorderProperty"
+import React, { useMemo } from "react"
+import calcBorderProperty from "../calcBorderProperty"
 import { CellData } from "../cellDataHandler"
 import { CellStyled } from "../styled/Table-styled"
 import { TableMouseItemCallback } from "../types/types"
@@ -17,12 +17,11 @@ interface TableRendererProps {
 
 type CellStyledProperty = {
 	key: string
-	borderProperty: BorderProperty
 	contentEditable?: boolean
 }
 
 const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCallback, mousemoveItemCallback, mouseupItemCallback, editIndex }) => {
-	const borderProperty = calcBorderProperty(cellData, cellData.length, cellData[0] && cellData[0].length)
+	const borderProperty = useMemo(() => calcBorderProperty(cellData, cellData.length, cellData[0] && cellData[0].length), [cellData])
 
 	const mousedownItem = (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => {
 		mousedownItemCallback && mousedownItemCallback(params)
@@ -48,7 +47,6 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 
 		const property: CellStyledProperty = {
 			key: `${rowIndex}-${columnIndex}`,
-			borderProperty: { ...borderProperty[rowIndex][columnIndex] },
 		}
 
 		contentEditable && (property.contentEditable = contentEditable)
@@ -64,6 +62,7 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 						{item.map((item, columnIndex) => (
 							<CellStyled
 								{...cellStyledProperty(rowIndex, columnIndex)}
+								$borderProperty={borderProperty[rowIndex][columnIndex]}
 								onMouseDown={() =>
 									mousedownItem({
 										rowIndex,
