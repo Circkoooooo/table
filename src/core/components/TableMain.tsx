@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { createEmptyCellData, createRulerCellData } from "../cellDataHandler"
 import TableBorder, { BorderProps } from "./TableBorder"
 import TableRenderer from "./TableRenderer"
@@ -89,7 +89,7 @@ const TableMain = () => {
 		})
 	}
 
-	const resolveBorderProperty = (): BorderProps => {
+	const resolveBorderProperty = useMemo((): BorderProps => {
 		const { mousedownIndex, mousemoveIndex } = interactionInfoRecord
 		const { rowLength, columnLength } = withRulerCellData.info
 
@@ -181,11 +181,11 @@ const TableMain = () => {
 			offsetLeft,
 			offsetTop,
 		}
-	}
+	}, [interactionInfoRecord, withRulerCellData])
 
 	return (
 		<>
-			<TableBorder {...{ ...resolveBorderProperty() }} />
+			<TableBorder {...resolveBorderProperty} />
 			<TableRenderer
 				cellData={withRulerCellData.data}
 				mousedownItemCallback={(params) => handleMousedown(params)}
