@@ -12,14 +12,14 @@ export const Body = styled.div`
 	flex-direction: column;
 `
 
-export const Header = styled.div`
+export const Header = styled.header`
 	background-color: #fff;
 	width: 100%;
 	height: ${BackgroundConfig.headerHeight};
 	border-bottom: ${BackgroundConfig.border};
 `
 
-export const Main = styled.div`
+export const Main = styled.main`
 	width: 100%;
 	height: 100%;
 	flex: 1;
@@ -27,7 +27,7 @@ export const Main = styled.div`
 	overflow: hidden;
 `
 
-export const Aside = styled.div`
+export const Aside = styled.aside`
 	background: #fff;
 	min-width: 300px;
 	height: 100%;

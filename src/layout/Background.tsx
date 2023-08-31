@@ -11,11 +11,11 @@ interface BackgroundProps {
 const Background: React.FC<BackgroundProps> = ({ HeaderSlot, MainSlot, AsideSlot, onContextMenu }) => {
 	return (
 		<>
-			<Body role="body" onContextMenu={(event) => onContextMenu(event)}>
-				<Header role="header">{HeaderSlot}</Header>
-				<Main role="main">
+			<Body data-testid="body" onContextMenu={(event) => onContextMenu(event)}>
+				<Header>{HeaderSlot}</Header>
+				<Main>
 					{AsideSlot && <Aside>{AsideSlot}</Aside>}
-					<Content role="content">{MainSlot}</Content>
+					<Content>{MainSlot}</Content>
 				</Main>
 			</Body>
 		</>
