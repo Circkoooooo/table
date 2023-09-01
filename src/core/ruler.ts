@@ -1,3 +1,5 @@
+import deepClone from "../tools/deepClone"
+
 /**
  * 对数组中的值从后往前进行自增进位
  * 如果是空数组[]，则传入最小的值minPrefixCode，否则对最后的值进行自增，最后一个值如果大于maxPrefixCode则将它置为minPrefixCode，向前进位。
@@ -14,53 +16,57 @@
  * @param minPrefixCode
  * @param maxPrefixCode
  */
-function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) {
+export function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) {
+	const resultPrefixArray = deepClone(prefixArray)
+
 	if (prefixArray.length === 0) {
-		prefixArray[0] = minPrefixCode
+		resultPrefixArray[0] = minPrefixCode
 	} else {
-		if (prefixArray.length === 1) {
-			if (prefixArray[0] === maxPrefixCode) {
-				prefixArray[0] = minPrefixCode
-				prefixArray.unshift(minPrefixCode)
+		if (resultPrefixArray.length === 1) {
+			if (resultPrefixArray[0] === maxPrefixCode) {
+				resultPrefixArray[0] = minPrefixCode
+				resultPrefixArray.unshift(minPrefixCode)
 			} else {
-				prefixArray[0]++
+				resultPrefixArray[0]++
 			}
 		} else {
-			for (let i = prefixArray.length - 1, carry = false; i >= 0; i--) {
+			for (let i = resultPrefixArray.length - 1, carry = false; i >= 0; i--) {
 				//最后一个索引
-				if (i === prefixArray.length - 1) {
-					if (prefixArray[i] === maxPrefixCode) {
+				if (i === resultPrefixArray.length - 1) {
+					if (resultPrefixArray[i] === maxPrefixCode) {
 						carry = true
-						prefixArray[i] = minPrefixCode
+						resultPrefixArray[i] = minPrefixCode
 					} else {
-						prefixArray[i]++
+						resultPrefixArray[i]++
 					}
 				} else {
 					if (carry) {
 						carry = false
 
-						if (prefixArray[i] === maxPrefixCode) {
-							carry = true
-							prefixArray[i] = minPrefixCode
-
-							if (i === 0) {
-								prefixArray.unshift(minPrefixCode)
-							}
+						let isLastPrefixCarry = false
+						if (resultPrefixArray[i] === maxPrefixCode) {
+							isLastPrefixCarry = true
+							resultPrefixArray[i] = minPrefixCode
 						} else {
-							prefixArray[i]++
+							resultPrefixArray[i]++
+						}
+
+						if (isLastPrefixCarry && i === 0) {
+							resultPrefixArray.unshift(minPrefixCode)
 						}
 					}
 				}
 			}
 		}
 	}
+	return resultPrefixArray
 }
 
 /**
  * 生成ascii码区间内符合A - Z .. AA - AZ .. AAA AAB - ZZZ ...规则的取值数组
  *
  */
-export const getColumnLabel = (columnCount: number, asciiMin: number | string, asciiMax: number | string): string[] => {
+export const getColumnLabel = (columnCount: number, asciiMin: number | string = 65, asciiMax: number | string = 90): string[] => {
 	const asciiLimit: number[] = []
 	const result: string[] = []
 
@@ -68,12 +74,16 @@ export const getColumnLabel = (columnCount: number, asciiMin: number | string, a
 		asciiLimit.push(asciiMin)
 	} else if (typeof asciiMin === "string") {
 		asciiLimit.push(asciiMin.charCodeAt(0))
+	} else {
+		throw new Error(`Type of ${asciiMin} is not a valid type`)
 	}
 
 	if (typeof asciiMax === "number") {
 		asciiLimit.push(asciiMax)
 	} else if (typeof asciiMax === "string") {
 		asciiLimit.push(asciiMax.charCodeAt(0))
+	} else {
+		throw new Error(`Type of ${asciiMax} is not a valid type`)
 	}
 
 	//前缀
@@ -90,7 +100,8 @@ export const getColumnLabel = (columnCount: number, asciiMin: number | string, a
 		//如果有前缀标记，处理前缀数组
 		if (previousPrefixCode.needAddPrefix) {
 			previousPrefixCode.needAddPrefix = false
-			resolvePrefixArray(previousPrefixCode.prefixes, asciiLimit[0], asciiLimit[1])
+			previousPrefixCode.prefixes.splice(0)
+			previousPrefixCode.prefixes.push(...resolvePrefixArray(previousPrefixCode.prefixes, asciiLimit[0], asciiLimit[1]))
 		}
 
 		//判断是否为最后一个值，如果是，记录前缀标记
