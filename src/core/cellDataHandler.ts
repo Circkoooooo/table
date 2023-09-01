@@ -38,7 +38,7 @@ export const createRulerCellData = (emptyRulerCellData: CellData): WithRulerCell
 		data: tempEmptyRulerCellData,
 		info: {
 			rowLength: tempEmptyRulerCellData.length,
-			columnLength: tempEmptyRulerCellData[0] && tempEmptyRulerCellData[0].length,
+			columnLength: (tempEmptyRulerCellData[0] && tempEmptyRulerCellData[0].length) || 0,
 		},
 	}
 
