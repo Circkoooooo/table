@@ -1,5 +1,7 @@
+import isIndexEqual from "../core/Tools/Table/isIndexEqual"
 import isIndexTableBody from "../core/Tools/Table/isIndexTableBody"
 import { createEmptyCellData, createRulerCellData } from "../core/cellDataHandler"
+import { IndexType } from "../core/types/table"
 
 describe("functions of table data", () => {
 	it("Provide a emptyCellData. Data should includes ruler data and length of info object should equals the length of data.", () => {
@@ -43,5 +45,27 @@ describe("Data handler function tools", () => {
 		expect(falseResult).toBeFalsy()
 		expect(falseResult2).toBeFalsy()
 		expect(trueResult).toBeTruthy()
+	})
+
+	it("row index and column index equal", () => {
+		const indexOrigin: IndexType = {
+			rowIndex: 0,
+			columnIndex: 0,
+		}
+
+		const indexTarget: IndexType = {
+			rowIndex: 0,
+			columnIndex: 0,
+		}
+
+		const indexTarget2: IndexType = {
+			rowIndex: 0,
+			columnIndex: 1,
+		}
+		const equal = isIndexEqual(indexOrigin, indexTarget)
+		const notEqual = isIndexEqual(indexOrigin, indexTarget2)
+
+		expect(equal).toBeTruthy()
+		expect(notEqual).toBeFalsy()
 	})
 })
