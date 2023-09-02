@@ -10,20 +10,6 @@ describe("ruler", () => {
 		expect(getColumnLabel(26, "A", "Z")).toMatchObject(resultA2Z)
 	})
 
-	it("typeof asciiMin is valid type", () => {
-		function validType() {
-			getColumnLabel(26, null as unknown as any, "Z")
-		}
-		expect(validType).toThrow(new Error("Type of null is not a valid type"))
-	})
-
-	it("typeof asciiMax is valid type", () => {
-		function validType() {
-			getColumnLabel(26, 90, null as unknown as any)
-		}
-		expect(validType).toThrow(new Error("Type of null is not a valid type"))
-	})
-
 	it("snapshot", () => {
 		expect(getColumnLabel(26)).toMatchSnapshot()
 	})

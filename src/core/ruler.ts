@@ -62,6 +62,14 @@ export function resolvePrefixArray(prefixArray: number[], minPrefixCode: number,
 	return resultPrefixArray
 }
 
+function pickValidTypeAsciiCode(asciiCode: number | string): number {
+	if (typeof asciiCode === "number") {
+		return asciiCode
+	}
+
+	return asciiCode.charCodeAt(0)
+}
+
 /**
  * 生成ascii码区间内符合A - Z .. AA - AZ .. AAA AAB - ZZZ ...规则的取值数组
  *
@@ -70,21 +78,8 @@ export const getColumnLabel = (columnCount: number, asciiMin: number | string = 
 	const asciiLimit: number[] = []
 	const result: string[] = []
 
-	if (typeof asciiMin === "number") {
-		asciiLimit.push(asciiMin)
-	} else if (typeof asciiMin === "string") {
-		asciiLimit.push(asciiMin.charCodeAt(0))
-	} else {
-		throw new Error(`Type of ${asciiMin} is not a valid type`)
-	}
-
-	if (typeof asciiMax === "number") {
-		asciiLimit.push(asciiMax)
-	} else if (typeof asciiMax === "string") {
-		asciiLimit.push(asciiMax.charCodeAt(0))
-	} else {
-		throw new Error(`Type of ${asciiMax} is not a valid type`)
-	}
+	asciiLimit.push(pickValidTypeAsciiCode(asciiMin))
+	asciiLimit.push(pickValidTypeAsciiCode(asciiMax))
 
 	//前缀
 	const previousPrefixCode = {
