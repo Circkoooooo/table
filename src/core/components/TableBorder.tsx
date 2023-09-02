@@ -4,19 +4,19 @@ import styled, { css } from "styled-components"
 interface BorderWrapperProps {
 	width: number
 	height: number
-	offsetLeft: number
-	offsetTop: number
+	$offsetLeft: number
+	$offsetTop: number
 }
 
-export const BorderWrapper = styled.div<BorderWrapperProps>(({ width, height, offsetLeft, offsetTop }) => {
+export const BorderWrapper = styled.div<BorderWrapperProps>(({ width, height, $offsetLeft, $offsetTop }) => {
 	return css`
 		border: 2px solid red;
+		position: absolute;
 		width: ${width}px;
 		height: ${height}px;
-		position: absolute;
 		z-index: 3;
 		pointer-events: none;
-		transform: translate(${offsetLeft}px, ${offsetTop}px);
+		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
 	`
 })
 
@@ -37,7 +37,7 @@ export type BorderProps =
 const TableBorder: React.FC<BorderProps> = ({ isRender, borderWidth, borderHeight, offsetLeft, offsetTop }) => {
 	if (!isRender) return null
 
-	return <BorderWrapper height={borderHeight} width={borderWidth} offsetLeft={offsetLeft} offsetTop={offsetTop} />
+	return <BorderWrapper height={borderHeight} width={borderWidth} $offsetLeft={offsetLeft} $offsetTop={offsetTop} />
 }
 
 export default TableBorder

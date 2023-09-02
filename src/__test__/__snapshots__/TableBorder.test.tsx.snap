@@ -3,10 +3,8 @@
 exports[`Table border component border wrap component 1`] = `
 <DocumentFragment>
   <div
-    class="sc-bcPKhP kAXhXo"
+    class="sc-bcPKhP kLaeiY"
     height="100"
-    offsetleft="10"
-    offsettop="10"
     width="100"
   />
 </DocumentFragment>
@@ -14,9 +12,9 @@ exports[`Table border component border wrap component 1`] = `
 
 exports[`Table border component table border render 1`] = `
 <styled.div
+  $offsetLeft={0}
+  $offsetTop={0}
   height={100}
-  offsetLeft={0}
-  offsetTop={0}
   width={100}
 />
 `;
