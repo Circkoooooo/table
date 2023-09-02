@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table border component border wrap component 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-bcPKhP kAXhXo"
+    height="100"
+    offsetleft="10"
+    offsettop="10"
+    width="100"
+  />
+</DocumentFragment>
+`;
+
+exports[`Table border component table border render 1`] = `
+<styled.div
+  height={100}
+  offsetLeft={0}
+  offsetTop={0}
+  width={100}
+/>
+`;
