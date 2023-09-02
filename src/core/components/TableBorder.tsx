@@ -8,7 +8,7 @@ interface BorderWrapperProps {
 	offsetTop: number
 }
 
-const BorderWrapper = styled.div<BorderWrapperProps>(({ width, height, offsetLeft, offsetTop }) => {
+export const BorderWrapper = styled.div<BorderWrapperProps>(({ width, height, offsetLeft, offsetTop }) => {
 	return css`
 		border: 2px solid red;
 		width: ${width}px;
