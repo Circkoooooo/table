@@ -134,6 +134,7 @@ describe("TableMain component", () => {
 		fireEvent.mouseDown(firstCellBody)
 		fireEvent.mouseMove(CellBodySecond)
 		const highlightBorder = screen.getByTestId("cell-highlight")
+		expect(highlightBorder.getAttribute("width")).toBe("200")
 		expect(highlightBorder.getAttribute("width")).toBe("300")
 		expect(highlightBorder.getAttribute("height")).toBe("60")
 	})
