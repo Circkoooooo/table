@@ -37,7 +37,7 @@ export type BorderProps =
 const TableBorder: React.FC<BorderProps> = ({ isRender, borderWidth, borderHeight, offsetLeft, offsetTop }) => {
 	if (!isRender) return null
 
-	return <BorderWrapper height={borderHeight} width={borderWidth} $offsetLeft={offsetLeft} $offsetTop={offsetTop} />
+	return <BorderWrapper data-testid="cell-highlight" height={borderHeight} width={borderWidth} $offsetLeft={offsetLeft} $offsetTop={offsetTop} />
 }
 
 export default TableBorder
