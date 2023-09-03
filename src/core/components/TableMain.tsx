@@ -29,7 +29,7 @@ const TableMain = () => {
 		columnNum: 26,
 	})
 
-	const withRulerCellData = createRulerCellData(emptyRulerCellData)
+	const [withRulerCellData, setWithRulerCellData] = useState(createRulerCellData(emptyRulerCellData))
 
 	/**
 	 * mouse down on cells, record the index.
@@ -89,18 +89,33 @@ const TableMain = () => {
 		})
 	}
 
+	const handleInput = ({ rowIndex, columnIndex, oldValue, newValue }: TableMouseItemCallback.TableInputItemCallbackParams) => {
+		const newRulerCellData = withRulerCellData.data.map((row, rowIdx) => {
+			if (rowIdx === rowIndex) {
+				return row.map((column, columnIdx) => {
+					if (columnIdx === columnIndex) {
+						return newValue
+					}
+					return column
+				})
+			}
+			return row
+		})
+
+		setWithRulerCellData({
+			data: newRulerCellData,
+			info: { ...withRulerCellData.info },
+		})
+	}
+
 	const resolveBorderProperty = useMemo((): BorderProps => {
 		const { mousedownIndex, mousemoveIndex } = interactionInfoRecord
-		const { rowLength, columnLength } = withRulerCellData.info
 
 		const noBorder = {
 			isRender: false,
 		} as { isRender: false }
 
 		if (mousedownIndex === null || mousemoveIndex === null) return noBorder
-
-		//Exclude the unexpected index.
-		if (mousedownIndex.rowIndex < 0 || mousedownIndex.rowIndex > rowLength || mousedownIndex.columnIndex < 0 || mousedownIndex.columnIndex > columnLength) return noBorder
 
 		const { rowIndex: mousedownRowIndex, columnIndex: mousedownColumnIndex } = mousedownIndex
 		const { rowIndex: mousemoveRowIndex, columnIndex: mousemoveColumnIndex } = mousemoveIndex
@@ -129,7 +144,9 @@ const TableMain = () => {
 					borderHeight = (mousemoveRowIndex === 0 ? rowIndexOffset - 1 : rowIndexOffset) * 30
 					offsetLeft = 100
 					offsetTop = (mousemoveRowIndex === 0 ? rowStartIndex + 1 : rowStartIndex) * 30
-				} else if (mousedownRowIndex === 0) {
+				}
+
+				if (mousedownRowIndex === 0) {
 					//fill a column
 					borderWidth = (mousemoveColumnIndex === 0 ? columnIndexOffset - 1 : columnIndexOffset) * 100
 					borderHeight = withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30
@@ -191,6 +208,7 @@ const TableMain = () => {
 				mousedownItemCallback={(params) => handleMousedown(params)}
 				mousemoveItemCallback={(params) => handleMousemove(params)}
 				mouseupItemCallback={() => handleMouseup()}
+				inputItemCallback={(params) => handleInput(params)}
 				{...{
 					editIndex: interactionInfoRecord.editIndex ?? undefined,
 				}}
