@@ -1,3 +1,5 @@
+import { CellDataElement } from "../cellDataHandler"
+
 export type AbstractTableElementType = string | number | undefined | null
 
 export type CurrentSelectCellInfo = {
@@ -23,5 +25,12 @@ export namespace TableMouseItemCallback {
 	export type TableMousemoveItemCallbackParams = {
 		rowIndex: number
 		columnIndex: number
+	}
+
+	export type TableInputItemCallbackParams = {
+		rowIndex: number
+		columnIndex: number
+		oldValue: CellDataElement
+		newValue: CellDataElement
 	}
 }
