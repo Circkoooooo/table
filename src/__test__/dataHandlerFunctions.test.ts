@@ -1,7 +1,7 @@
 import isIndexEqual from "../core/Tools/Table/isIndexEqual"
 import isIndexTableBody from "../core/Tools/Table/isIndexTableBody"
 import { createEmptyCellData, createRulerCellData } from "../core/cellDataHandler"
-import { IndexType } from "../core/types/table"
+import { IndexType } from "../core/types/table.type"
 
 describe("functions of table data", () => {
 	it("Provide a emptyCellData. Data should includes ruler data and length of info object should equals the length of data.", () => {

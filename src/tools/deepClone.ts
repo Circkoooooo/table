@@ -20,9 +20,8 @@ const deepClone = (target: any) => {
 
 		if (propertySet.has(value)) {
 			tempObject[key] = value
-		} else {
-			tempObject[key] = deepClone(value)
 		}
+		tempObject[key] = deepClone(value)
 	}
 	return tempObject
 }

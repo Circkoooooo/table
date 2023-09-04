@@ -23,4 +23,16 @@ describe("deep clone", () => {
 		expect(a).toBe(c)
 		expect(a).toMatchObject(b)
 	})
+
+	test("Object datatype. Array.", () => {
+		const a = [
+			{
+				test: "test",
+			},
+		]
+		const c = a
+		const b = deepClone(a)
+		expect(a).toBe(c)
+		expect(a).toMatchObject(b)
+	})
 })

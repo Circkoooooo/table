@@ -2,8 +2,8 @@ import { useMemo, useState } from "react"
 import { createEmptyCellData, createRulerCellData } from "../cellDataHandler"
 import TableBorder, { BorderProps } from "./TableBorder"
 import TableRenderer from "./TableRenderer"
-import { TableMouseItemCallback } from "../types/types"
-import { IndexType } from "../types/table"
+import { TableMouseItemCallback } from "../types/types.type"
+import { IndexType } from "../types/table.type"
 
 type InteractionInfo = {
 	isMousedown: boolean

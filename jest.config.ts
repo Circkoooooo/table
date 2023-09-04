@@ -1,6 +1,6 @@
 const config = {
 	roots: ["<rootDir>/src"],
-	collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}", "!src/**/*.d.ts", "!src/index.tsx"],
+	collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}", "!src/**/*.d.ts", "!src/index.tsx", "!src/**/*.type.ts"],
 	setupFiles: ["react-app-polyfill/jsdom"],
 	testMatch: ["<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}", "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"],
 	testEnvironment: "jsdom",
