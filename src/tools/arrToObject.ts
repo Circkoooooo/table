@@ -21,12 +21,12 @@ export function arrToObject(arr: any[]) {
 		throw new Error("Need to receive a valid variable.")
 	})
 
-	const flatedObject = objetArray.reduce((pre, val) => {
+	const flatObject = objetArray.reduce((pre, val) => {
 		return {
 			...pre,
 			...val,
 		}
 	})
 
-	return flatedObject
+	return flatObject
 }

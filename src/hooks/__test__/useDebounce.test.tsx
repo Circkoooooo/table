@@ -1,8 +1,8 @@
-import { mockWait } from "../../tools/mock/mockWait"
 import useDebounce from "../useDebounce"
 import { fireEvent, render, screen } from "@testing-library/react"
 
 describe("useDebounce", () => {
+	jest.useFakeTimers()
 	test("debounce", async () => {
 		const mockFn = {
 			debounce: jest.fn(),
@@ -21,14 +21,15 @@ describe("useDebounce", () => {
 
 		fireEvent.click(screen.getByTestId("test-component"))
 		expect(mockFn.debounce).toHaveBeenCalledTimes(0)
-		await mockWait(1000)
+		jest.advanceTimersByTime(1000)
 		expect(mockFn.debounce).toHaveBeenCalledTimes(1)
-		await mockWait(900)
+		jest.advanceTimersByTime(900)
+
 		fireEvent.click(screen.getByTestId("test-component"))
-		await mockWait(900)
+		jest.advanceTimersByTime(900)
 		expect(mockFn.debounce).toHaveBeenCalledTimes(1)
 		fireEvent.click(screen.getByTestId("test-component"))
-		await mockWait(1000)
+		jest.advanceTimersByTime(1000)
 		expect(mockFn.debounce).toHaveBeenCalledTimes(2)
 	})
 })
