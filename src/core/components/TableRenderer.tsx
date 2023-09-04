@@ -42,13 +42,17 @@ const TableRenderer: React.FC<TableRendererProps> = ({ cellData, mousedownItemCa
 
 	// Property of CellStyled Component.
 	const cellStyledProperty = (rowIndex: number, columnIndex: number): CellStyledProperty => {
-		const contentEditable =
-			(isIndexTableBody(cellData, rowIndex, columnIndex) &&
-				isIndexEqual(editIndex, {
-					rowIndex,
-					columnIndex,
-				})) ??
-			undefined
+		let contentEditable = undefined
+
+		if (
+			isIndexTableBody(cellData, rowIndex, columnIndex) &&
+			isIndexEqual(editIndex, {
+				rowIndex,
+				columnIndex,
+			})
+		) {
+			contentEditable = true
+		}
 
 		const property: CellStyledProperty = {
 			key: `${rowIndex}-${columnIndex}`,
