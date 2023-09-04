@@ -5,18 +5,10 @@ export interface CellStyledProps {
 	$borderProperty: BorderProperty
 }
 
-export interface HintBorderProps {
-	rowIndex: number
-	columnIndex: number
-	pointerRowIndex: number
-	pointerColumnIndex: number
-	isNeedShow: boolean
-}
-
 // 单元格
 export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
 	const { top, right, bottom, left } = $borderProperty
-	const dark = false
+
 	const DEFAULT_BORDER_WIDTH = 1
 	const CLEAR_BORDER_WIDTH = 0
 	const borderWidth = [
@@ -29,7 +21,7 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
 	const HEIGHT = `${top && bottom ? "30px" : "30px"}`
 	const BORDER_COLOR = `rgba(0, 0, 0, 0.15)`
 	const BORDER_WIDTH = `${borderWidth.join(" ")}`
-	const BACKGROUND_COLOR = `${dark ? "#f0f0f0" : "#fff"}`
+	const BACKGROUND_COLOR = "#ffffff"
 
 	return css`
 		z-index: 0;
@@ -106,38 +98,3 @@ export const TableDataRow = styled.div`
 	display: flex;
 	z-index: 1;
 `
-
-export const HintBorderStyled = styled.div<HintBorderProps>(({ rowIndex, columnIndex, pointerRowIndex, pointerColumnIndex, isNeedShow }) => {
-	const DEFAULT_WIDTH = 101
-	const DEFAULT_HEIGHT = 31
-
-	let offsetRowIndex = 0
-	let offsetColumnIndex = 0
-	let targetWidth = 0
-	let targetHeight = 0
-
-	if (pointerColumnIndex - columnIndex < 0) {
-		offsetColumnIndex = pointerColumnIndex - columnIndex
-	}
-	targetWidth = pointerColumnIndex - columnIndex === 0 ? DEFAULT_WIDTH : (Math.abs(pointerColumnIndex - columnIndex) + 1) * (DEFAULT_WIDTH - 1) + 1
-
-	if (pointerRowIndex - rowIndex < 0) {
-		offsetRowIndex = pointerRowIndex - rowIndex
-	}
-	targetHeight = pointerRowIndex - rowIndex === 0 ? DEFAULT_HEIGHT : (Math.abs(pointerRowIndex - rowIndex) + 1) * (DEFAULT_HEIGHT - 1) + 1
-
-	return css`
-		position: absolute;
-		border: 2px solid blue;
-		left: ${(columnIndex + offsetColumnIndex) * 100}px;
-		top: ${(rowIndex + offsetRowIndex) * 30}px;
-		transition-property: left, top, width, height;
-		transition-timing-function: ease-out;
-		transition-duration: 0.05s;
-		z-index: 1;
-		width: ${targetWidth}px;
-		height: ${targetHeight}px;
-		pointer-events: none;
-		display: ${isNeedShow ? "block" : "none"};
-	`
-})
