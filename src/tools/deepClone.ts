@@ -1,4 +1,4 @@
-const deepClone = (target: any) => {
+const deepClone = (target: any, visited = new WeakMap()) => {
 	if (target === null || target === undefined || !(typeof target === "object")) return target
 
 	//array
@@ -12,16 +12,17 @@ const deepClone = (target: any) => {
 		return tempArr
 	}
 
+	if (visited.has(target)) {
+		return visited.get(target)
+	}
+
 	//object
 	const tempObject: any = {}
-	const propertySet = new Set()
+	const weakMap = new WeakMap()
 	for (const [key, value] of Object.entries(target)) {
-		propertySet.add(value)
+		weakMap.set(target, value)
 
-		if (propertySet.has(value)) {
-			tempObject[key] = value
-		}
-		tempObject[key] = deepClone(value)
+		tempObject[key] = deepClone(value, weakMap)
 	}
 	return tempObject
 }

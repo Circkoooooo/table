@@ -35,4 +35,11 @@ describe("deep clone", () => {
 		expect(a).toBe(c)
 		expect(a).toMatchObject(b)
 	})
+
+	test("Circular references.", () => {
+		const a: any = {}
+		a.a = a
+
+		expect(deepClone(a)).toMatchObject({ a: a })
+	})
 })
