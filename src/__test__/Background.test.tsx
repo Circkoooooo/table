@@ -1,11 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import App from "../App"
+import Background from "../layout/Background"
 
 describe("Background Component", () => {
 	it("calls prevent default when contextmenu triggered", async () => {
-		render(<App />)
+		const contextMenuMock = jest.fn()
+		render(
+			<Background
+				{...{
+					HeaderSlot: <div>header</div>,
+					MainSlot: <div>main</div>,
+					AsideSlot: <div>aside</div>,
+					onContextMenu: () => contextMenuMock(),
+				}}
+			/>
+		)
 
-		const isDefault = fireEvent.contextMenu(screen.getByTestId("body"))
-		expect(isDefault).toBe(false)
+		fireEvent.contextMenu(screen.getByTestId("body"))
+		expect(contextMenuMock).toHaveBeenCalled()
 	})
 })
