@@ -1,5 +1,5 @@
-import isIndexEqual from "../core/Tools/Table/isIndexEqual"
-import isIndexTableBody from "../core/Tools/Table/isIndexTableBody"
+import isIndexEqual from "../core/tools/Table/isIndexEqual"
+import isIndexTableBody from "../core/tools/Table/isIndexTableBody"
 import { createEmptyCellData, createRulerCellData } from "../core/cellDataHandler"
 import { IndexType } from "../core/types/table.type"
 
