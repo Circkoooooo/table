@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react"
 import { createEmptyCellData, createRulerCellData } from "../cellDataHandler"
 import TableBorder, { BorderProps } from "./TableBorder"
-import TableRenderer from "./TableRenderer"
 import { TableMouseItemCallback } from "../types/types.type"
 import { IndexType } from "../types/table.type"
+import TableCellWrapper from "./TableCellWrapper"
 
 type InteractionInfo = {
 	isMousedown: boolean
@@ -203,7 +203,7 @@ const TableMain = () => {
 	return (
 		<>
 			<TableBorder {...resolveBorderProperty} />
-			<TableRenderer
+			<TableCellWrapper
 				cellData={withRulerCellData.data}
 				mousedownItemCallback={(params) => handleMousedown(params)}
 				mousemoveItemCallback={(params) => handleMousemove(params)}

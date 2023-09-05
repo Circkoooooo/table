@@ -126,6 +126,7 @@ describe("TableMain component", () => {
 		expect(highlightBorder.getAttribute("width")).toBe("2600")
 		expect(highlightBorder.getAttribute("height")).toBe("30")
 	})
+
 	test("mousemoveIndex > mousedownIndex", () => {
 		render(<TableMain />)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
