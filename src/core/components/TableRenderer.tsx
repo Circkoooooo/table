@@ -4,8 +4,8 @@ import { CellData } from "../cellDataHandler"
 import { CellStyled } from "../styled/Table-styled"
 import { TableMouseItemCallback } from "../types/types.type"
 import { IndexType } from "../types/table.type"
-import isIndexEqual from "../tools/Table/isIndexEqual"
-import isIndexTableBody from "../tools/Table/isIndexTableBody"
+import isIndexEqual from "../tools/isIndexEqual"
+import isIndexTableBody from "../tools/isIndexTableBody"
 
 interface TableRendererProps {
 	cellData: CellData

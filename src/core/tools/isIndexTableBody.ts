@@ -1,4 +1,4 @@
-import { CellData } from "../../cellDataHandler"
+import { CellData } from "../cellDataHandler"
 
 /**
  * indexes should not be 0 or out of the max indexes.
