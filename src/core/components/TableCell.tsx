@@ -28,7 +28,7 @@ interface TableCellProps {
 const TableCell: React.FC<TableCellProps> = ({
 	cellData,
 	cellValue,
-	rowIndex,
+	rowIndex, 
 	columnIndex,
 	borderProperty,
 	editIndex,
