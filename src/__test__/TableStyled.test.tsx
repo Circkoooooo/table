@@ -11,6 +11,6 @@ describe("Table Styled components", () => {
 	}
 
 	test("CellStyled", () => {
-		render(<CellStyled $borderProperty={properties} />)
+		render(<CellStyled $isEditable={false} $isIndexTableBody={false} $borderProperty={properties} />)
 	})
 })

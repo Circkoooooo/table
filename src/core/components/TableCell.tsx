@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { CellData, CellDataElement } from "../cellDataHandler"
-import { CellStyled } from "../styled/Table-styled"
+import { CellContentWrapper, CellStyled } from "../styled/Table-styled"
 import { TableMouseItemCallback } from "../types/types.type"
 import { BorderProperty } from "../calcBorderProperty"
 import useDebounce from "../../hooks/useDebounce"
@@ -28,7 +28,7 @@ interface TableCellProps {
 const TableCell: React.FC<TableCellProps> = ({
 	cellData,
 	cellValue,
-	rowIndex, 
+	rowIndex,
 	columnIndex,
 	borderProperty,
 	editIndex,
@@ -62,8 +62,7 @@ const TableCell: React.FC<TableCellProps> = ({
 	}
 
 	const excuteUpdateValue = () => {
-		isEditable &&
-			inputItemCallback &&
+		inputItemCallback &&
 			inputItemCallback({
 				rowIndex,
 				columnIndex,
@@ -72,54 +71,77 @@ const TableCell: React.FC<TableCellProps> = ({
 			})
 	}
 
-	const handleInput = useDebounce((event: React.FormEvent<HTMLDivElement>) => {
+	const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
 		const target = event.target as HTMLDivElement
 
+		if (!target && !currentValue) return
+		if ((target.innerText as string) === cellValue) return
+
+		excuteUpdateValue()
+	}
+
+	const handleInput = useDebounce((event: React.FormEvent<HTMLDivElement>) => {
+		//remove the content of CellContentWrapper
+		const target = event.target as HTMLDivElement
+
+		if (!isIndexTableBody(cellData, rowIndex, columnIndex)) return
 		setCurrentValue(`${target.innerText}`)
-	}, 300)
+	}, 100)
 
 	return (
-		<CellStyled
-			suppressContentEditableWarning
-			data-testid={(() => {
-				if (rowIndex === 0 && columnIndex === 0) {
-					return "cell-row-column-head"
-				} else if (rowIndex === 0 && columnIndex !== 0) {
-					return "cell-row-head"
-				} else if (columnIndex === 0 && rowIndex !== 0) {
-					return "cell-column-head"
-				}
-				return "cell-body"
-			})()}
-			{...cellStyledProperty(rowIndex, columnIndex)}
-			$borderProperty={borderProperty[rowIndex][columnIndex]}
-			onMouseDown={() =>
-				mousedownItemCallback &&
-				mousedownItemCallback({
-					rowIndex,
-					columnIndex,
-				})
-			}
-			onMouseMove={() => {
-				mousemoveItemCallback &&
-					mousemoveItemCallback({
-						rowIndex,
-						columnIndex,
-					})
-			}}
-			onMouseUp={() => {
-				mouseupItemCallback &&
-					mouseupItemCallback({
-						rowIndex,
-						columnIndex,
-					})
-			}}
-			onInput={(event) => handleInput(event)}
-			onBlur={() => excuteUpdateValue()}
-			tabIndex={parseInt(`${rowIndex}${columnIndex}`)}
-		>
-			{cellValue}
-		</CellStyled>
+		<>
+			<CellStyled
+				{...{
+					$isIndexTableBody: isIndexTableBody(cellData, rowIndex, columnIndex),
+					$isEditable: isEditable,
+				}}
+				$borderProperty={borderProperty[rowIndex][columnIndex]}
+			>
+				<CellContentWrapper
+					tabIndex={parseInt(`${rowIndex}${columnIndex}`)}
+					suppressContentEditableWarning
+					data-testid={(() => {
+						if (rowIndex === 0 && columnIndex === 0) {
+							return "cell-row-column-head"
+						} else if (rowIndex === 0 && columnIndex !== 0) {
+							return "cell-row-head"
+						} else if (columnIndex === 0 && rowIndex !== 0) {
+							return "cell-column-head"
+						}
+						return "cell-body"
+					})()}
+					{...cellStyledProperty(rowIndex, columnIndex)}
+					$isTableBody={isIndexTableBody(cellData, rowIndex, columnIndex)}
+					onInput={(event) => handleInput(event)}
+					onBlur={(event) => {
+						handleBlur(event)
+					}}
+					onMouseDown={() => {
+						mousedownItemCallback &&
+							mousedownItemCallback({
+								rowIndex,
+								columnIndex,
+							})
+					}}
+					onMouseMove={() => {
+						mousemoveItemCallback &&
+							mousemoveItemCallback({
+								rowIndex,
+								columnIndex,
+							})
+					}}
+					onMouseUp={() => {
+						mouseupItemCallback &&
+							mouseupItemCallback({
+								rowIndex,
+								columnIndex,
+							})
+					}}
+				>
+					{cellValue}
+				</CellContentWrapper>
+			</CellStyled>
+		</>
 	)
 }
 

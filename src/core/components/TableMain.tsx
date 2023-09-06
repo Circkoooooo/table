@@ -69,9 +69,12 @@ const TableMain = () => {
 	const handleMousemove = ({ rowIndex, columnIndex }: TableMouseItemCallback.TableMousemoveItemCallbackParams) => {
 		if (!interactionInfoRecord.isMousedown) return
 
+		if (interactionInfoRecord.editIndex !== null) return
+
 		setInteractionInfoRecord({
 			...interactionInfoRecord,
 			isMousemove: true,
+			editIndex: null,
 			mousemoveIndex: {
 				rowIndex,
 				columnIndex,

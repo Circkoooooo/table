@@ -3,10 +3,12 @@ import { BorderProperty } from "../calcBorderProperty"
 
 export interface CellStyledProps {
 	$borderProperty: BorderProperty
+	$isIndexTableBody: boolean
+	$isEditable: boolean
 }
 
 // 单元格
-export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
+export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isIndexTableBody, $isEditable }) => {
 	const { top, right, bottom, left } = $borderProperty
 
 	const DEFAULT_BORDER_WIDTH = 1
@@ -30,9 +32,10 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
 		height: ${HEIGHT};
 		line-height: ${HEIGHT};
 		display: inline-block;
+		z-index: ${$isEditable ? 1 : 0};
 
 		background-color: ${BACKGROUND_COLOR};
-		text-align: center;
+		text-align: ${$isIndexTableBody ? "left" : "center"};
 		vertical-align: top;
 		user-select: none;
 
@@ -56,6 +59,25 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty }) => {
 	`
 })
 
+export const CellRow = styled.div``
+
+interface CellContentWrapperProps {
+	$isTableBody?: boolean
+}
+
+export const CellContentWrapper = styled.div<CellContentWrapperProps>(({ $isTableBody }) => {
+	return css`
+		padding: 0 5px;
+		outline: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		text-align: ${!$isTableBody ? "center" : "left"};
+		display: block;
+	`
+})
 // data最外层容器
 export const TableFrame = styled.div`
 	position: relative;

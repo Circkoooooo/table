@@ -4,6 +4,7 @@ import { CellData } from "../cellDataHandler"
 import { TableMouseItemCallback } from "../types/types.type"
 import { IndexType } from "../types/table.type"
 import TableCell from "./TableCell"
+import { CellRow } from "../styled/Table-styled"
 
 interface TableCellWrapperProps {
 	cellData: CellData
@@ -20,25 +21,27 @@ const TableCellWrapper: React.FC<TableCellWrapperProps> = ({ cellData, mousedown
 	return (
 		<>
 			{cellData.map((item, rowIndex) => (
-				<div key={`${rowIndex}`}>
-					{item.map((item, columnIndex) => (
-						<TableCell
-							{...{
-								key: `${rowIndex}-${columnIndex}`,
-								rowIndex,
-								columnIndex,
-								cellValue: item,
-								cellData,
-								borderProperty,
-								mousedownItemCallback,
-								mousemoveItemCallback,
-								mouseupItemCallback,
-								inputItemCallback,
-								editIndex,
-							}}
-						/>
-					))}
-				</div>
+				<CellRow key={`${rowIndex}`}>
+					{item.map((item, columnIndex) => {
+						return (
+							<TableCell
+								{...{
+									key: `${rowIndex}-${columnIndex}`,
+									rowIndex,
+									columnIndex,
+									cellValue: item,
+									cellData,
+									borderProperty,
+									mousedownItemCallback,
+									mousemoveItemCallback,
+									mouseupItemCallback,
+									inputItemCallback,
+									editIndex,
+								}}
+							/>
+						)
+					})}
+				</CellRow>
 			))}
 		</>
 	)
