@@ -112,6 +112,7 @@ const TableCell: React.FC<TableCellProps> = ({
 					})()}
 					{...cellStyledProperty(rowIndex, columnIndex)}
 					$isTableBody={isIndexTableBody(cellData, rowIndex, columnIndex)}
+					$isEditable={isEditable}
 					onInput={(event) => handleInput(event)}
 					onBlur={(event) => {
 						handleBlur(event)

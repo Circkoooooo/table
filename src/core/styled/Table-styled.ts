@@ -63,19 +63,47 @@ export const CellRow = styled.div``
 
 interface CellContentWrapperProps {
 	$isTableBody?: boolean
+	$isEditable?: boolean
 }
 
-export const CellContentWrapper = styled.div<CellContentWrapperProps>(({ $isTableBody }) => {
+export const CellContentWrapper = styled.div<CellContentWrapperProps>(({ $isTableBody, $isEditable }) => {
+	const afterCSS = css`
+		content: " ";
+		position: absolute;
+		box-sizing: border-box;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		// background-color: red;
+		z-index: 1000;
+		pointer-events: none;
+		border: ${$isEditable ? "2px solid blue" : "none"};
+	`
+
+	if ($isEditable) {
+		afterCSS.push({
+			border: "2px solid blue",
+		})
+	}
+
 	return css`
 		padding: 0 5px;
 		outline: none;
 		position: absolute;
 		top: 0;
 		left: 0;
-		width: 100%;
-		height: 100%;
+		min-width: 100%;
+		max-width: 400px;
+		white-space: break-spaces;
+		background: ${$isEditable ? "#fff" : "none"};
+		min-height: 100%;
 		text-align: ${!$isTableBody ? "center" : "left"};
 		display: block;
+
+		&::after {
+			${afterCSS}
+		}
 	`
 })
 // data最外层容器

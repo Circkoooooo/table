@@ -118,7 +118,7 @@ const TableMain = () => {
 			isRender: false,
 		} as { isRender: false }
 
-		if (mousedownIndex === null || mousemoveIndex === null) return noBorder
+		if (interactionInfoRecord.editIndex !== null || mousedownIndex === null || mousemoveIndex === null) return noBorder
 
 		const { rowIndex: mousedownRowIndex, columnIndex: mousedownColumnIndex } = mousedownIndex
 		const { rowIndex: mousemoveRowIndex, columnIndex: mousemoveColumnIndex } = mousemoveIndex
