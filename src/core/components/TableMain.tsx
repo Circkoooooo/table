@@ -2,8 +2,11 @@ import { useMemo, useState } from "react"
 import { createEmptyCellData, createRulerCellData } from "../cellDataHandler"
 import TableBorder, { BorderProps } from "./TableBorder"
 import { TableMouseItemCallback } from "../types/types.type"
-import { IndexType } from "../types/table.type"
+import { IndexType, SizeProperty } from "../types/table.type"
 import TableCellWrapper from "./TableCellWrapper"
+import { isTableHeader } from "../tools/isIndexHeader"
+import { calcSizeOfSizeProperty } from "../tools/calcSizeOfSizeProperty"
+import { TABLE_CONFIG } from "../configs/table_config"
 
 type InteractionInfo = {
 	isMousedown: boolean
@@ -31,6 +34,25 @@ const TableMain = () => {
 
 	const [withRulerCellData, setWithRulerCellData] = useState(createRulerCellData(emptyRulerCellData))
 
+	const [sizeProperty, setSizeProperty] = useState<SizeProperty.RowColumnSizeProperty>({
+		rowSizeProperty: [
+			// {
+			// 	isSingleItem: false,
+			// 	startRowIndex: 2,
+			// 	endRowIndex: 3,
+			// 	height: 300,
+			// },
+		],
+		columnSizeProperty: [
+			// {
+			// 	isSingleItem: false,
+			// 	startColumnIndex: 2,
+			// 	endColumnIndex: 3,
+			// 	width: 300,
+			// },
+		],
+	})
+
 	/**
 	 * mouse down on cells, record the index.
 	 *
@@ -52,10 +74,12 @@ const TableMain = () => {
 
 		const { mousedownIndex } = interactionInfoRecord
 		if (mousedownIndex && mousedownIndex.rowIndex === rowIndex && mousedownIndex.columnIndex === columnIndex) {
-			tempInteractionInfo.isEdit = true
-			tempInteractionInfo.editIndex = {
-				rowIndex,
-				columnIndex,
+			if (!isTableHeader(rowIndex, columnIndex)) {
+				tempInteractionInfo.isEdit = true
+				tempInteractionInfo.editIndex = {
+					rowIndex,
+					columnIndex,
+				}
 			}
 		} else {
 			tempInteractionInfo.isEdit = false
@@ -111,6 +135,7 @@ const TableMain = () => {
 		})
 	}
 
+	// Recalculate border info when bound events on cell was trigger.
 	const resolveBorderProperty = useMemo((): BorderProps => {
 		const { mousedownIndex, mousemoveIndex } = interactionInfoRecord
 
@@ -128,80 +153,84 @@ const TableMain = () => {
 		const rowStartIndex = mousedownRowIndex < mousemoveRowIndex ? mousedownRowIndex : mousemoveRowIndex
 		const columnStartIndex = mousedownColumnIndex < mousemoveColumnIndex ? mousedownColumnIndex : mousemoveColumnIndex
 
-		//Click on a table head, render a border covers a row or column.
-		if (mousedownColumnIndex === 0 || mousedownRowIndex === 0) {
-			let borderWidth = columnIndexOffset * 100,
-				borderHeight = rowIndexOffset * 30,
-				offsetLeft = columnStartIndex * 100,
-				offsetTop = rowStartIndex * 30
+		//all cells propertyes
+		const cellSizeProperty = calcSizeOfSizeProperty(sizeProperty, mousedownIndex, mousemoveIndex, withRulerCellData)
 
-			if (mousedownColumnIndex === 0 && mousedownRowIndex === 0) {
-				borderWidth = (withRulerCellData.data.length - 1) * 100
-				borderHeight = withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30
-				offsetLeft = 100
-				offsetTop = 30
-			} else {
-				//fill a row
-				if (mousedownColumnIndex === 0) {
-					borderWidth = (withRulerCellData.data.length - 1) * 100
-					borderHeight = (mousemoveRowIndex === 0 ? rowIndexOffset - 1 : rowIndexOffset) * 30
-					offsetLeft = 100
-					offsetTop = (mousemoveRowIndex === 0 ? rowStartIndex + 1 : rowStartIndex) * 30
-				}
-
-				if (mousedownRowIndex === 0) {
-					//fill a column
-					borderWidth = (mousemoveColumnIndex === 0 ? columnIndexOffset - 1 : columnIndexOffset) * 100
-					borderHeight = withRulerCellData.data[0] && (withRulerCellData.data[0].length - 1) * 30
-					offsetLeft = (mousemoveColumnIndex === 0 ? columnStartIndex + 1 : columnStartIndex) * 100
-					offsetTop = 30
-				}
-			}
-
-			return {
-				isRender: true,
-				borderWidth,
-				borderHeight,
-				offsetLeft,
-				offsetTop,
-			}
+		const sizeRecord = {
+			sumWidth: 0,
+			sumHeight: 0,
+			offsetLeft: 0,
+			offsetTop: 0,
+			isRowHeaderLogicStart: false, // the row-index after calcuating equals 0.
+			isColumnHeaderLogicStart: false,
+			isRowHeaderMousedownStart: false, // mouse down on cell header.
+			isColumnHeaderMousedownStart: false,
 		}
 
-		// Click on a element is not the head.
-		if (mousedownRowIndex === mousemoveRowIndex && mousedownColumnIndex === mousemoveColumnIndex) {
-			return {
-				isRender: true,
-				borderWidth: 100,
-				borderHeight: 30,
-				offsetLeft: mousedownIndex.columnIndex * 100,
-				offsetTop: mousedownIndex.rowIndex * 30,
-			}
+		sizeRecord.sumWidth = cellSizeProperty.sumWidthArr
+			.filter((_, index) => {
+				return index !== 0 && index >= columnStartIndex && index <= columnStartIndex + columnIndexOffset - 1
+			})
+			.reduce((pre, val) => pre + val, 0)
+
+		sizeRecord.sumHeight = cellSizeProperty.sumHeightArr
+			.filter((_, index) => {
+				return index !== 0 && index >= rowStartIndex && index <= rowIndexOffset + rowStartIndex - 1
+			})
+			.reduce((pre, val) => pre + val, 0)
+
+		sizeRecord.offsetLeft = cellSizeProperty.sumWidthArr
+			.filter((_, index) => {
+				return index < columnStartIndex
+			})
+			.reduce((pre, val) => pre + val, 0)
+
+		sizeRecord.offsetTop = cellSizeProperty.sumHeightArr
+			.filter((_, index) => {
+				return index < rowStartIndex
+			})
+			.reduce((pre, val) => pre + val, 0)
+
+		if (sizeRecord.sumWidth !== 0 && rowStartIndex === 0) {
+			sizeRecord.isRowHeaderLogicStart = true
+		}
+		if (sizeRecord.sumHeight !== 0 && columnStartIndex === 0) {
+			sizeRecord.isColumnHeaderLogicStart = true
 		}
 
-		// Different click-element and move-element, trigger the multiple selections.
-		let borderWidth = columnIndexOffset * 100,
-			borderHeight = rowIndexOffset * 30,
-			offsetLeft = columnStartIndex * 100,
-			offsetTop = rowStartIndex * 30
+		// mousedown on header
+		if (mousedownRowIndex === 0) {
+			sizeRecord.sumHeight = cellSizeProperty.sumHeightArr.filter((item, index) => index !== 0).reduce((pre, val) => pre + val)
+			sizeRecord.offsetTop = cellSizeProperty.sumHeightArr[0]
+			sizeRecord.isColumnHeaderMousedownStart = true
+		}
+		if (mousedownColumnIndex === 0) {
+			sizeRecord.sumWidth = cellSizeProperty.sumWidthArr.filter((item, index) => index !== 0).reduce((pre, val) => pre + val)
+			sizeRecord.offsetLeft = cellSizeProperty.sumWidthArr[0]
+			sizeRecord.isRowHeaderMousedownStart = true
+		}
 
+		// mousemove on header
 		if (mousemoveRowIndex === 0) {
-			borderHeight = (rowIndexOffset - 1) * 30
-			offsetTop = (rowStartIndex + 1) * 30
+			sizeRecord.offsetTop = cellSizeProperty.sumHeightArr[0]
+		}
+		if (mousemoveColumnIndex === 0) {
+			sizeRecord.offsetLeft = cellSizeProperty.sumWidthArr[0]
 		}
 
-		if (mousemoveColumnIndex === 0) {
-			borderWidth = (columnIndexOffset - 1) * 100
-			offsetLeft = (columnStartIndex + 1) * 100
-		}
+		const { sumWidth, sumHeight, offsetLeft, offsetTop, isRowHeaderLogicStart, isColumnHeaderLogicStart } = sizeRecord
+		const { DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT } = TABLE_CONFIG
+
+		if (sizeRecord.sumWidth === 0 || sizeRecord.sumHeight === 0) return noBorder
 
 		return {
 			isRender: true,
-			borderWidth,
-			borderHeight,
-			offsetLeft,
-			offsetTop,
+			borderWidth: sumWidth,
+			borderHeight: sumHeight,
+			offsetLeft: isColumnHeaderLogicStart && offsetLeft === 0 ? DEFAULT_CELL_WIDTH : offsetLeft,
+			offsetTop: isRowHeaderLogicStart && offsetTop === 0 ? DEFAULT_CELL_HEIGHT : offsetTop,
 		}
-	}, [interactionInfoRecord, withRulerCellData])
+	}, [interactionInfoRecord, withRulerCellData, sizeProperty])
 
 	return (
 		<>
@@ -214,6 +243,7 @@ const TableMain = () => {
 				inputItemCallback={(params) => handleInput(params)}
 				{...{
 					editIndex: interactionInfoRecord.editIndex ?? undefined,
+					sizeProperty,
 				}}
 			/>
 		</>

@@ -9,3 +9,44 @@ export type BorderProperty = {
 	bottom?: boolean
 	left?: boolean
 }
+
+export namespace SizeProperty {
+	// Row
+	export type RowSizeSingleItemProperty = {
+		isSingleItem: true
+		rowIndex: number
+		height: number
+	}
+
+	export type RowSizeRangeItemProperty = {
+		isSingleItem: false
+		startRowIndex: number
+		endRowIndex: number
+		height: number
+	}
+
+	// type
+	export type RowSizeProperty = RowSizeSingleItemProperty | RowSizeRangeItemProperty
+
+	// Column
+	export type ColumnSizeSingleItemProperty = {
+		isSingleItem: true
+		columnIndex: number
+		width: number
+	}
+
+	export type ColumnSizeRangeItemProperty = {
+		isSingleItem: false
+		startColumnIndex: number
+		endColumnIndex: number
+		width: number
+	}
+
+	export type ColumnSizeProperty = ColumnSizeSingleItemProperty | ColumnSizeRangeItemProperty
+
+	// size property
+	export type RowColumnSizeProperty = {
+		rowSizeProperty: RowSizeProperty[]
+		columnSizeProperty: ColumnSizeProperty[]
+	}
+}

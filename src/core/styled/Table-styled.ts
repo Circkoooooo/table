@@ -1,14 +1,16 @@
 import styled, { css } from "styled-components"
 import { BorderProperty } from "../calcBorderProperty"
-
+import { TABLE_CONFIG } from "../configs/table_config"
+import { SizeProperty } from "../types/table.type"
 export interface CellStyledProps {
 	$borderProperty: BorderProperty
 	$isIndexTableBody: boolean
 	$isEditable: boolean
+	$columnSizeProperty: SizeProperty.ColumnSizeProperty | null
 }
 
 // 单元格
-export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isIndexTableBody, $isEditable }) => {
+export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isIndexTableBody, $isEditable, $columnSizeProperty }) => {
 	const { top, right, bottom, left } = $borderProperty
 
 	const DEFAULT_BORDER_WIDTH = 1
@@ -20,7 +22,6 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isInd
 		`${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
 	]
 
-	const HEIGHT = `${top && bottom ? "30px" : "30px"}`
 	const BORDER_COLOR = `rgba(0, 0, 0, 0.15)`
 	const BORDER_WIDTH = `${borderWidth.join(" ")}`
 	const BACKGROUND_COLOR = "#ffffff"
@@ -28,9 +29,8 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isInd
 	return css`
 		z-index: 0;
 		position: relative;
-		width: 100px;
-		height: ${HEIGHT};
-		line-height: ${HEIGHT};
+		width: ${$columnSizeProperty ? `${$columnSizeProperty.width}px` : `${TABLE_CONFIG.DEFAULT_CELL_WIDTH}px`};
+		height: 100%;
 		display: inline-block;
 		z-index: ${$isEditable ? 1 : 0};
 
@@ -59,7 +59,23 @@ export const CellStyled = styled.div<CellStyledProps>(({ $borderProperty, $isInd
 	`
 })
 
-export const CellRow = styled.div``
+interface CellRowProps {
+	$rowSizeProperty: SizeProperty.RowSizeProperty | null
+	$rowIndex: number
+}
+
+export const CellRow = styled.div<CellRowProps>(({ $rowSizeProperty, $rowIndex }) => {
+	// row which in header.
+	if ($rowIndex === 0) {
+		return css`
+			height: ${TABLE_CONFIG.DEFAULT_CELL_HEIGHT}px;
+		`
+	}
+
+	return css`
+		height: ${$rowSizeProperty ? `${$rowSizeProperty.height}px` : `${TABLE_CONFIG.DEFAULT_CELL_HEIGHT}px`};
+	`
+})
 
 interface CellContentWrapperProps {
 	$isTableBody?: boolean
@@ -88,7 +104,7 @@ export const CellContentWrapper = styled.div<CellContentWrapperProps>(({ $isTabl
 	}
 
 	return css`
-		padding: 0 5px;
+		padding: 5px;
 		outline: none;
 		position: absolute;
 		top: 0;
@@ -110,7 +126,6 @@ export const CellContentWrapper = styled.div<CellContentWrapperProps>(({ $isTabl
 export const TableFrame = styled.div`
 	position: relative;
 	white-space: nowrap;
-	display: flex;
 	flex-direction: column;
 	overflow: auto;
 	width: 100%;

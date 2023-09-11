@@ -6,7 +6,7 @@ import { BorderProperty } from "../calcBorderProperty"
 import useDebounce from "../../hooks/useDebounce"
 import isIndexTableBody from "../tools/isIndexTableBody"
 import isIndexEqual from "../tools/isIndexEqual"
-import { IndexType } from "../types/table.type"
+import { IndexType, SizeProperty } from "../types/table.type"
 
 type CellStyledProperty = {
 	contentEditable?: boolean
@@ -19,6 +19,7 @@ interface TableCellProps {
 	columnIndex: number
 	borderProperty: BorderProperty[][]
 	editIndex?: IndexType
+	columnSizeProperty: SizeProperty.ColumnSizeProperty | null
 	mousedownItemCallback?: (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => void
 	mousemoveItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
 	mouseupItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
@@ -31,6 +32,7 @@ const TableCell: React.FC<TableCellProps> = ({
 	rowIndex,
 	columnIndex,
 	borderProperty,
+	columnSizeProperty,
 	editIndex,
 	mousedownItemCallback,
 	mousemoveItemCallback,
@@ -94,6 +96,7 @@ const TableCell: React.FC<TableCellProps> = ({
 				{...{
 					$isIndexTableBody: isIndexTableBody(cellData, rowIndex, columnIndex),
 					$isEditable: isEditable,
+					$columnSizeProperty: columnSizeProperty,
 				}}
 				$borderProperty={borderProperty[rowIndex][columnIndex]}
 			>
