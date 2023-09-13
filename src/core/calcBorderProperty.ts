@@ -17,10 +17,8 @@ const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: numbe
 				left: false,
 			}
 
-			// last row
-			if (rowIndex === cellData.length - 1) {
-				//both last row and column
-				if (columnIndex === row.length - 1) {
+			if (rowIndex === 0) {
+				if (columnIndex === 0) {
 					property.top = true
 					property.right = true
 					property.bottom = true
@@ -28,20 +26,20 @@ const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: numbe
 				} else {
 					property.top = true
 					property.bottom = true
-					property.left = true
+					property.right = true
 				}
 			} else {
 				// last column and not last row
-				if (columnIndex === row.length - 1) {
-					property.top = true
+				if (columnIndex === 0) {
+					// property.top = true
 					property.right = true
-					property.bottom = false
+					property.bottom = true
 					property.left = true
 				} else {
 					//neither last row nor last column
 					Object.assign(property, {
-						top: true,
-						left: true,
+						right: true,
+						bottom: true,
 					})
 				}
 			}
