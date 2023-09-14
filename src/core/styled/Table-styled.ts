@@ -127,7 +127,7 @@ export const TableFrame = styled.div`
 	position: relative;
 	white-space: nowrap;
 	flex-direction: column;
-	overflow: auto;
+	height: 100%;
 	width: 100%;
 `
 

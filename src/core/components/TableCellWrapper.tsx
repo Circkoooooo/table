@@ -13,10 +13,20 @@ interface TableCellWrapperProps {
 	mouseupItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
 	inputItemCallback?: (params: TableMouseItemCallback.TableInputItemCallbackParams) => void
 	sizeProperty?: SizeProperty.RowColumnSizeProperty
-	editIndex?: IndexType
+	editIndex: IndexType | null
+	renderingIndexRange: SizeProperty.RenderingIndexRange
 }
 
-const TableCellWrapper: React.FC<TableCellWrapperProps> = ({ cellData, mousedownItemCallback, mousemoveItemCallback, mouseupItemCallback, inputItemCallback, editIndex, sizeProperty }) => {
+const TableCellWrapper: React.FC<TableCellWrapperProps> = ({
+	cellData,
+	mousedownItemCallback,
+	mousemoveItemCallback,
+	mouseupItemCallback,
+	inputItemCallback,
+	editIndex,
+	sizeProperty,
+	renderingIndexRange,
+}) => {
 	const borderProperty = useMemo(() => calcBorderProperty(cellData, cellData.length, cellData[0] && cellData[0].length), [cellData])
 
 	//Parse single items and contained items from the data that is SizeProperty type.
@@ -61,30 +71,39 @@ const TableCellWrapper: React.FC<TableCellWrapperProps> = ({ cellData, mousedown
 
 	return (
 		<>
-			{cellData.map((item, rowIndex) => (
-				<CellRow key={`${rowIndex}`} $rowSizeProperty={resolveRowSizeProperty(rowIndex)} $rowIndex={rowIndex}>
-					{item.map((item, columnIndex) => {
-						return (
-							<TableCell
-								{...{
-									key: `${rowIndex}-${columnIndex}`,
-									rowIndex,
-									columnIndex,
-									cellValue: item,
-									cellData,
-									borderProperty,
-									mousedownItemCallback,
-									mousemoveItemCallback,
-									mouseupItemCallback,
-									inputItemCallback,
-									editIndex,
-									columnSizeProperty: resolveColumnSizeProperty(columnIndex),
-								}}
-							/>
-						)
-					})}
-				</CellRow>
-			))}
+			{cellData.map((item, rowIndex) => {
+				if (rowIndex <= renderingIndexRange.endRowIndex && rowIndex >= renderingIndexRange.startRowIndex) {
+					return (
+						<CellRow key={`${rowIndex}`} $rowSizeProperty={resolveRowSizeProperty(rowIndex)} $rowIndex={rowIndex}>
+							{item.map((item, columnIndex) => {
+								if (columnIndex <= renderingIndexRange.endColumnIndex && columnIndex >= renderingIndexRange.startColumnIndex) {
+									return (
+										<TableCell
+											{...{
+												key: `${rowIndex}-${columnIndex}`,
+												rowIndex,
+												columnIndex,
+												cellValue: item,
+												cellData,
+												borderProperty,
+												mousedownItemCallback,
+												mousemoveItemCallback,
+												mouseupItemCallback,
+												inputItemCallback,
+												editIndex,
+												columnSizeProperty: resolveColumnSizeProperty(columnIndex),
+											}}
+										/>
+									)
+								}
+								return null
+							})}
+						</CellRow>
+					)
+				}
+
+				return null
+			})}
 		</>
 	)
 }

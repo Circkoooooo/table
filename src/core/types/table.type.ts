@@ -11,6 +11,12 @@ export type BorderProperty = {
 }
 
 export namespace SizeProperty {
+	export type RenderingIndexRange = {
+		startRowIndex: number
+		endRowIndex: number
+		startColumnIndex: number
+		endColumnIndex: number
+	}
 	// Row
 	export type RowSizeSingleItemProperty = {
 		isSingleItem: true

@@ -18,7 +18,7 @@ interface TableCellProps {
 	rowIndex: number
 	columnIndex: number
 	borderProperty: BorderProperty[][]
-	editIndex?: IndexType
+	editIndex: IndexType | null
 	columnSizeProperty: SizeProperty.ColumnSizeProperty | null
 	mousedownItemCallback?: (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => void
 	mousemoveItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
@@ -88,7 +88,7 @@ const TableCell: React.FC<TableCellProps> = ({
 
 		if (!isIndexTableBody(cellData, rowIndex, columnIndex)) return
 		setCurrentValue(`${target.innerText}`)
-	}, 100)
+	}, 10)
 
 	return (
 		<>
