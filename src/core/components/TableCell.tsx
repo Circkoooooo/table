@@ -1,58 +1,43 @@
-import React, { useState } from "react"
-import { CellData, CellDataElement } from "../cellDataHandler"
+import React, { memo, useMemo, useState } from "react"
+import { CellDataElement } from "../cellDataHandler"
 import { CellContentWrapper, CellStyled } from "../styled/Table-styled"
-import { TableMouseItemCallback } from "../types/types.type"
-import { BorderProperty } from "../calcBorderProperty"
-import useDebounce from "../../hooks/useDebounce"
-import isIndexTableBody from "../tools/isIndexTableBody"
-import isIndexEqual from "../tools/isIndexEqual"
-import { IndexType, SizeProperty } from "../types/table.type"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+
+import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../features/interaction/interactionSlice"
+import { inputDispatch } from "../features/table-data/tableDataSlice"
 
 type CellStyledProperty = {
 	contentEditable?: boolean
 }
 
 interface TableCellProps {
-	cellData: CellData
 	cellValue: CellDataElement
 	rowIndex: number
 	columnIndex: number
-	borderProperty: BorderProperty[][]
-	editIndex: IndexType | null
-	columnSizeProperty: SizeProperty.ColumnSizeProperty | null
-	mousedownItemCallback?: (params: TableMouseItemCallback.TableMousedownItemCallbackParams) => void
-	mousemoveItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
-	mouseupItemCallback?: (params: TableMouseItemCallback.TableMousemoveItemCallbackParams) => void
-	inputItemCallback?: (params: TableMouseItemCallback.TableInputItemCallbackParams) => void
+	width: number
+	isTableBody: boolean
+	isEditable: boolean
+	borderRender: {
+		isRenderTop: boolean
+		isRenderRight: boolean
+		isRenderBottom: boolean
+		isRenderLeft: boolean
+	}
 }
 
-const TableCell: React.FC<TableCellProps> = ({
-	cellData,
-	cellValue,
-	rowIndex,
-	columnIndex,
-	borderProperty,
-	columnSizeProperty,
-	editIndex,
-	mousedownItemCallback,
-	mousemoveItemCallback,
-	mouseupItemCallback,
-	inputItemCallback,
-}) => {
-	const [currentValue, setCurrentValue] = useState<CellDataElement>("")
+const TableCell = memo<TableCellProps>(({ cellValue, rowIndex, columnIndex, width, isTableBody, isEditable, borderRender }) => {
+	const [currentValue, setCurrentValue] = useState<CellDataElement>(null)
 
-	const isEditable =
-		isIndexTableBody(cellData, rowIndex, columnIndex) &&
-		isIndexEqual(editIndex, {
-			rowIndex,
-			columnIndex,
-		})
+	const interactionState = useAppSelector((state) => state.interaction)
+	const dispatch = useAppDispatch()
+
+	const isContextEditableMemo = useMemo(() => isTableBody && isEditable, [isTableBody, isEditable])
 
 	// Property of CellStyled Component.
 	const cellStyledProperty = (rowIndex: number, columnIndex: number): CellStyledProperty => {
 		let contentEditable = undefined
 
-		if (isEditable) {
+		if (isContextEditableMemo) {
 			contentEditable = true
 		}
 
@@ -64,13 +49,15 @@ const TableCell: React.FC<TableCellProps> = ({
 	}
 
 	const excuteUpdateValue = () => {
-		inputItemCallback &&
-			inputItemCallback({
-				rowIndex,
-				columnIndex,
-				oldValue: cellValue,
-				newValue: currentValue,
+		dispatch(
+			inputDispatch({
+				cellIndex: {
+					rowIndex,
+					columnIndex,
+				},
+				newValue: currentValue === "" ? null : currentValue,
 			})
+		)
 	}
 
 	const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
@@ -82,64 +69,89 @@ const TableCell: React.FC<TableCellProps> = ({
 		excuteUpdateValue()
 	}
 
-	const handleInput = useDebounce((event: React.FormEvent<HTMLDivElement>) => {
+	const handleInput = (event: React.FormEvent<HTMLDivElement>) => {
 		//remove the content of CellContentWrapper
 		const target = event.target as HTMLDivElement
 
-		if (!isIndexTableBody(cellData, rowIndex, columnIndex)) return
-		setCurrentValue(`${target.innerText}`)
-	}, 10)
+		if (!isTableBody) return
+		setCurrentValue(`${target.innerText}` || null)
+	}
+
+	// script properties
+	const datasetId = useMemo(() => {
+		if (rowIndex === 0 && columnIndex === 0) {
+			return "cell-row-column-head"
+		} else if (rowIndex === 0 && columnIndex !== 0) {
+			return "cell-row-head"
+		} else if (columnIndex === 0 && rowIndex !== 0) {
+			return "cell-column-head"
+		}
+		return "cell-body"
+	}, [columnIndex, rowIndex])
+
+	const borderWidthCSS = useMemo(() => {
+		const top = borderRender.isRenderTop
+		const left = borderRender.isRenderLeft
+		const bottom = borderRender.isRenderBottom
+		const right = borderRender.isRenderRight
+
+		const DEFAULT_BORDER_WIDTH = 1
+		const CLEAR_BORDER_WIDTH = 0
+
+		const borderWidth = [
+			`${top ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+			`${right ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+			`${bottom ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+			`${left ? DEFAULT_BORDER_WIDTH : CLEAR_BORDER_WIDTH}px`,
+		]
+
+		return borderWidth.join(" ")
+	}, [borderRender])
 
 	return (
 		<>
 			<CellStyled
 				{...{
-					$isIndexTableBody: isIndexTableBody(cellData, rowIndex, columnIndex),
+					$isIndexTableBody: isTableBody,
 					$isEditable: isEditable,
-					$columnSizeProperty: columnSizeProperty,
+					width,
+					$borderWidthCSS: borderWidthCSS,
 				}}
-				$borderProperty={borderProperty[rowIndex][columnIndex]}
 			>
 				<CellContentWrapper
 					tabIndex={parseInt(`${rowIndex}${columnIndex}`)}
 					suppressContentEditableWarning
-					data-testid={(() => {
-						if (rowIndex === 0 && columnIndex === 0) {
-							return "cell-row-column-head"
-						} else if (rowIndex === 0 && columnIndex !== 0) {
-							return "cell-row-head"
-						} else if (columnIndex === 0 && rowIndex !== 0) {
-							return "cell-column-head"
-						}
-						return "cell-body"
-					})()}
+					data-testid={datasetId}
 					{...cellStyledProperty(rowIndex, columnIndex)}
-					$isTableBody={isIndexTableBody(cellData, rowIndex, columnIndex)}
+					$isTableBody={isTableBody}
 					$isEditable={isEditable}
 					onInput={(event) => handleInput(event)}
 					onBlur={(event) => {
 						handleBlur(event)
 					}}
 					onMouseDown={() => {
-						mousedownItemCallback &&
-							mousedownItemCallback({
-								rowIndex,
-								columnIndex,
+						dispatch(
+							mousedownDispatch({
+								cellIndex: {
+									rowIndex,
+									columnIndex,
+								},
 							})
+						)
 					}}
 					onMouseMove={() => {
-						mousemoveItemCallback &&
-							mousemoveItemCallback({
-								rowIndex,
-								columnIndex,
+						if (!interactionState.isMousedown) return
+						dispatch(
+							mousemoveDispatch({
+								cellIndex: {
+									rowIndex,
+									columnIndex,
+								},
 							})
+						)
 					}}
 					onMouseUp={() => {
-						mouseupItemCallback &&
-							mouseupItemCallback({
-								rowIndex,
-								columnIndex,
-							})
+						dispatch(mouseupDispatch())
 					}}
 				>
 					{cellValue}
@@ -147,6 +159,6 @@ const TableCell: React.FC<TableCellProps> = ({
 			</CellStyled>
 		</>
 	)
-}
+})
 
 export default TableCell

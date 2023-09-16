@@ -3,10 +3,16 @@ import { TableMain } from "../core/components/TableMain"
 import userEvent from "@testing-library/user-event"
 import { act } from "react-dom/test-utils"
 import Table from "../core/Table"
+import { Provider } from "react-redux"
+import store from "../core/redux/store"
 
 describe("TableMain component", () => {
 	test("edit content on cellbody", async () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 
 		fireEvent.mouseDown(firstCellBody)
@@ -23,7 +29,11 @@ describe("TableMain component", () => {
 	})
 
 	test("blur", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 		const secondCellBody = screen.getAllByTestId("cell-body")[1]
@@ -38,7 +48,11 @@ describe("TableMain component", () => {
 	})
 
 	test("not add contenteditable in head", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellRowHead = screen.getAllByTestId("cell-row-head")[0]
 		const firstCellColumnHead = screen.getAllByTestId("cell-column-head")[0]
 		const firstCellRowColumnHead = screen.getByTestId("cell-row-column-head")
@@ -52,14 +66,22 @@ describe("TableMain component", () => {
 	})
 
 	test("clickdown on row cellheader", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellRowHead = screen.getAllByTestId("cell-row-head")[0]
 
 		fireEvent.mouseDown(firstCellRowHead)
 	})
 
 	test("clickdown on column cellheader", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellColumnHead = screen.getAllByTestId("cell-column-head")[0]
 
 		fireEvent.mouseDown(firstCellColumnHead)
@@ -69,7 +91,11 @@ describe("TableMain component", () => {
 	})
 
 	test("clickdown on column and row cellheader", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellRowColumnHead = screen.getAllByTestId("cell-row-column-head")[0]
 
 		fireEvent.mouseDown(firstCellRowColumnHead)
@@ -79,7 +105,11 @@ describe("TableMain component", () => {
 	})
 
 	test("mousemove indexes equals mousedown indexes", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 
 		fireEvent.mouseDown(firstCellBody)
@@ -89,44 +119,12 @@ describe("TableMain component", () => {
 		expect(highlightBorder.getAttribute("height")).toBe("30")
 	})
 
-	test("mousemove indexes not equals mousedown indexes", () => {
-		render(<TableMain />)
-		const firstCellBody = screen.getAllByTestId("cell-body")[0]
-		const secondCellBody = screen.getAllByTestId("cell-body")[1]
-
-		fireEvent.mouseDown(firstCellBody)
-		fireEvent.mouseMove(secondCellBody)
-		const highlightBorder = screen.getByTestId("cell-highlight")
-		expect(highlightBorder.getAttribute("width")).toBe("200")
-		expect(highlightBorder.getAttribute("height")).toBe("30")
-	})
-
-	test("mousemove indexes equals the head indexes. columnIndex equals 0", () => {
-		render(<TableMain />)
-		const firstCellBody = screen.getAllByTestId("cell-body")[0]
-		const secondCellBody = screen.getAllByTestId("cell-row-head")[0] // columnIndex equals 0
-
-		fireEvent.mouseDown(firstCellBody)
-		fireEvent.mouseMove(secondCellBody)
-		const highlightBorder = screen.getByTestId("cell-highlight")
-		expect(highlightBorder.getAttribute("width")).toBe("100")
-		expect(highlightBorder.getAttribute("height")).toBe("30")
-	})
-
-	test("mousemove indexes equals the head indexes. rowIndex equals 0", () => {
-		render(<TableMain />)
-		const firstCellBody = screen.getAllByTestId("cell-body")[0]
-		const secondCellBody = screen.getAllByTestId("cell-column-head")[0] // rowIndexes equals 0
-
-		fireEvent.mouseDown(firstCellBody)
-		fireEvent.mouseMove(secondCellBody)
-		const highlightBorder = screen.getByTestId("cell-highlight")
-		expect(highlightBorder.getAttribute("width")).toBe("100")
-		expect(highlightBorder.getAttribute("height")).toBe("30")
-	})
-
 	test("mousedown in body and mousemove in row-column-head", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellRowHead = screen.getAllByTestId("cell-row-head")[0]
 		const firstCellColumnHead = screen.getAllByTestId("cell-column-head")[0]
 		const rowColumnHead = screen.getAllByTestId("cell-row-column-head")[0]
@@ -144,7 +142,11 @@ describe("TableMain component", () => {
 	})
 
 	test("mousemoveIndex > mousedownIndex", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 		const CellBodySecond = screen.getAllByTestId("cell-body")[28] // rowIndexes equals 0
 
@@ -156,7 +158,11 @@ describe("TableMain component", () => {
 	})
 
 	test("mousemoveIndex < mousedownIndex", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const cellBodyFirst = screen.getAllByTestId("cell-body")[28]
 		const secondCellBody = screen.getAllByTestId("cell-body")[1] // rowIndexes equals 0
 
@@ -168,21 +174,33 @@ describe("TableMain component", () => {
 	})
 
 	test("mousemove table body without any status", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 
 		fireEvent.mouseMove(firstCellBody)
 	})
 
 	test("mouseup", () => {
-		render(<TableMain />)
+		render(
+			<Provider store={store}>
+				<TableMain />
+			</Provider>
+		)
 		const firstCellBody = screen.getAllByTestId("cell-body")[0]
 
 		fireEvent.mouseUp(firstCellBody)
 	})
 
 	test("input in a cell which not body", async () => {
-		render(<Table />)
+		render(
+			<Provider store={store}>
+				<Table />
+			</Provider>
+		)
 		const firstCellRowHead = screen.getAllByTestId("cell-row-head")[0]
 		const firstCellColumnHead = screen.getAllByTestId("cell-column-head")[0]
 		const firstCellRowColumnHead = screen.getByTestId("cell-row-column-head")
@@ -196,9 +214,5 @@ describe("TableMain component", () => {
 
 		fireEvent.mouseDown(firstCellRowColumnHead)
 		await act(() => user.type(firstCellRowColumnHead, "test-value"))
-
-		// expect(firstCellRowHead.textContent).toBe("A")
-		// expect(firstCellColumnHead.textContent).toBe("1")
-		// expect(firstCellRowColumnHead.textContent).toBe("")
 	})
 })

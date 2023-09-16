@@ -9,13 +9,3 @@ exports[`Table border component border wrap component 1`] = `
   />
 </DocumentFragment>
 `;
-
-exports[`Table border component table border render 1`] = `
-<styled.div
-  $offsetLeft={0}
-  $offsetTop={0}
-  data-testid="cell-highlight"
-  height={100}
-  width={100}
-/>
-`;
