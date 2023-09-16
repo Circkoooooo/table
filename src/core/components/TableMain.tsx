@@ -8,16 +8,20 @@ import { isTableHeader } from "../tools/isIndexHeader"
 import { calcSizeOfSizeProperty } from "../tools/calcSizeOfSizeProperty"
 import { TABLE_CONFIG } from "../configs/table_config"
 import { TableMainContainer } from "../styled/TableMain-styled"
+import { WithRulerCelLDataContext } from "../context/tableContext"
+import { EventContext } from "../context/eventContext"
 
 type InteractionInfo = {
 	isMousedown: boolean
 	isMousemove: boolean
 	isEdit: boolean
+}
+
+type InteractionIndexRecord = {
 	mousedownIndex: IndexType | null
 	mousemoveIndex: IndexType | null
 	editIndex: IndexType | null
 }
-
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
 
@@ -25,14 +29,17 @@ const TableMain = () => {
 		isMousedown: false,
 		isMousemove: false,
 		isEdit: false,
+	})
+
+	const [interactionIndexRecord, setInteractionIndexRcord] = useState<InteractionIndexRecord>({
 		mousedownIndex: null,
 		mousemoveIndex: null,
 		editIndex: null,
 	})
 
 	const emptyRulerCellData = createEmptyCellData({
-		rowNum: 100,
-		columnNum: 100,
+		rowNum: 26,
+		columnNum: 26,
 	})
 
 	const [withRulerCellData, setWithRulerCellData] = useState(createRulerCellData(emptyRulerCellData))
@@ -43,7 +50,7 @@ const TableMain = () => {
 				isSingleItem: false,
 				startRowIndex: 2,
 				endRowIndex: 3,
-				height: 300,
+				height: 100,
 			},
 		],
 		columnSizeProperty: [
@@ -59,8 +66,8 @@ const TableMain = () => {
 	const [renderingIndexRange, setRenderingIndexRange] = useState<SizeProperty.RenderingIndexRange>({
 		startRowIndex: 0,
 		startColumnIndex: 0,
-		endRowIndex: 30,
-		endColumnIndex: 30,
+		endRowIndex: withRulerCellData.info.rowLength,
+		endColumnIndex: withRulerCellData.info.columnLength,
 	})
 
 	/************************************************* Event handler ********************************************************************/
@@ -73,6 +80,9 @@ const TableMain = () => {
 		const tempInteractionInfo = {
 			...interactionInfoRecord,
 			isMousedown: true,
+		}
+		const tempInteractionIndexInfo = {
+			...interactionIndexRecord,
 			mousedownIndex: {
 				rowIndex,
 				columnIndex,
@@ -83,32 +93,36 @@ const TableMain = () => {
 			},
 		}
 
-		const { mousedownIndex } = interactionInfoRecord
+		const { mousedownIndex } = interactionIndexRecord
 		if (mousedownIndex && mousedownIndex.rowIndex === rowIndex && mousedownIndex.columnIndex === columnIndex) {
 			if (!isTableHeader(rowIndex, columnIndex)) {
 				tempInteractionInfo.isEdit = true
-				tempInteractionInfo.editIndex = {
+				tempInteractionIndexInfo.editIndex = {
 					rowIndex,
 					columnIndex,
 				}
 			}
 		} else {
 			tempInteractionInfo.isEdit = false
-			tempInteractionInfo.editIndex = null
+			tempInteractionIndexInfo.editIndex = null
 		}
 
 		setInteractionInfoRecord(tempInteractionInfo)
+		setInteractionIndexRcord(tempInteractionIndexInfo)
 	}
 
 	//mouse moves over cells, record index.
 	const handleMousemove = ({ rowIndex, columnIndex }: TableMouseItemCallback.TableMousemoveItemCallbackParams) => {
 		if (!interactionInfoRecord.isMousedown) return
-
-		if (interactionInfoRecord.editIndex !== null) return
+		if (interactionIndexRecord.editIndex !== null) return
 
 		setInteractionInfoRecord({
 			...interactionInfoRecord,
 			isMousemove: true,
+		})
+
+		setInteractionIndexRcord({
+			...interactionIndexRecord,
 			editIndex: null,
 			mousemoveIndex: {
 				rowIndex,
@@ -148,13 +162,13 @@ const TableMain = () => {
 
 	// Recalculate border info when bound events on cell was trigger.
 	const resolveBorderProperty = useMemo((): BorderProps => {
-		const { mousedownIndex, mousemoveIndex } = interactionInfoRecord
+		const { mousedownIndex, mousemoveIndex } = interactionIndexRecord
 
 		const noBorder = {
 			isRender: false,
 		} as { isRender: false }
 
-		if (interactionInfoRecord.editIndex !== null || mousedownIndex === null || mousemoveIndex === null) return noBorder
+		if (interactionIndexRecord.editIndex !== null || mousedownIndex === null || mousemoveIndex === null) return noBorder
 
 		const { rowIndex: mousedownRowIndex, columnIndex: mousedownColumnIndex } = mousedownIndex
 		const { rowIndex: mousemoveRowIndex, columnIndex: mousemoveColumnIndex } = mousemoveIndex
@@ -241,7 +255,7 @@ const TableMain = () => {
 			offsetLeft: isColumnHeaderLogicStart && offsetLeft === 0 ? DEFAULT_CELL_WIDTH : offsetLeft,
 			offsetTop: isRowHeaderLogicStart && offsetTop === 0 ? DEFAULT_CELL_HEIGHT : offsetTop,
 		}
-	}, [interactionInfoRecord, withRulerCellData, sizeProperty])
+	}, [interactionIndexRecord, sizeProperty, withRulerCellData])
 
 	/************************************************* Recalculating ********************************************************************/
 	const fullContainerHeight = useMemo(() => {
@@ -401,21 +415,28 @@ const TableMain = () => {
 
 	return (
 		<>
-			<TableMainContainer ref={tableMainContainerRef} data-testid="table-scroll-container">
-				<TableBorder {...resolveBorderProperty} />
-				<TableCellWrapper
-					cellData={withRulerCellData.data}
-					mousedownItemCallback={(params) => handleMousedown(params)}
-					mousemoveItemCallback={(params) => handleMousemove(params)}
-					mouseupItemCallback={() => handleMouseup()}
-					inputItemCallback={(params) => handleInput(params)}
-					{...{
-						editIndex: interactionInfoRecord.editIndex ?? null,
-						sizeProperty,
-						renderingIndexRange: renderingIndexRange,
-					}}
-				/>
-			</TableMainContainer>
+			<WithRulerCelLDataContext.Provider value={withRulerCellData}>
+				<TableMainContainer ref={tableMainContainerRef} data-testid="table-scroll-container">
+					<TableBorder {...resolveBorderProperty} />
+					<EventContext.Provider
+						value={{
+							mousedownItemCallback: handleMousedown,
+							mousemoveItemCallback: handleMousemove,
+							mouseupItemCallback: handleMouseup,
+							inputItemCallback: handleInput,
+						}}
+					>
+						<TableCellWrapper
+							{...{
+								withRulerCellData,
+								editIndex: interactionIndexRecord.editIndex ?? null,
+								sizeProperty,
+								renderingIndexRange: renderingIndexRange,
+							}}
+						/>
+					</EventContext.Provider>
+				</TableMainContainer>
+			</WithRulerCelLDataContext.Provider>
 		</>
 	)
 }

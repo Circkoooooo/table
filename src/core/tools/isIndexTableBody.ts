@@ -7,9 +7,9 @@ import { CellData } from "../cellDataHandler"
  * @param columnIndex
  * @returns
  */
-const isIndexTableBody = (cellData: CellData, rowIndex: number, columnIndex: number) => {
+const isIndexTableBody = (rowIndex: number, columnIndex: number, maxRowLength: number, maxColumnlength: number) => {
 	if (rowIndex === 0 || columnIndex === 0) return false
-	if (rowIndex > cellData.length - 1 || (cellData[0] && columnIndex > cellData[0].length - 1)) return false
+	if (rowIndex > maxRowLength || columnIndex > maxColumnlength) return false
 	return true
 }
 

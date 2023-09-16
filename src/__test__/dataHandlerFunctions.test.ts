@@ -39,9 +39,9 @@ describe("Data handler function tools", () => {
 				columnNum: 10,
 			})
 		)
-		const falseResult = isIndexTableBody(cellData.data, 0, 0)
-		const falseResult2 = isIndexTableBody(cellData.data, 11, 11)
-		const trueResult = isIndexTableBody(cellData.data, 1, 1)
+		const falseResult = isIndexTableBody(0, 0, cellData.info.rowLength, cellData.info.columnLength)
+		const falseResult2 = isIndexTableBody(11, 11, cellData.info.rowLength, cellData.info.columnLength)
+		const trueResult = isIndexTableBody(1, 1, cellData.info.rowLength, cellData.info.columnLength)
 		expect(falseResult).toBeFalsy()
 		expect(falseResult2).toBeFalsy()
 		expect(trueResult).toBeTruthy()

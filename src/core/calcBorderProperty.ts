@@ -1,10 +1,10 @@
 import { CellData } from "./cellDataHandler"
 
 export type BorderProperty = {
-	top?: boolean
-	right?: boolean
-	bottom?: boolean
-	left?: boolean
+	top: boolean
+	right: boolean
+	bottom: boolean
+	left: boolean
 }
 
 const calcBorderProperty = (cellData: CellData, rowNum: number, columnNum: number): BorderProperty[][] => {

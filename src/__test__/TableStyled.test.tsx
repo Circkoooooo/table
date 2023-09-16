@@ -19,6 +19,6 @@ describe("Table Styled components", () => {
 	} as SizeProperty.ColumnSizeProperty
 
 	test("CellStyled", () => {
-		render(<CellStyled $isEditable={false} $isIndexTableBody={false} $borderProperty={properties} $columnSizeProperty={columnSizeProperty} />)
+		render(<CellStyled $isEditable={false} $isIndexTableBody={false} $borderProperty={properties} width={100} />)
 	})
 })
