@@ -28,7 +28,6 @@ interface TableCellProps {
 const TableCell = memo<TableCellProps>(({ cellValue, rowIndex, columnIndex, width, isTableBody, isEditable, borderRender }) => {
 	const [currentValue, setCurrentValue] = useState<CellDataElement>(null)
 
-	const interactionState = useAppSelector((state) => state.interaction)
 	const dispatch = useAppDispatch()
 
 	const isContextEditableMemo = useMemo(() => isTableBody && isEditable, [isTableBody, isEditable])
@@ -140,7 +139,6 @@ const TableCell = memo<TableCellProps>(({ cellValue, rowIndex, columnIndex, widt
 						)
 					}}
 					onMouseMove={() => {
-						if (!interactionState.isMousedown) return
 						dispatch(
 							mousemoveDispatch({
 								cellIndex: {
