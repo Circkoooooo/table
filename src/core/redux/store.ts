@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
-import interactionReducer from "../features/interaction/interactionSlice"
-import tableDataSlice from "../features/table-data/tableDataSlice"
+import interactionReducer from "./interaction/interactionSlice"
+import tableDataSlice from "./table-data/tableDataSlice"
 
 const store = configureStore({
 	reducer: {

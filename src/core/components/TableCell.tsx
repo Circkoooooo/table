@@ -3,8 +3,8 @@ import { CellDataElement } from "../cellDataHandler"
 import { CellContentWrapper, CellStyled } from "../styled/Table-styled"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 
-import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../features/interaction/interactionSlice"
-import { inputDispatch } from "../features/table-data/tableDataSlice"
+import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
+import { inputDispatch } from "../redux/table-data/tableDataSlice"
 
 type CellStyledProperty = {
 	contentEditable?: boolean

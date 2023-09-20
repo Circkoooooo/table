@@ -5,7 +5,7 @@ import { calcSizeOfSizeProperty } from "../tools/calcSizeOfSizeProperty"
 import { TABLE_CONFIG } from "../configs/table_config"
 import { SizeProperty } from "../types/table.type"
 import { WithRulerCellData } from "../cellDataHandler"
-import { InteractionRecord } from "../features/interaction/interactionSlice"
+import { InteractionRecord } from "../redux/interaction/interactionSlice"
 
 interface BorderWrapperProps {
 	width: number

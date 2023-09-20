@@ -9,8 +9,8 @@ type CellDataState = {
 const initialState: CellDataState = {
 	cellData: createRulerCellData(
 		createEmptyCellData({
-			rowNum: 100,
-			columnNum: 100,
+			rowNum: 26,
+			columnNum: 26,
 		})
 	),
 }
