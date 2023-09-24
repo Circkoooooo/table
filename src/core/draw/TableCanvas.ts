@@ -31,6 +31,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine } = drawLine()
 
+		const drawTableState = {
+			offsetTop: 0,
+			offsetLeft: 0,
+		}
+
 		let dpr = getDpr()
 
 		const drawLineProperty = {
@@ -45,87 +50,102 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const cellWidth = Math.round(_cellWidth * dpr)
 		const cellHeight = Math.round(_cellHeight * dpr)
 
-		const beforeDraw = () => {
+		// 对其起始位置
+		const offset = drawLineWidth / 2
+
+		const beforeMark = () => {
 			beginPath()
 		}
-
-		const onDraw = () => {
-			const offset = drawLineWidth / 2
-
-			// render horizon
-			for (let i = 0; i < height; i++) {
-				if (i === 0) {
-					markLine(
-						{
-							x: offset,
-							y: drawLineWidth,
-						},
-						{
-							x: width,
-							y: drawLineWidth,
-						},
-						drawLineProperty
-					)
-					continue
-				}
-
-				if (i % (cellHeight + drawLineWidth) === 0) {
-					markLine(
-						{
-							x: offset,
-							y: i,
-						},
-						{
-							x: width,
-							y: i,
-						},
-						drawLineProperty
-					)
-					continue
-				}
-			}
-
-			// render vertical
-			for (let i = 0; i < width; i++) {
-				if (i === 0) {
-					markLine(
-						{
-							x: drawLineWidth,
-							y: offset,
-						},
-						{
-							x: drawLineWidth,
-							y: height,
-						},
-						drawLineProperty
-					)
-					continue
-				}
-
-				if (i % (cellWidth + drawLineWidth) === 0) {
-					markLine(
-						{
-							x: i,
-							y: offset,
-						},
-						{
-							x: i,
-							y: height,
-						},
-						drawLineProperty
-					)
-					continue
-				}
-			}
-		}
-
-		const afterDraw = () => {
+		const afterMark = () => {
 			strokeLine()
 		}
 
-		beforeDraw()
-		onDraw()
-		afterDraw()
+		const drawHorizonHeader = () => {
+			const startY = drawLineWidth
+
+			markLine(
+				{
+					x: offset,
+					y: startY,
+				},
+				{
+					x: width,
+					y: startY,
+				},
+				drawLineProperty
+			)
+		}
+
+		const drawVerticalHeader = () => {
+			markLine(
+				{
+					x: drawLineWidth,
+					y: offset,
+				},
+				{
+					x: drawLineWidth,
+					y: height,
+				},
+				drawLineProperty
+			)
+		}
+
+		const drawBodyHorizon = () => {
+			for (let i = 0; i < height; i++) {
+				if (i !== 0 && i % (cellHeight + drawLineWidth) === 0) {
+					markLine(
+						{
+							x: offset,
+							y: i,
+						},
+						{
+							x: width,
+							y: i,
+						},
+						drawLineProperty
+					)
+					continue
+				}
+			}
+		}
+
+		const drawBodyVertical = () => {
+			for (let i = 0; i < width; i++) {
+				if (i !== 0 && i % (cellWidth + drawLineWidth) === 0) {
+					markLine(
+						{
+							x: i,
+							y: offset,
+						},
+						{
+							x: i,
+							y: height,
+						},
+						drawLineProperty
+					)
+					continue
+				}
+			}
+		}
+
+		const drawAll = (offsetTop?: number, offsetLeft?: number) => {
+			offsetTop && (drawTableState.offsetTop = offsetTop)
+			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
+			beforeMark()
+			drawHorizonHeader()
+			drawVerticalHeader()
+			drawBodyHorizon()
+			drawBodyVertical()
+			afterMark()
+		}
+
+		return {
+			drawAll,
+			drawHorizonHeader,
+			drawVerticalHeader,
+			drawBodyHorizon,
+			drawBodyVertical,
+		}
 	}
 
 	/**
