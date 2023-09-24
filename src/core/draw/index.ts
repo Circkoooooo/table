@@ -100,10 +100,9 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 			context.beginPath()
 		}
 
-		const markLine = (start: Coordinate, end: Coordinate, drawProperty?: DrawLineProperty) => {
+		const markLine = (start: Coordinate, end: Coordinate) => {
 			if (!context) return
-			updateStrokeColor(drawProperty?.lineColor)
-			updateCanvasLineWidth(drawProperty?.lineWidth)
+
 			const offset = getPixelOffset(canvasState.canvasLineWidth) ?? 0
 
 			context.moveTo(start.x + offset, start.y + offset)
@@ -115,10 +114,16 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 			context.stroke()
 		}
 
+		const closePath = () => {
+			if (!context) return
+			context.closePath()
+		}
+
 		return {
 			beginPath,
 			markLine,
 			strokeLine,
+			closePath,
 		}
 	}
 
@@ -180,6 +185,8 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		getPixelOffset,
 		measureText,
 		getTextHeight,
+		updateStrokeColor,
+		updateCanvasLineWidth,
 	}
 }
 

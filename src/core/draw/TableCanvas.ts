@@ -10,7 +10,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		dpr: 1,
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, measureText, getTextHeight } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -29,7 +29,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 	 */
 	const drawTableFrame = (_cellWidth: number, _cellHeight: number, _drawLineProperty?: DrawLineProperty) => {
 		const { width, height } = canvasState.currentCanvasSize
-		const { beginPath, markLine, strokeLine } = drawLine()
+		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
 		const drawTableState = {
 			offsetTop: 0,
@@ -53,41 +53,95 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 对其起始位置
 		const offset = drawLineWidth / 2
 
-		const beforeMark = () => {
+		const startMark = () => {
 			beginPath()
 		}
-		const afterMark = () => {
+
+		const closeMarkAndDraw = () => {
 			strokeLine()
+			closePath()
 		}
 
 		const drawHorizonHeader = () => {
 			const startY = drawLineWidth
 
-			markLine(
-				{
-					x: offset,
-					y: startY,
-				},
-				{
-					x: width,
-					y: startY,
-				},
-				drawLineProperty
-			)
+			for (let i = 0; i < height; i++) {
+				if (i === 0) {
+					markLine(
+						{
+							x: offset,
+							y: startY,
+						},
+						{
+							x: width,
+							y: startY,
+						}
+					)
+				} else if (i === cellHeight + drawLineWidth) {
+					markLine(
+						{
+							x: offset,
+							y: cellHeight + drawLineWidth,
+						},
+						{
+							x: width,
+							y: cellHeight + drawLineWidth,
+						}
+					)
+				} else if (i % (cellHeight + drawLineWidth) === 0) {
+					markLine(
+						{
+							x: offset,
+							y: i,
+						},
+						{
+							x: cellWidth + drawLineWidth,
+							y: i,
+						}
+					)
+				}
+			}
 		}
 
 		const drawVerticalHeader = () => {
-			markLine(
-				{
-					x: drawLineWidth,
-					y: offset,
-				},
-				{
-					x: drawLineWidth,
-					y: height,
-				},
-				drawLineProperty
-			)
+			const startX = drawLineWidth
+
+			for (let i = 0; i < width; i++) {
+				if (i === 0) {
+					markLine(
+						{
+							x: startX,
+							y: offset,
+						},
+						{
+							x: startX,
+							y: height,
+						}
+					)
+				} else if (i === cellWidth + drawLineWidth) {
+					markLine(
+						{
+							x: cellWidth + drawLineWidth,
+							y: offset,
+						},
+						{
+							x: cellWidth + drawLineWidth,
+							y: height,
+						}
+					)
+				} else if (i % (cellWidth + drawLineWidth) === 0) {
+					markLine(
+						{
+							x: i,
+							y: offset,
+						},
+						{
+							x: i,
+							y: cellHeight + drawLineWidth,
+						}
+					)
+				}
+			}
 		}
 
 		const drawBodyHorizon = () => {
@@ -95,14 +149,13 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				if (i !== 0 && i % (cellHeight + drawLineWidth) === 0) {
 					markLine(
 						{
-							x: offset,
+							x: offset + cellWidth,
 							y: i,
 						},
 						{
 							x: width,
 							y: i,
-						},
-						drawLineProperty
+						}
 					)
 					continue
 				}
@@ -115,13 +168,12 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					markLine(
 						{
 							x: i,
-							y: offset,
+							y: offset + cellHeight,
 						},
 						{
 							x: i,
 							y: height,
-						},
-						drawLineProperty
+						}
 					)
 					continue
 				}
@@ -131,12 +183,20 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawAll = (offsetTop?: number, offsetLeft?: number) => {
 			offsetTop && (drawTableState.offsetTop = offsetTop)
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
-			beforeMark()
-			drawHorizonHeader()
-			drawVerticalHeader()
+
+			updateCanvasLineWidth(drawLineProperty.lineWidth)
+
+			startMark()
+			updateStrokeColor("#E0E0E0")
 			drawBodyHorizon()
 			drawBodyVertical()
-			afterMark()
+			closeMarkAndDraw()
+
+			startMark()
+			updateStrokeColor(drawLineProperty.lineColor)
+			drawHorizonHeader()
+			drawVerticalHeader()
+			closeMarkAndDraw()
 		}
 
 		return {
