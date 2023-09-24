@@ -31,9 +31,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine } = drawLine()
 
-		let dpr = 0
-		let pixelOffset = 0
-		dpr = getDpr()
+		let dpr = getDpr()
 
 		const drawLineProperty = {
 			..._drawLineProperty,
@@ -47,15 +45,13 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const cellWidth = Math.round(_cellWidth * dpr)
 		const cellHeight = Math.round(_cellHeight * dpr)
 
-		// 线条偏移量，适配dpr缩放
-		pixelOffset = (getPixelOffset(drawLineWidth) ?? 0) * dpr
-
 		const beforeDraw = () => {
 			beginPath()
 		}
 
 		const onDraw = () => {
-			const offset = 0 + pixelOffset
+			const offset = drawLineWidth / 2
+
 			// render horizon
 			for (let i = 0; i < height; i++) {
 				if (i === 0) {
