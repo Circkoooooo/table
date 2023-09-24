@@ -4,8 +4,8 @@ export type Coordinate = {
 }
 
 export type DrawLineProperty = {
-	lineColor: string
-	lineWidth: number
+	lineColor?: string
+	lineWidth?: number
 }
 /**
  *
@@ -84,12 +84,12 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 
 	/**
 	 * 调用来实现线条的绘制。
-	 * 
-	 * @returns 
+	 *
+	 * @returns
 	 * beginPath: 线条绘制前调用
-	 * 
+	 *
 	 * markLine: 在指定位置标记线条来为渲染做准备
-	 * 
+	 *
 	 * strokeLine：渲染标记好的线条
 	 */
 	const drawLine = () => {
