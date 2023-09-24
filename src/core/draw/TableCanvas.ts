@@ -10,7 +10,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		dpr: 1,
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, getPixelOffset, getTextHeight } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, measureText, getTextHeight } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -141,13 +141,16 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 		const cellWidth = Math.round(_cellWidth * dpr)
 		const cellHeight = Math.round(_cellHeight * dpr)
+		const drawLineWidth = Math.round(lineWidth * dpr)
+		const drawFontsize = 16 * dpr
 
 		const columnLabels = getColumnLabel(Math.ceil(width / cellWidth))
 		let columnCount = 0
 		for (let i = 0; i < width; i++) {
-			if (i !== 0 && i % (cellWidth + lineWidth) === 0) {
-				const textHeight = getTextHeight(16) ?? 0
-				fillText(columnLabels[columnCount], i + cellWidth / 2, (cellHeight + lineWidth) / 2 - (textHeight * dpr) / 2, 16, "center", "top")
+			if (i !== 0 && i % (cellWidth + drawLineWidth) === 0) {
+				const positionX = i + drawLineWidth + cellWidth / 2
+				const positionY = cellHeight / 2 + drawLineWidth
+				fillText(columnLabels[columnCount], positionX, positionY, drawFontsize, "center", "middle")
 				columnCount++
 			}
 		}
@@ -155,9 +158,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const rowLabels = getRowLabel(Math.ceil(height / cellHeight))
 		let rowCount = 0
 		for (let i = 0; i < height; i++) {
-			if (i !== 0 && i % (cellHeight + lineWidth) === 0) {
-				const textHeight = getTextHeight(16) ?? 0
-				fillText(rowLabels[rowCount], cellWidth / 2, i + (cellHeight + lineWidth) / 2 - (textHeight * dpr) / 2, 16, "center", "top")
+			if (i !== 0 && i % (cellHeight + drawLineWidth) === 0) {
+				const positionX = drawLineWidth + cellWidth / 2
+				const positionY = i + cellHeight / 2 + drawLineWidth
+				fillText(rowLabels[rowCount], positionX, positionY, drawFontsize, "center", "middle")
 				rowCount++
 			}
 		}

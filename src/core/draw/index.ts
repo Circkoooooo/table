@@ -142,7 +142,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		) => {
 			if (!context) return
 
-			context.font = `${fontSize * window.devicePixelRatio}px Microsoft Yahei`
+			context.font = `${fontSize}px Microsoft Yahei`
 			context.textAlign = textAlign
 			context.textBaseline = textBaseline
 
