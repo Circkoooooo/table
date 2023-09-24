@@ -183,7 +183,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			window.removeEventListener("touchmove", handleTouchMove)
 			window.removeEventListener("resize", calcOffset)
 		}
-	}, [])
+	}, [calcOffset, handleMouseDown, handleMouseMove, handleTouchMove])
 
 	return (
 		<TableMenuScrollbarContainer dirction={direction} ref={scrollbarContainerRef}>
