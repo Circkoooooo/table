@@ -6,9 +6,7 @@ import store from "./redux/store"
 const Table = () => {
 	return (
 		<Provider store={store}>
-			<TableFrame>
-				<TableMain />
-			</TableFrame>
+			<TableMain />
 		</Provider>
 	)
 }

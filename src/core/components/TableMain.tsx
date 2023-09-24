@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { SizeProperty } from "../types/table.type"
-import { TABLE_CONFIG } from "../configs/table_config"
-import { TableMainContainer } from "../styled/TableMain-styled"
-import { useAppSelector } from "../redux/hooks"
+import { useEffect, useRef } from "react"
+import { TableCanvasContainer, TableRowContainer, TableMainContainer, TableMenu, TableVerticalScrollbarContainer } from "../styled/TableMain-styled"
 import TableCanvas from "../draw/TableCanvas"
 import { debounce } from "../../tools/debounce"
+import TableMenuScrollbar from "./TableMenuScrollbar"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
@@ -173,19 +171,22 @@ const TableMain = () => {
 		function draw() {
 			if (tableMainContainerRef.current === null || canvasRef.current === null) return
 			const canvas = TableCanvas(canvasRef.current)
-
 			canvas.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
+
 			const lineWidth = 1
 			const cellWidth = 100
 			const cellHeight = 30
-			canvas.drawTableFrame(cellWidth, cellHeight, {
+
+			const { drawBodyHorizon, drawHorizonHeader, drawBodyVertical, drawVerticalHeader, drawAll } = canvas.drawTableFrame(cellWidth, cellHeight, {
 				lineWidth: lineWidth,
 				lineColor: "#bebfb9",
 			})
 			canvas.drawCellText(cellWidth, cellHeight, lineWidth)
-		}
 
+			drawAll()
+		}
 		draw()
+
 		window.onresize = debounce(() => {
 			draw()
 		}, 100)
@@ -193,8 +194,19 @@ const TableMain = () => {
 
 	return (
 		<>
-			<TableMainContainer ref={tableMainContainerRef} data-testid="table-scroll-container">
-				<canvas ref={canvasRef}></canvas>
+			<TableMainContainer>
+				<TableRowContainer>
+					<TableCanvasContainer ref={tableMainContainerRef}>
+						<canvas ref={canvasRef}></canvas>
+					</TableCanvasContainer>
+					<TableVerticalScrollbarContainer>
+						<TableMenuScrollbar direction="vertical" />
+					</TableVerticalScrollbarContainer>
+				</TableRowContainer>
+
+				<TableMenu>
+					<TableMenuScrollbar direction="horizontal" />
+				</TableMenu>
 			</TableMainContainer>
 		</>
 	)
