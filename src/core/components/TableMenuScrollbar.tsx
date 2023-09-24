@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/TableMain-styled"
 
 type ScrollbarRecord = {
@@ -72,7 +72,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	}
 
 	// 计算并设置最新的滑块位置
-	const calcOffset = () => {
+	const calcOffset = useCallback(() => {
 		const dpr = window.devicePixelRatio
 		const { startScreenPosition, endScreenPosition } = record.current
 
@@ -96,40 +96,43 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 			scrollbatItemRef.current.setAttribute("style", `transform:translateY(${targetTranslateY / dpr}px);`)
 		}
-	}
+	}, [direction])
 
-	const recordStartPosition = (screenX: number, screenY: number) => {
-		if (direction === "horizontal") {
-			const maxOffset = getScrollMaxOffsetLeft() ?? 0
-			const currentOffset = record.current.currentOffsetLeft + record.current.offsetX
-			if (currentOffset < 0) {
-				record.current.currentOffsetLeft = 0
-			} else if (currentOffset > maxOffset) {
-				record.current.currentOffsetLeft = maxOffset
+	const recordStartPosition = useCallback(
+		(screenX: number, screenY: number) => {
+			if (direction === "horizontal") {
+				const maxOffset = getScrollMaxOffsetLeft() ?? 0
+				const currentOffset = record.current.currentOffsetLeft + record.current.offsetX
+				if (currentOffset < 0) {
+					record.current.currentOffsetLeft = 0
+				} else if (currentOffset > maxOffset) {
+					record.current.currentOffsetLeft = maxOffset
+				} else {
+					record.current.currentOffsetLeft = record.current.currentOffsetLeft + record.current.offsetX
+				}
 			} else {
-				record.current.currentOffsetLeft = record.current.currentOffsetLeft + record.current.offsetX
+				const maxOffset = getScrollMaxOffsetTop() ?? 0
+				const currentOffset = record.current.currentOffsetTop + record.current.offsetY
+				if (currentOffset < 0) {
+					record.current.currentOffsetTop = 0
+				} else if (currentOffset > maxOffset) {
+					record.current.currentOffsetTop = maxOffset
+				} else {
+					record.current.currentOffsetTop = record.current.currentOffsetTop + record.current.offsetY
+				}
 			}
-		} else {
-			const maxOffset = getScrollMaxOffsetTop() ?? 0
-			const currentOffset = record.current.currentOffsetTop + record.current.offsetY
-			if (currentOffset < 0) {
-				record.current.currentOffsetTop = 0
-			} else if (currentOffset > maxOffset) {
-				record.current.currentOffsetTop = maxOffset
-			} else {
-				record.current.currentOffsetTop = record.current.currentOffsetTop + record.current.offsetY
-			}
-		}
 
-		record.current.startScreenPosition = {
-			x: screenX,
-			y: screenY,
-		}
-		record.current.endScreenPosition = {
-			x: screenX,
-			y: screenY,
-		}
-	}
+			record.current.startScreenPosition = {
+				x: screenX,
+				y: screenY,
+			}
+			record.current.endScreenPosition = {
+				x: screenX,
+				y: screenY,
+			}
+		},
+		[direction]
+	)
 
 	const recordEndPosition = (screenX: number, screenY: number) => {
 		record.current.endScreenPosition = {
@@ -138,10 +141,13 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		}
 	}
 
-	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		record.current.isMouseDown = true
-		recordStartPosition(e.screenX, e.screenY)
-	}
+	const handleMouseDown = useCallback(
+		(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+			record.current.isMouseDown = true
+			recordStartPosition(e.screenX, e.screenY)
+		},
+		[recordStartPosition]
+	)
 
 	const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
 		record.current.isTouchStart = true
@@ -156,18 +162,24 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		if (record.current.isTouchStart) record.current.isTouchStart = false
 	}
 
-	const handleTouchMove = (e: TouchEvent) => {
-		if (!record.current.isTouchStart) return
-		const targetTouch = e.targetTouches[0]
-		recordEndPosition(targetTouch.screenX, targetTouch.screenY)
-		calcOffset()
-	}
+	const handleTouchMove = useCallback(
+		(e: TouchEvent) => {
+			if (!record.current.isTouchStart) return
+			const targetTouch = e.targetTouches[0]
+			recordEndPosition(targetTouch.screenX, targetTouch.screenY)
+			calcOffset()
+		},
+		[calcOffset]
+	)
 
-	const handleMouseMove = (e: MouseEvent) => {
-		if (!record.current.isMouseDown) return
-		recordEndPosition(e.screenX, e.screenY)
-		calcOffset()
-	}
+	const handleMouseMove = useCallback(
+		(e: MouseEvent) => {
+			if (!record.current.isMouseDown) return
+			recordEndPosition(e.screenX, e.screenY)
+			calcOffset()
+		},
+		[calcOffset]
+	)
 
 	useEffect(() => {
 		window.addEventListener("mouseup", handleMouseUp)
@@ -183,7 +195,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			window.removeEventListener("touchmove", handleTouchMove)
 			window.removeEventListener("resize", calcOffset)
 		}
-	}, [])
+	}, [calcOffset, handleMouseDown, handleMouseMove, handleTouchMove])
 
 	return (
 		<TableMenuScrollbarContainer dirction={direction} ref={scrollbarContainerRef}>
