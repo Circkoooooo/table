@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled, { css } from "styled-components"
 
 export const TableMainContainer = styled.div`
 	height: 100%;
@@ -31,11 +31,11 @@ export const TableMenu = styled.div`
 	position: relative;
 `
 
-type Dircion = {
+type Direcion = {
 	dirction: "vertical" | "horizontal"
 }
 
-export const TableMenuScrollbarContainer = styled.div<Dircion>`
+export const TableMenuScrollbarContainer = styled.div<Direcion>`
 	position: absolute;
 	width: ${(props) => (props.dirction === "horizontal" ? "100%" : "18px")};
 	height: ${(props) => (props.dirction === "horizontal" ? "18px" : "100%")};
@@ -47,14 +47,20 @@ export const TableMenuScrollbarContainer = styled.div<Dircion>`
 	user-select: none;
 `
 
-export const TableMenuScrollbarItem = styled.div<Dircion>`
-	width: ${(props) => (props.dirction === "horizontal" ? "40px" : "100%")};
-	height: ${(props) => (props.dirction === "horizontal" ? "100%" : "40px")};
+type ScrollbarItem = {
+	$scrollBarLength: number
+}
 
-	border-radius: 4px;
-	background-color: rgba(0, 0, 0, 0.5);
+export const TableMenuScrollbarItem = styled.div<Direcion & ScrollbarItem>(({ dirction, $scrollBarLength }) => {
+	return css`
+		width: ${dirction === "horizontal" ? `${$scrollBarLength}px ` : "100%"};
+		height: ${dirction === "horizontal" ? "100%" : `${$scrollBarLength}px`};
 
-	&:hover {
-		opacity: 0.8;
-	}
-`
+		border-radius: 4px;
+		background-color: rgba(0, 0, 0, 0.5);
+
+		&:hover {
+			opacity: 0.8;
+		}
+	`
+})

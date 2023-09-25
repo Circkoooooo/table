@@ -144,39 +144,41 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawBodyHorizon = () => {
-			for (let i = 0; i < height; i++) {
-				if (i !== 0 && i % (cellHeight + drawLineWidth) === 0) {
-					markLine(
-						{
-							x: offset + cellWidth,
-							y: i,
-						},
-						{
-							x: width,
-							y: i,
-						}
-					)
-					continue
-				}
+		const drawBodyHorizon = (scrollTop?: number) => {
+			const ofs = Math.round(scrollTop ?? 0 * dpr)
+
+			for (let i = 0; i < height + ofs; i += cellHeight + drawLineWidth) {
+				// console.log(i, ofs + drawLineWidth + cellHeight)
+				if (i < ofs + drawLineWidth + cellHeight) continue
+
+				markLine(
+					{
+						x: offset + cellWidth,
+						y: i - ofs,
+					},
+					{
+						x: width,
+						y: i - ofs,
+					}
+				)
 			}
 		}
 
-		const drawBodyVertical = () => {
-			for (let i = 0; i < width; i++) {
-				if (i !== 0 && i % (cellWidth + drawLineWidth) === 0) {
-					markLine(
-						{
-							x: i,
-							y: offset + cellHeight,
-						},
-						{
-							x: i,
-							y: height,
-						}
-					)
-					continue
-				}
+		const drawBodyVertical = (scrollLeft?: number) => {
+			const ofs = Math.round(scrollLeft ?? 0 * dpr)
+
+			for (let i = ofs; i < width + ofs; i += cellWidth + drawLineWidth) {
+				if (i === ofs) continue
+				markLine(
+					{
+						x: i + ofs,
+						y: offset + cellHeight,
+					},
+					{
+						x: i + ofs,
+						y: height,
+					}
+				)
 			}
 		}
 

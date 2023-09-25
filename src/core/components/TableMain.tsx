@@ -1,37 +1,60 @@
 import { useEffect, useRef } from "react"
-import { TableCanvasContainer, TableRowContainer, TableMainContainer, TableMenu, TableVerticalScrollbarContainer } from "../styled/TableMain-styled"
+import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
 import TableCanvas from "../draw/TableCanvas"
 import { debounce } from "../../tools/debounce"
 import TableMenuScrollbar from "./TableMenuScrollbar"
+import { useDispatch } from "react-redux"
+import { updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
+	const canvasRef = useRef<HTMLCanvasElement>(null)
 
-	const canvasRef = useRef(null)
-	useEffect(() => {
-		function draw() {
-			if (tableMainContainerRef.current === null || canvasRef.current === null) return
-			const canvas = TableCanvas(canvasRef.current)
-			canvas.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
+	const dispatch = useDispatch()
 
-			const lineWidth = 1
-			const cellWidth = 100
-			const cellHeight = 30
-
-			const { drawAll } = canvas.drawTableFrame(cellWidth, cellHeight, {
-				lineWidth: lineWidth,
-				lineColor: "#bebfb9",
+	const updateStoreContainerSize = () => {
+		dispatch(
+			updateContainerSizeDispatch({
+				containerWidth: canvasRef.current?.clientWidth ?? 0,
+				containerHeight: canvasRef.current?.clientHeight ?? 0,
 			})
-			canvas.drawCellText(cellWidth, cellHeight, lineWidth)
+		)
+	}
 
-			drawAll()
-		}
+	function draw() {
+		if (tableMainContainerRef.current === null || canvasRef.current === null) return
+		const canvas = TableCanvas(canvasRef.current)
+		canvas.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
+
+		const lineWidth = 1
+		const cellWidth = 100
+		const cellHeight = 30
+
+		const { drawAll } = canvas.drawTableFrame(cellWidth, cellHeight, {
+			lineWidth: lineWidth,
+			lineColor: "#bebfb9",
+		})
+
+		canvas.drawCellText(cellWidth, cellHeight, lineWidth)
+
+		drawAll()
+	}
+
+	const handleResize = debounce(() => {
 		draw()
+		updateStoreContainerSize()
+	}, 0)
 
-		window.onresize = debounce(() => {
-			draw()
-		}, 100)
-	}, [])
+	useEffect(() => {
+		if (!tableMainContainerRef || !canvasRef) return
+
+		handleResize()
+		window.addEventListener("resize", handleResize)
+
+		return () => {
+			window.removeEventListener("resize", handleResize)
+		}
+	}, [handleResize])
 
 	return (
 		<>
