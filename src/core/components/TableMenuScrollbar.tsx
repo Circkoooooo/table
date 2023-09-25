@@ -12,19 +12,34 @@ type ScrollbarRecord = {
 		x: number
 		y: number
 	}
-	offsetX: number //右 -> 正
-	offsetY: number //下 -> 正
 	currentOffsetLeft: number
 	currentOffsetTop: number
+	offsetLeft: number //右 -> 正
+	offsetTop: number //下 -> 正
+	startOffsetLeft: number
+	startOffsetTop: number
 	getScrollMaxOffsetLeft: number
 	getScrollMaxOffsetTop: number
 }
 
+type ScrollCallbackParam = {
+	currentOffsetLeft: number
+	currentOffsetTop: number
+	maxOffsetLeft: number
+	maxOffsetTop: number
+	offsetPercent: number
+	nativeRecord: {
+		direction: string
+		offsetTop: number
+		offsetLeft: number
+	}
+}
 interface TableMenuScrollbarProps {
 	direction: "vertical" | "horizontal"
+	scrollCallback?: (param: ScrollCallbackParam) => void
 }
 
-const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) => {
+const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction, scrollCallback }) => {
 	const scrollbatItemRef = useRef<HTMLDivElement>(null)
 	const scrollbarContainerRef = useRef<HTMLDivElement>(null)
 
@@ -39,13 +54,35 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			x: 0,
 			y: 0,
 		},
-		offsetX: 0,
-		offsetY: 0,
 		currentOffsetLeft: 0,
 		currentOffsetTop: 0,
+		offsetLeft: 0, //记录过程中产生的偏移量
+		offsetTop: 0,
+		startOffsetLeft: 0, //开始记录时滑块的便宜
+		startOffsetTop: 0,
 		getScrollMaxOffsetLeft: 0,
 		getScrollMaxOffsetTop: 0,
 	})
+
+	const execScrollCallback = useCallback(() => {
+		const { offsetLeft, offsetTop, startOffsetLeft, startOffsetTop, currentOffsetLeft, currentOffsetTop } = record.current
+
+		const offsetPercent = direction === "horizontal" ? currentOffsetLeft / (getScrollMaxOffsetLeft() ?? 0) : currentOffsetTop / (getScrollMaxOffsetTop() ?? 0)
+
+		scrollCallback &&
+			scrollCallback({
+				currentOffsetLeft,
+				currentOffsetTop,
+				maxOffsetLeft: getScrollMaxOffsetLeft() ?? 0,
+				maxOffsetTop: getScrollMaxOffsetTop() ?? 0,
+				offsetPercent,
+				nativeRecord: {
+					direction,
+					offsetTop,
+					offsetLeft,
+				},
+			})
+	}, [direction, scrollCallback])
 
 	const getScrollMaxOffsetLeft = () => {
 		if (!scrollbatItemRef.current || !scrollbarContainerRef.current) return null
@@ -76,49 +113,55 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		const dpr = window.devicePixelRatio
 		const { startScreenPosition, endScreenPosition } = record.current
 
-		record.current.offsetX = endScreenPosition.x - startScreenPosition.x
-		record.current.offsetY = endScreenPosition.y - startScreenPosition.y
+		record.current.offsetLeft = endScreenPosition.x - startScreenPosition.x
+		record.current.offsetTop = endScreenPosition.y - startScreenPosition.y
 
 		if (!scrollbatItemRef.current || !scrollbarContainerRef.current) return null
 
 		if (direction === "horizontal") {
-			const translateX = record.current.currentOffsetLeft + record.current.offsetX
-
 			const maxOffset = getScrollMaxOffsetLeft() ?? 0
-			const targetTranslateX = translateX < 0 ? 0 : translateX > maxOffset ? maxOffset : translateX
+			const currentOffsetLeft = record.current.startOffsetLeft + record.current.offsetLeft
+			record.current.currentOffsetLeft = currentOffsetLeft < 0 ? 0 : currentOffsetLeft > maxOffset ? maxOffset : currentOffsetLeft
+
+			const targetTranslateX = record.current.currentOffsetLeft
 
 			scrollbatItemRef.current.setAttribute("style", `transform:translateX(${targetTranslateX / dpr}px);`)
 		} else {
-			const translateY = record.current.currentOffsetTop + record.current.offsetY
-
+			record.current.currentOffsetTop = record.current.startOffsetTop + record.current.offsetTop
 			const maxOffset = getScrollMaxOffsetTop() ?? 0
-			const targetTranslateY = translateY < 0 ? 0 : translateY > maxOffset ? maxOffset : translateY
+			const currentOffsetTop = record.current.startOffsetTop + record.current.offsetTop
+			record.current.currentOffsetTop = currentOffsetTop < 0 ? 0 : currentOffsetTop > maxOffset ? maxOffset : currentOffsetTop
 
+			const targetTranslateY = currentOffsetTop < 0 ? 0 : currentOffsetTop > maxOffset ? maxOffset : currentOffsetTop
 			scrollbatItemRef.current.setAttribute("style", `transform:translateY(${targetTranslateY / dpr}px);`)
 		}
-	}, [direction])
+
+		execScrollCallback()
+	}, [direction, execScrollCallback])
 
 	const recordStartPosition = useCallback(
 		(screenX: number, screenY: number) => {
 			if (direction === "horizontal") {
 				const maxOffset = getScrollMaxOffsetLeft() ?? 0
-				const currentOffset = record.current.currentOffsetLeft + record.current.offsetX
+
+				const currentOffset = record.current.startOffsetLeft + record.current.offsetLeft
+
 				if (currentOffset < 0) {
-					record.current.currentOffsetLeft = 0
+					record.current.startOffsetLeft = 0
 				} else if (currentOffset > maxOffset) {
-					record.current.currentOffsetLeft = maxOffset
+					record.current.startOffsetLeft = maxOffset
 				} else {
-					record.current.currentOffsetLeft = record.current.currentOffsetLeft + record.current.offsetX
+					record.current.startOffsetLeft = record.current.startOffsetLeft + record.current.offsetLeft
 				}
 			} else {
 				const maxOffset = getScrollMaxOffsetTop() ?? 0
-				const currentOffset = record.current.currentOffsetTop + record.current.offsetY
+				const currentOffset = record.current.startOffsetTop + record.current.offsetTop
 				if (currentOffset < 0) {
-					record.current.currentOffsetTop = 0
+					record.current.startOffsetTop = 0
 				} else if (currentOffset > maxOffset) {
-					record.current.currentOffsetTop = maxOffset
+					record.current.startOffsetTop = maxOffset
 				} else {
-					record.current.currentOffsetTop = record.current.currentOffsetTop + record.current.offsetY
+					record.current.startOffsetTop = record.current.startOffsetTop + record.current.offsetTop
 				}
 			}
 

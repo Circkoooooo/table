@@ -41,12 +41,12 @@ const TableMain = () => {
 						<canvas ref={canvasRef}></canvas>
 					</TableCanvasContainer>
 					<TableVerticalScrollbarContainer>
-						<TableMenuScrollbar direction="vertical" />
+						<TableMenuScrollbar direction="vertical" scrollCallback={(param) => console.log(param)} />
 					</TableVerticalScrollbarContainer>
 				</TableRowContainer>
 
 				<TableMenu>
-					<TableMenuScrollbar direction="horizontal" />
+					<TableMenuScrollbar direction="horizontal" scrollCallback={(param) => console.log(param)} />
 				</TableMenu>
 			</TableMainContainer>
 		</>
