@@ -1,6 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/TableMain-styled"
-import { useAppSelector } from "../redux/hooks"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { updateContainerOffsetDispatch } from "../redux/canvas/canvasSlice"
+import { debounce } from "../../tools/debounce"
+import useDebounce from "../../hooks/useDebounce"
 
 type ScrollbarRecord = {
 	isMouseDown: boolean
@@ -13,16 +16,14 @@ type ScrollbarRecord = {
 		x: number
 		y: number
 	}
-	canvasContainerWidth: number
-	canvasContainerHeight: number
-	canvasContainerMaxWidth: number // 容器宽度 + 容器外的宽度。理论上大于canvasContainerWidth
-	canvasContainerMaxHeight: number
 	currentOffsetLeft: number
 	currentOffsetTop: number
 	offsetLeft: number //右 -> 正
 	offsetTop: number //下 -> 正
 	startOffsetLeft: number
 	startOffsetTop: number
+	offsetPercent: number
+	ratio: number
 }
 
 type ScrollCallbackParam = {
@@ -30,7 +31,7 @@ type ScrollCallbackParam = {
 	currentOffsetTop: number
 	maxOffsetLeft: number
 	maxOffsetTop: number
-	offsetPercent: number
+	currentOffsetPercent: number
 	nativeRecord: {
 		direction: string
 		offsetTop: number
@@ -42,10 +43,14 @@ interface TableMenuScrollbarProps {
 	scrollCallback?: (param: ScrollCallbackParam) => void
 }
 
-const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction, scrollCallback }) => {
-	const scrollbatItemRef = useRef<HTMLDivElement>(null)
+const MIN_SCROLLITEM_SIZE = 50
+
+const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) => {
+	const scrollbarItemRef = useRef<HTMLDivElement>(null)
 	const scrollbarContainerRef = useRef<HTMLDivElement>(null)
 	const canvasStore = useAppSelector((state) => state.canvas)
+
+	const dispatch = useAppDispatch()
 
 	const record = useRef<ScrollbarRecord>({
 		isMouseDown: false,
@@ -58,101 +63,155 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction, scro
 			x: 0,
 			y: 0,
 		},
-		canvasContainerWidth: 0,
-		canvasContainerHeight: 0,
-		canvasContainerMaxWidth: 0,
-		canvasContainerMaxHeight: 0,
 		currentOffsetLeft: 0,
 		currentOffsetTop: 0,
 		offsetLeft: 0, //记录过程中产生的偏移量
 		offsetTop: 0,
 		startOffsetLeft: 0, //开始记录时滑块的便宜
 		startOffsetTop: 0,
+		offsetPercent: 0,
+		ratio: 0,
 	})
 
-	const scrollBarLength = useMemo(() => {
-		if (!scrollbarContainerRef.current) return 0
+	const canvasContainerRef = useRef({
+		canvasContainerWidth: 0,
+		canvasContainerHeight: 0,
+		canvasContainerMaxWidth: 0,
+		canvasContainerMaxHeight: 0,
+		canvasContainerOffsetLeft: 0,
+		canvasContainerOffsetTop: 0,
+	})
+
+	/**
+	 * 滚动条容器中body部分的长度
+	 */
+	const scrollbarContainerLength = useCallback(() => {
+		const container = scrollbarContainerRef.current
+		if (!container) return 0
+
+		const boxOuterWidth = Number(window.getComputedStyle(container).borderWidth.replace("px", "")) + Number(window.getComputedStyle(container).padding.replace("px", ""))
+
+		if (direction === "horizontal") {
+			return container.clientWidth - boxOuterWidth * 2
+		} else {
+			return container.clientHeight - boxOuterWidth * 2
+		}
+	}, [direction])
+
+	/**
+	 * 滚动条滑块长度
+	 */
+	const scrollbarItemLength = useCallback(() => {
+		const container = scrollbarContainerRef.current
+		if (!container) return 0
 		const containerMaxWidth = canvasStore.containerMaxWidth
 		const containerMaxHeight = canvasStore.containerMaxHeight
 		const containerWidth = canvasStore.containerWidth
 		const containerHeight = canvasStore.containerHeight
 
-		let scroll = 0
-
-		const boxOuterWidth =
-			Number(window.getComputedStyle(scrollbarContainerRef.current).borderWidth.replace("px", "")) + Number(window.getComputedStyle(scrollbarContainerRef.current).padding.replace("px", ""))
+		let restScroll = 0
 
 		if (direction === "horizontal") {
-			scroll = scrollbarContainerRef.current.clientWidth * ((containerMaxWidth - containerWidth) / containerMaxWidth)
-			return scrollbarContainerRef.current.clientWidth - boxOuterWidth * 2 - scroll
+			const containerLength = scrollbarContainerLength()
+			restScroll = containerLength * ((containerMaxWidth - containerWidth) / containerMaxWidth)
+
+			return Math.min(Math.max(MIN_SCROLLITEM_SIZE, containerLength - restScroll), containerLength)
 		} else {
-			scroll = scrollbarContainerRef.current.clientHeight * ((containerMaxHeight - containerHeight) / containerMaxHeight)
-			return scrollbarContainerRef.current.clientHeight - boxOuterWidth * 2 - scroll
+			const containerLength = scrollbarContainerLength()
+			restScroll = container.clientHeight * ((containerMaxHeight - containerHeight) / containerMaxHeight)
+			return Math.min(Math.max(MIN_SCROLLITEM_SIZE, containerLength - restScroll), containerLength)
 		}
-	}, [canvasStore, direction])
+	}, [canvasStore.containerWidth, canvasStore.containerHeight, canvasStore.containerMaxHeight, canvasStore.containerMaxWidth, direction, scrollbarContainerLength])
 
-	const execScrollCallback = useCallback(() => {
-		const { offsetLeft, offsetTop, currentOffsetLeft, currentOffsetTop, canvasContainerMaxWidth, canvasContainerMaxHeight, canvasContainerWidth, canvasContainerHeight } = record.current
+	const scrollbarMaxScroll = useCallback(() => {
+		return scrollbarContainerLength() - scrollbarItemLength()
+	}, [scrollbarItemLength, scrollbarContainerLength])
 
-		const maxOffsetLeft = canvasContainerMaxWidth - canvasContainerWidth
-		const maxOffsetTop = canvasContainerMaxHeight - canvasContainerHeight
-		const offsetPercent = direction === "horizontal" ? currentOffsetLeft / maxOffsetLeft : currentOffsetTop / maxOffsetTop
+	const scrollPercent = useCallback(() => {
+		//最大偏移量
+		const maxScrollLength = scrollbarMaxScroll()
+		const { startScreenPosition, endScreenPosition, offsetPercent } = record.current
+		//1. 获取滑块初始位移
+		const newScrollbarOffset = Math.max(0, Math.min(offsetPercent * maxScrollLength, maxScrollLength))
 
-		scrollCallback &&
-			scrollCallback({
-				currentOffsetLeft,
-				currentOffsetTop,
-				maxOffsetLeft,
-				maxOffsetTop,
-				offsetPercent,
-				nativeRecord: {
-					direction,
-					offsetTop,
-					offsetLeft,
-				},
-			})
-	}, [direction, scrollCallback])
+		if (direction === "horizontal") {
+			const offsetLeft = endScreenPosition.x - startScreenPosition.x
+			const newOffsetLeft = Math.min(Math.max(0, newScrollbarOffset + offsetLeft), maxScrollLength)
+			return isNaN(newOffsetLeft / maxScrollLength) ? 0 : newOffsetLeft / maxScrollLength
+		} else {
+			const offsetTop = endScreenPosition.y - startScreenPosition.y
+			const newOffsetTop = Math.min(Math.max(0, newScrollbarOffset + offsetTop), maxScrollLength)
+			return isNaN(newOffsetTop / maxScrollLength) ? 0 : newOffsetTop / maxScrollLength
+		}
+	}, [scrollbarMaxScroll, direction])
 
 	// 计算并设置最新的滑块位置
 	const calcOffset = useCallback(() => {
-		const dpr = window.devicePixelRatio
-		const { startScreenPosition, endScreenPosition, canvasContainerWidth, canvasContainerHeight, canvasContainerMaxWidth, canvasContainerMaxHeight } = record.current
+		if (!scrollbarItemRef.current) return null
 
-		record.current.offsetLeft = endScreenPosition.x - startScreenPosition.x
-		record.current.offsetTop = endScreenPosition.y - startScreenPosition.y
+		//最大偏移量
+		const maxScrollLength = scrollbarMaxScroll()
 
-		if (!scrollbarContainerRef.current || !scrollbatItemRef.current) return null
+		const { startScreenPosition, endScreenPosition, offsetPercent } = record.current
+		//1. 获取滑块初始位移
+		const newScrollbarOffset = Math.max(0, Math.min(offsetPercent * maxScrollLength, maxScrollLength))
+
+		// 获取最新偏移
+		const offsetLeft = endScreenPosition.x - startScreenPosition.x
+		const offsetTop = endScreenPosition.y - startScreenPosition.y
 
 		if (direction === "horizontal") {
-			const maxScrollBarOffset = scrollbarContainerRef.current.clientWidth * ((canvasContainerMaxWidth - canvasContainerWidth) / canvasContainerMaxWidth)
-			const currentOffsetLeft = record.current.startOffsetLeft + record.current.offsetLeft
-			const targetTranslateX = currentOffsetLeft < 0 ? 0 : currentOffsetLeft > maxScrollBarOffset ? maxScrollBarOffset : currentOffsetLeft
+			// 计算当前滑块的偏移量
+			const newOffsetLeft = Math.min(Math.max(0, newScrollbarOffset + offsetLeft), maxScrollLength)
 
-			record.current.currentOffsetLeft = targetTranslateX
-			scrollbatItemRef.current.setAttribute("style", `transform:translateX(${targetTranslateX / dpr}px);`)
+			scrollbarItemRef.current.setAttribute("style", `transform:translateX(${newOffsetLeft}px);}px`)
+			record.current.currentOffsetLeft = newOffsetLeft
+
+			// 计算并记录当前偏移量
+			const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasStore.containerMaxOffsetLeft
+			dispatch(
+				updateContainerOffsetDispatch({
+					offsetLeft: isNaN(currentOffsetLeft) ? 0 : currentOffsetLeft,
+				})
+			)
 		} else {
-			const maxScrollBarOffset = scrollbarContainerRef.current.clientHeight * ((canvasContainerMaxHeight - canvasContainerHeight) / canvasContainerMaxHeight)
-			const currentOffsetTop = record.current.startOffsetTop + record.current.offsetTop
-			const targetTranslateY = currentOffsetTop < 0 ? 0 : currentOffsetTop > maxScrollBarOffset ? maxScrollBarOffset : currentOffsetTop
+			const newOffsetTop = Math.min(Math.max(0, newScrollbarOffset + offsetTop), maxScrollLength)
+			scrollbarItemRef.current.setAttribute("style", `transform:translateY(${newOffsetTop}px);}px`)
+			record.current.currentOffsetTop = newOffsetTop
 
-			record.current.currentOffsetTop = targetTranslateY
-			scrollbatItemRef.current.setAttribute("style", `transform:translateY(${targetTranslateY / dpr}px);`)
+			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasStore.containerMaxOffsetTop
+
+			dispatch(
+				updateContainerOffsetDispatch({
+					offsetTop: isNaN(currentOffsetTop) ? 0 : currentOffsetTop,
+				})
+			)
 		}
-
-		execScrollCallback()
-	}, [direction, execScrollCallback])
+	}, [direction, scrollbarMaxScroll])
 
 	useEffect(() => {
-		record.current.canvasContainerWidth = canvasStore.containerWidth
-		record.current.canvasContainerHeight = canvasStore.containerHeight
-		record.current.canvasContainerMaxWidth = canvasStore.containerMaxWidth
-		record.current.canvasContainerMaxHeight = canvasStore.containerMaxHeight
-		calcOffset()
-	}, [canvasStore, calcOffset])
+		canvasContainerRef.current = {
+			canvasContainerWidth: canvasStore.containerWidth,
+			canvasContainerHeight: canvasStore.containerHeight,
+			canvasContainerMaxWidth: canvasStore.containerMaxWidth,
+			canvasContainerMaxHeight: canvasStore.containerMaxHeight,
+			canvasContainerOffsetLeft: canvasStore.containerOffsetLeft,
+			canvasContainerOffsetTop: canvasStore.containerOffsetTop,
+		}
+
+		if (direction === "horizontal") {
+			const ratio = scrollbarItemLength() / canvasStore.containerMaxWidth
+			record.current.ratio = ratio
+		} else {
+			const ratio = scrollbarItemLength() / canvasStore.containerMaxHeight
+			record.current.ratio = ratio
+		}
+	}, [scrollbarItemLength, direction])
 
 	const recordStartPosition = useCallback(
 		(screenX: number, screenY: number) => {
-			const { canvasContainerMaxWidth, canvasContainerMaxHeight, canvasContainerWidth, canvasContainerHeight } = record.current
+			const { canvasContainerMaxWidth, canvasContainerMaxHeight, canvasContainerWidth, canvasContainerHeight } = canvasContainerRef.current
+
 			if (direction === "horizontal") {
 				const maxOffset = canvasContainerMaxWidth - canvasContainerWidth
 				const currentOffset = record.current.startOffsetLeft + record.current.offsetLeft
@@ -203,18 +262,27 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction, scro
 		[recordStartPosition]
 	)
 
-	const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-		record.current.isTouchStart = true
-		recordStartPosition(e.targetTouches[0].screenX, e.targetTouches[0].screenY)
-	}
+	const handleTouchStart = useCallback(
+		(e: TouchEvent) => {
+			record.current.isTouchStart = true
+			recordStartPosition(e.targetTouches[0].screenX, e.targetTouches[0].screenY)
+		},
+		[recordStartPosition]
+	)
 
-	const handleMouseUp = () => {
-		if (record.current.isMouseDown) record.current.isMouseDown = false
-	}
+	const handleMouseUp = useCallback(() => {
+		if (!record.current.isMouseDown) return
+		record.current.isMouseDown = false
 
-	const handleTouchEnd = () => {
-		if (record.current.isTouchStart) record.current.isTouchStart = false
-	}
+		record.current.offsetPercent = scrollPercent()
+	}, [scrollPercent])
+
+	const handleTouchEnd = useCallback(() => {
+		if (record.current.isTouchStart) return
+		record.current.isTouchStart = false
+
+		record.current.offsetPercent = scrollPercent()
+	}, [scrollPercent])
 
 	const handleTouchMove = useCallback(
 		(e: TouchEvent) => {
@@ -235,25 +303,31 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction, scro
 		[calcOffset]
 	)
 
+	const handleResize = useDebounce(() => {
+		calcOffset()
+	}, 100)
+
 	useEffect(() => {
 		window.addEventListener("mouseup", handleMouseUp)
 		window.addEventListener("touchend", handleTouchEnd)
 		window.addEventListener("mousemove", handleMouseMove)
 		window.addEventListener("touchmove", handleTouchMove)
-
-		window.addEventListener("resize", calcOffset)
+		window.addEventListener("touchstart", handleTouchStart)
 		return () => {
 			window.removeEventListener("mouseup", handleMouseUp)
 			window.removeEventListener("touchend", handleTouchEnd)
 			window.removeEventListener("mousemove", handleMouseMove)
 			window.removeEventListener("touchmove", handleTouchMove)
-			window.removeEventListener("resize", calcOffset)
 		}
-	}, [calcOffset, handleMouseDown, handleMouseMove, handleTouchMove])
+	}, [handleMouseUp, handleTouchEnd, handleMouseMove, handleTouchMove, handleTouchStart])
+
+	useEffect(() => {
+		window.addEventListener("resize", handleResize)
+	}, [handleResize])
 
 	return (
 		<TableMenuScrollbarContainer dirction={direction} ref={scrollbarContainerRef}>
-			<TableMenuScrollbarItem $scrollBarLength={scrollBarLength} dirction={direction} ref={scrollbatItemRef} onTouchStart={(e) => handleTouchStart(e)} onMouseDown={(e) => handleMouseDown(e)} />
+			<TableMenuScrollbarItem $scrollBarLength={scrollbarItemLength()} dirction={direction} ref={scrollbarItemRef} onTouchStart={(e) => {}} onMouseDown={(e) => handleMouseDown(e)} />
 		</TableMenuScrollbarContainer>
 	)
 }

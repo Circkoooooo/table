@@ -1,27 +1,18 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
 import TableCanvas from "../draw/TableCanvas"
-import { debounce } from "../../tools/debounce"
 import TableMenuScrollbar from "./TableMenuScrollbar"
-import { useDispatch } from "react-redux"
-import { updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
+import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 
-	const dispatch = useDispatch()
+	const dispatch = useAppDispatch()
+	const canvasStore = useAppSelector((state) => state.canvas)
 
-	const updateStoreContainerSize = () => {
-		dispatch(
-			updateContainerSizeDispatch({
-				containerWidth: canvasRef.current?.clientWidth ?? 0,
-				containerHeight: canvasRef.current?.clientHeight ?? 0,
-			})
-		)
-	}
-
-	function draw() {
+	const draw = () => {
 		if (tableMainContainerRef.current === null || canvasRef.current === null) return
 		const canvas = TableCanvas(canvasRef.current)
 		canvas.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
@@ -35,15 +26,30 @@ const TableMain = () => {
 			lineColor: "#bebfb9",
 		})
 
-		canvas.drawCellText(cellWidth, cellHeight, lineWidth)
+		const offsetLeft = canvasStore.containerOffsetLeft
+		const offsetTop = canvasStore.containerOffsetTop
 
-		drawAll()
+		drawAll(offsetLeft, offsetTop)
 	}
 
-	const handleResize = debounce(() => {
+	const handleResize = () => {
+		// resize 重绘内容
 		draw()
-		updateStoreContainerSize()
-	}, 0)
+
+		// store最新的尺寸和偏移
+		dispatch(
+			updateContainerSizeDispatch({
+				containerWidth: tableMainContainerRef.current?.clientWidth ?? 0,
+				containerHeight: tableMainContainerRef.current?.clientHeight ?? 0,
+			})
+		)
+		dispatch(
+			updateContainerMaxSizeDispatch({
+				maxWidth: 1000,
+				maxHeight: 1000,
+			})
+		)
+	}
 
 	useEffect(() => {
 		if (!tableMainContainerRef || !canvasRef) return
@@ -54,7 +60,11 @@ const TableMain = () => {
 		return () => {
 			window.removeEventListener("resize", handleResize)
 		}
-	}, [handleResize])
+	}, [])
+
+	useEffect(() => {
+		draw()
+	}, [canvasStore])
 
 	return (
 		<>
@@ -64,12 +74,12 @@ const TableMain = () => {
 						<canvas ref={canvasRef}></canvas>
 					</TableCanvasContainer>
 					<TableVerticalScrollbarContainer>
-						<TableMenuScrollbar direction="vertical" scrollCallback={(param) => console.log(param)} />
+						<TableMenuScrollbar direction="vertical" />
 					</TableVerticalScrollbarContainer>
 				</TableRowContainer>
 
 				<TableMenu>
-					<TableMenuScrollbar direction="horizontal" scrollCallback={(param) => console.log(param)} />
+					<TableMenuScrollbar direction="horizontal" />
 				</TableMenu>
 			</TableMainContainer>
 		</>

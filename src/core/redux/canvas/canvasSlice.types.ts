@@ -3,7 +3,12 @@ export type DispatchUpdateContainerSize = {
 	containerHeight: number
 }
 
-export type DispatchUpdateOverflowSize = {
-	overflowWidth: number
-	overflowHeight: number
+export type DispatchUpdateMaxSize = {
+	maxWidth: number
+	maxHeight: number
+}
+
+export type DispatchUpdateOffsetSize = {
+	offsetLeft?: number
+	offsetTop?: number
 }

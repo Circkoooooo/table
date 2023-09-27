@@ -1,18 +1,33 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
-import { DispatchUpdateContainerSize, DispatchUpdateOverflowSize } from "./canvasSlice.types"
+import { DispatchUpdateContainerSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize } from "./canvasSlice.types"
 
-type CanvasRecord = {
+export type CanvasRecord = {
 	containerWidth: number
 	containerHeight: number
 	containerMaxWidth: number
 	containerMaxHeight: number
+	containerOffsetLeft: number
+	containerOffsetTop: number
+	containerMaxOffsetLeft: number
+	containerMaxOffsetTop: number
 }
 
 const initialState: CanvasRecord = {
 	containerWidth: 0,
 	containerHeight: 0,
-	containerMaxWidth: 4000,
-	containerMaxHeight: 4000,
+	containerOffsetLeft: 0,
+	containerOffsetTop: 0,
+	containerMaxWidth: 0,
+	containerMaxHeight: 0,
+	containerMaxOffsetLeft: 0,
+	containerMaxOffsetTop: 0,
+}
+
+const calcMaxOffset = (width: number, height: number, maxWidth: number, maxHeight: number) => {
+	return {
+		containerMaxOffsetLeft: maxWidth - width,
+		containerMaxOffsetTop: maxHeight - height,
+	}
 }
 
 const canvasSlice = createSlice({
@@ -23,15 +38,29 @@ const canvasSlice = createSlice({
 			const { containerWidth, containerHeight } = action.payload
 			state.containerWidth = containerWidth
 			state.containerHeight = containerHeight
+
+			const { containerMaxOffsetLeft, containerMaxOffsetTop } = calcMaxOffset(state.containerWidth, state.containerHeight, state.containerMaxWidth, state.containerMaxHeight)
+			state.containerMaxOffsetLeft = containerMaxOffsetLeft
+			state.containerMaxOffsetTop = containerMaxOffsetTop
 		},
-		updateMaxSizeDispatch: (state, action: PayloadAction<DispatchUpdateOverflowSize>) => {
-			const { overflowWidth, overflowHeight } = action.payload
-			state.containerMaxWidth = overflowWidth
-			state.containerMaxHeight = overflowHeight
+		updateContainerMaxSizeDispatch: (state, action: PayloadAction<DispatchUpdateMaxSize>) => {
+			const { maxWidth, maxHeight } = action.payload
+			state.containerMaxWidth = maxWidth
+			state.containerMaxHeight = maxHeight
+
+			const { containerMaxOffsetLeft, containerMaxOffsetTop } = calcMaxOffset(state.containerWidth, state.containerHeight, state.containerMaxWidth, state.containerMaxHeight)
+			state.containerMaxOffsetLeft = containerMaxOffsetLeft
+			state.containerMaxOffsetTop = containerMaxOffsetTop
+		},
+		updateContainerOffsetDispatch: (state, action: PayloadAction<DispatchUpdateOffsetSize>) => {
+			const { offsetLeft, offsetTop } = action.payload
+
+			offsetLeft && (state.containerOffsetLeft = offsetLeft)
+			offsetTop && (state.containerOffsetTop = offsetTop)
 		},
 	},
 })
 
-export const { updateContainerSizeDispatch } = canvasSlice.actions
+export const { updateContainerSizeDispatch, updateContainerMaxSizeDispatch, updateContainerOffsetDispatch } = canvasSlice.actions
 
 export default canvasSlice.reducer
