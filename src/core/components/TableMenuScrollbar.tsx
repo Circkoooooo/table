@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef } from "react"
 import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/TableMain-styled"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { updateContainerOffsetDispatch } from "../redux/canvas/canvasSlice"
-import { debounce } from "../../tools/debounce"
 import useDebounce from "../../hooks/useDebounce"
 
 type ScrollbarRecord = {
@@ -80,6 +79,8 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		canvasContainerMaxHeight: 0,
 		canvasContainerOffsetLeft: 0,
 		canvasContainerOffsetTop: 0,
+		canvasContainerMaxOffsetLeft: 0,
+		canvasContainerMaxOffsetTop: 0,
 	})
 
 	/**
@@ -168,7 +169,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			record.current.currentOffsetLeft = newOffsetLeft
 
 			// 计算并记录当前偏移量
-			const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasStore.containerMaxOffsetLeft
+			const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetLeft
 			dispatch(
 				updateContainerOffsetDispatch({
 					offsetLeft: isNaN(currentOffsetLeft) ? 0 : currentOffsetLeft,
@@ -179,7 +180,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			scrollbarItemRef.current.setAttribute("style", `transform:translateY(${newOffsetTop}px);}px`)
 			record.current.currentOffsetTop = newOffsetTop
 
-			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasStore.containerMaxOffsetTop
+			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetTop
 
 			dispatch(
 				updateContainerOffsetDispatch({
@@ -187,7 +188,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 				})
 			)
 		}
-	}, [direction, scrollbarMaxScroll])
+	}, [direction, scrollbarMaxScroll, dispatch])
 
 	useEffect(() => {
 		canvasContainerRef.current = {
@@ -197,6 +198,8 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			canvasContainerMaxHeight: canvasStore.containerMaxHeight,
 			canvasContainerOffsetLeft: canvasStore.containerOffsetLeft,
 			canvasContainerOffsetTop: canvasStore.containerOffsetTop,
+			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft,
+			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop,
 		}
 
 		if (direction === "horizontal") {
@@ -206,7 +209,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			const ratio = scrollbarItemLength() / canvasStore.containerMaxHeight
 			record.current.ratio = ratio
 		}
-	}, [scrollbarItemLength, direction])
+	}, [scrollbarItemLength, direction, canvasStore])
 
 	const recordStartPosition = useCallback(
 		(screenX: number, screenY: number) => {
@@ -305,7 +308,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 	const handleResize = useDebounce(() => {
 		calcOffset()
-	}, 100)
+	}, 10)
 
 	useEffect(() => {
 		window.addEventListener("mouseup", handleMouseUp)

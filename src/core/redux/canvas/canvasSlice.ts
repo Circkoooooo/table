@@ -55,8 +55,8 @@ const canvasSlice = createSlice({
 		updateContainerOffsetDispatch: (state, action: PayloadAction<DispatchUpdateOffsetSize>) => {
 			const { offsetLeft, offsetTop } = action.payload
 
-			offsetLeft && (state.containerOffsetLeft = offsetLeft)
-			offsetTop && (state.containerOffsetTop = offsetTop)
+			offsetLeft !== undefined && (state.containerOffsetLeft = offsetLeft)
+			offsetTop !== undefined && (state.containerOffsetTop = offsetTop)
 		},
 	},
 })

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
 import TableCanvas from "../draw/TableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
@@ -45,8 +45,8 @@ const TableMain = () => {
 		)
 		dispatch(
 			updateContainerMaxSizeDispatch({
-				maxWidth: 1000,
-				maxHeight: 1000,
+				maxWidth: 3000,
+				maxHeight: 3000,
 			})
 		)
 	}
@@ -60,11 +60,11 @@ const TableMain = () => {
 		return () => {
 			window.removeEventListener("resize", handleResize)
 		}
-	}, [])
+	})
 
 	useEffect(() => {
 		draw()
-	}, [canvasStore])
+	})
 
 	return (
 		<>
