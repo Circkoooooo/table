@@ -10,7 +10,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		dpr: 1,
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -62,10 +62,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			closePath()
 		}
 
-		const drawHorizonHeader = () => {
+		const drawHorizontalHeader = (offsetTop?: number) => {
 			const startY = drawLineWidth
+			const ofs = Math.round((offsetTop ?? 0) * dpr)
 
-			for (let i = 0; i < height; i++) {
+			for (let i = 0; i < height + ofs; i++) {
 				if (i === 0) {
 					markLine(
 						{
@@ -89,24 +90,26 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else if (i % (cellHeight + drawLineWidth) === 0) {
+					if (i < ofs + drawLineWidth + cellHeight) continue
 					markLine(
 						{
 							x: offset,
-							y: i,
+							y: i - ofs,
 						},
 						{
 							x: cellWidth + drawLineWidth,
-							y: i,
+							y: i - ofs,
 						}
 					)
 				}
 			}
 		}
 
-		const drawVerticalHeader = () => {
+		const drawVerticalHeader = (offsetLeft?: number) => {
 			const startX = drawLineWidth
+			const ofs = Math.round((offsetLeft ?? 0) * dpr)
 
-			for (let i = 0; i < width; i++) {
+			for (let i = 0; i < width + ofs; i++) {
 				if (i === 0) {
 					markLine(
 						{
@@ -130,13 +133,15 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else if (i % (cellWidth + drawLineWidth) === 0) {
+					if (i < ofs + drawLineWidth + cellHeight) continue
+
 					markLine(
 						{
-							x: i,
+							x: i - ofs,
 							y: offset,
 						},
 						{
-							x: i,
+							x: i - ofs,
 							y: cellHeight + drawLineWidth,
 						}
 					)
@@ -144,11 +149,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawBodyHorizon = (scrollTop?: number) => {
-			const ofs = Math.round(scrollTop ?? 0 * dpr)
+		const drawBodyHorizontal = (scrollTop?: number) => {
+			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
 			for (let i = 0; i < height + ofs; i += cellHeight + drawLineWidth) {
-				// console.log(i, ofs + drawLineWidth + cellHeight)
 				if (i < ofs + drawLineWidth + cellHeight) continue
 
 				markLine(
@@ -165,94 +169,101 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		const drawBodyVertical = (scrollLeft?: number) => {
-			const ofs = Math.round(scrollLeft ?? 0 * dpr)
+			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = ofs; i < width + ofs; i += cellWidth + drawLineWidth) {
-				if (i === ofs) continue
+			for (let i = 0; i < width + ofs; i += cellWidth + drawLineWidth) {
+				if (i < ofs + drawLineWidth + cellWidth) continue
+
 				markLine(
 					{
-						x: i + ofs,
+						x: i - ofs,
 						y: offset + cellHeight,
 					},
 					{
-						x: i + ofs,
+						x: i - ofs,
 						y: height,
 					}
 				)
 			}
 		}
+		/**
+		 * 渲染表格中的文字
+		 */
+		const drawHeaderText = (scrollLeft: number = 0, scrollTop: number = 0) => {
+			const { fillText } = drawText()
+			const { width, height } = canvasState.currentCanvasSize
+			const dpr = getDpr()
 
-		const drawAll = (offsetTop?: number, offsetLeft?: number) => {
-			offsetTop && (drawTableState.offsetTop = offsetTop)
+			const cellWidth = Math.round(_cellWidth * dpr)
+			const cellHeight = Math.round(_cellHeight * dpr)
+
+			const ofsLeft = Math.round((scrollLeft ?? 0) * dpr)
+			const ofsTop = Math.round((scrollTop ?? 0) * dpr)
+
+			const drawFontsize = 16 * dpr
+
+			const columnLabels = getColumnLabel(Math.ceil(width + ofsLeft / cellWidth))
+			let columnCount = 0
+
+			// clip
+			clipRect(cellWidth + dpr, 0, width, cellHeight + dpr)
+			// render columnLabels
+			for (let i = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth) {
+				if (i === 0) continue
+				const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
+				const positionY = cellHeight / 2 + drawLineWidth
+				fillText(columnLabels[columnCount] ?? 0, positionX, positionY, drawFontsize, "center", "middle")
+				columnCount++
+			}
+			restoreClip()
+
+			clipRect(0, cellHeight + dpr, cellWidth + dpr, height)
+			// render rowLabels
+			const rowLabels = getRowLabel(Math.ceil(height + ofsTop / cellHeight))
+			let rowCount = 0
+			for (let i = 0; i < height + ofsTop; i += cellHeight + drawLineWidth) {
+				if (i === 0) continue
+				const positionX = drawLineWidth + cellWidth / 2
+				const positionY = i + cellHeight / 2 + drawLineWidth - ofsTop
+				fillText(rowLabels[rowCount], positionX, positionY, drawFontsize, "center", "middle")
+				rowCount++
+			}
+			restoreClip()
+		}
+
+		const drawAll = (offsetLeft?: number, offsetTop?: number) => {
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
+			offsetTop && (drawTableState.offsetTop = offsetTop)
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
+			drawHeaderText(offsetLeft, offsetTop)
 
 			startMark()
 			updateStrokeColor("#E0E0E0")
-			drawBodyHorizon()
-			drawBodyVertical()
+			drawBodyHorizontal(offsetTop)
+			drawBodyVertical(offsetLeft)
 			closeMarkAndDraw()
 
 			startMark()
 			updateStrokeColor(drawLineProperty.lineColor)
-			drawHorizonHeader()
-			drawVerticalHeader()
+			drawHorizontalHeader(offsetTop)
+			drawVerticalHeader(offsetLeft)
 			closeMarkAndDraw()
 		}
 
 		return {
 			drawAll,
-			drawHorizonHeader,
+			drawHorizontalHeader,
 			drawVerticalHeader,
-			drawBodyHorizon,
+			drawBodyHorizontal,
 			drawBodyVertical,
-		}
-	}
-
-	/**
-	 * 渲染表格中的文字
-	 * @param _cellWidth 1dpr缩放宽度
-	 * @param _cellHeight 1dpr高度
-	 * @param lineWidth 1dpr线条像素
-	 */
-	const drawCellText = (_cellWidth: number, _cellHeight: number, lineWidth: number) => {
-		const { fillText } = drawText()
-		const { width, height } = canvasState.currentCanvasSize
-		const dpr = getDpr()
-
-		const cellWidth = Math.round(_cellWidth * dpr)
-		const cellHeight = Math.round(_cellHeight * dpr)
-		const drawLineWidth = Math.round(lineWidth * dpr)
-		const drawFontsize = 16 * dpr
-
-		const columnLabels = getColumnLabel(Math.ceil(width / cellWidth))
-		let columnCount = 0
-		for (let i = 0; i < width; i++) {
-			if (i !== 0 && i % (cellWidth + drawLineWidth) === 0) {
-				const positionX = i + drawLineWidth + cellWidth / 2
-				const positionY = cellHeight / 2 + drawLineWidth
-				fillText(columnLabels[columnCount], positionX, positionY, drawFontsize, "center", "middle")
-				columnCount++
-			}
-		}
-
-		const rowLabels = getRowLabel(Math.ceil(height / cellHeight))
-		let rowCount = 0
-		for (let i = 0; i < height; i++) {
-			if (i !== 0 && i % (cellHeight + drawLineWidth) === 0) {
-				const positionX = drawLineWidth + cellWidth / 2
-				const positionY = i + cellHeight / 2 + drawLineWidth
-				fillText(rowLabels[rowCount], positionX, positionY, drawFontsize, "center", "middle")
-				rowCount++
-			}
+			drawHeaderText,
 		}
 	}
 
 	return {
 		updateCanvasSize,
 		drawTableFrame,
-		drawCellText,
 	}
 }
 
