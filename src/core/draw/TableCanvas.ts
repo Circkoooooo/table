@@ -133,7 +133,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else if (i % (cellWidth + drawLineWidth) === 0) {
-					if (i < ofs + drawLineWidth + cellHeight) continue
+					if (i < ofs + drawLineWidth + cellWidth) continue
 
 					markLine(
 						{
