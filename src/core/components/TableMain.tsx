@@ -1,27 +1,41 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
-import TableCanvas from "../draw/TableCanvas"
+import TableCanvas, { TableCanvasType } from "../draw/TableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
+
+const lineWidth = 1
+const cellWidth = 100
+const cellHeight = 30
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 
+	const tableCanvasOperate = useRef<TableCanvasType | null>(null)
+
 	const dispatch = useAppDispatch()
 	const canvasStore = useAppSelector((state) => state.canvas)
+	const tableDataStore = useAppSelector((state) => state.tableData)
 
-	const draw = () => {
+	const initTableCanvas = () => {
 		if (tableMainContainerRef.current === null || canvasRef.current === null) return
-		const canvas = TableCanvas(canvasRef.current)
-		canvas.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
+		tableCanvasOperate.current = TableCanvas(canvasRef.current)
+	}
 
-		const lineWidth = 1
-		const cellWidth = 100
-		const cellHeight = 30
+	const updateTableCanvasSize = () => {
+		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
+		const canvasOperate = tableCanvasOperate.current
+		canvasOperate.updateCanvasSize(tableMainContainerRef.current.clientWidth * window.devicePixelRatio, tableMainContainerRef.current.clientHeight * window.devicePixelRatio)
+	}
 
-		const { drawAll } = canvas.drawTableFrame(cellWidth, cellHeight, {
+	//重新绘制所有页面
+	const flushTable = useCallback(() => {
+		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
+		const canvasOperate = tableCanvasOperate.current
+
+		const { drawAll, drawHeaderText } = canvasOperate.drawTableFrame(cellWidth, cellHeight, {
 			lineWidth: lineWidth,
 			lineColor: "#bebfb9",
 		})
@@ -29,14 +43,12 @@ const TableMain = () => {
 		const offsetLeft = canvasStore.containerOffsetLeft
 		const offsetTop = canvasStore.containerOffsetTop
 
+		drawHeaderText(offsetLeft, offsetTop)
 		drawAll(offsetLeft, offsetTop)
-	}
+	}, [canvasStore])
 
-	const handleResize = () => {
-		// resize 重绘内容
-		draw()
-
-		// store最新的尺寸和偏移
+	//更新滚动内容的尺寸
+	const handleResize = useCallback(() => {
 		dispatch(
 			updateContainerSizeDispatch({
 				containerWidth: tableMainContainerRef.current?.clientWidth ?? 0,
@@ -49,22 +61,25 @@ const TableMain = () => {
 				maxHeight: 3000,
 			})
 		)
-	}
+	}, [dispatch])
 
 	useEffect(() => {
 		if (!tableMainContainerRef || !canvasRef) return
 
-		handleResize()
 		window.addEventListener("resize", handleResize)
 
 		return () => {
 			window.removeEventListener("resize", handleResize)
 		}
-	})
+	}, [handleResize])
 
+	//初始化，渲染初始页面
 	useEffect(() => {
-		draw()
-	})
+		initTableCanvas()
+		updateTableCanvasSize()
+		handleResize()
+		flushTable()
+	}, [flushTable, handleResize])
 
 	return (
 		<>
