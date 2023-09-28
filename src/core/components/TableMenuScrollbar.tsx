@@ -21,25 +21,10 @@ type ScrollbarRecord = {
 	offsetTop: number //下 -> 正
 	startOffsetLeft: number
 	startOffsetTop: number
-	offsetPercent: number
-	ratio: number
 }
 
-type ScrollCallbackParam = {
-	currentOffsetLeft: number
-	currentOffsetTop: number
-	maxOffsetLeft: number
-	maxOffsetTop: number
-	currentOffsetPercent: number
-	nativeRecord: {
-		direction: string
-		offsetTop: number
-		offsetLeft: number
-	}
-}
 interface TableMenuScrollbarProps {
 	direction: "vertical" | "horizontal"
-	scrollCallback?: (param: ScrollCallbackParam) => void
 }
 
 const MIN_SCROLLITEM_SIZE = 50
@@ -68,8 +53,6 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		offsetTop: 0,
 		startOffsetLeft: 0, //开始记录时滑块的便宜
 		startOffsetTop: 0,
-		offsetPercent: 0,
-		ratio: 0,
 	})
 
 	const canvasContainerRef = useRef({
@@ -84,7 +67,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	})
 
 	/**
-	 * 滚动条容器中body部分的长度
+	 * 滚动条容器的总滚动长度
 	 */
 	const scrollbarContainerLength = useCallback(() => {
 		const container = scrollbarContainerRef.current
@@ -115,71 +98,70 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		if (direction === "horizontal") {
 			const containerLength = scrollbarContainerLength()
 			restScroll = containerLength * ((containerMaxWidth - containerWidth) / containerMaxWidth)
-
 			return Math.min(Math.max(MIN_SCROLLITEM_SIZE, containerLength - restScroll), containerLength)
 		} else {
 			const containerLength = scrollbarContainerLength()
 			restScroll = container.clientHeight * ((containerMaxHeight - containerHeight) / containerMaxHeight)
 			return Math.min(Math.max(MIN_SCROLLITEM_SIZE, containerLength - restScroll), containerLength)
 		}
-	}, [canvasStore.containerWidth, canvasStore.containerHeight, canvasStore.containerMaxHeight, canvasStore.containerMaxWidth, direction, scrollbarContainerLength])
+	}, [canvasStore, direction, scrollbarContainerLength])
 
+	/**
+	 * 滚动条最大偏移量
+	 */
 	const scrollbarMaxScroll = useCallback(() => {
 		return scrollbarContainerLength() - scrollbarItemLength()
 	}, [scrollbarItemLength, scrollbarContainerLength])
 
-	const scrollPercent = useCallback(() => {
-		//最大偏移量
-		const maxScrollLength = scrollbarMaxScroll()
-		const { startScreenPosition, endScreenPosition, offsetPercent } = record.current
-		//1. 获取滑块初始位移
-		const newScrollbarOffset = Math.max(0, Math.min(offsetPercent * maxScrollLength, maxScrollLength))
+	const scrollbarOffset = useCallback(() => {
+		return direction === "horizontal" ? record.current.startOffsetLeft : record.current.startOffsetTop
+	}, [direction])
 
-		if (direction === "horizontal") {
-			const offsetLeft = endScreenPosition.x - startScreenPosition.x
-			const newOffsetLeft = Math.min(Math.max(0, newScrollbarOffset + offsetLeft), maxScrollLength)
-			return isNaN(newOffsetLeft / maxScrollLength) ? 0 : newOffsetLeft / maxScrollLength
-		} else {
-			const offsetTop = endScreenPosition.y - startScreenPosition.y
-			const newOffsetTop = Math.min(Math.max(0, newScrollbarOffset + offsetTop), maxScrollLength)
-			return isNaN(newOffsetTop / maxScrollLength) ? 0 : newOffsetTop / maxScrollLength
-		}
-	}, [scrollbarMaxScroll, direction])
+	const updateScrollbarTranslate = useCallback(
+		(translate: number) => {
+			if (!scrollbarItemRef.current) return
+
+			if (direction === "horizontal") {
+				scrollbarItemRef.current.setAttribute("style", `transform:translateX(${translate}px);`)
+			} else {
+				scrollbarItemRef.current.setAttribute("style", `transform:translateY(${translate}px);`)
+			}
+		},
+		[direction]
+	)
 
 	// 计算并设置最新的滑块位置
 	const calcOffset = useCallback(() => {
 		if (!scrollbarItemRef.current) return null
+		const { startScreenPosition, endScreenPosition } = record.current
 
-		//最大偏移量
 		const maxScrollLength = scrollbarMaxScroll()
+		const startScrollbarOffset = scrollbarOffset()
 
-		const { startScreenPosition, endScreenPosition, offsetPercent } = record.current
-		//1. 获取滑块初始位移
-		const newScrollbarOffset = Math.max(0, Math.min(offsetPercent * maxScrollLength, maxScrollLength))
-
-		// 获取最新偏移
-		const offsetLeft = endScreenPosition.x - startScreenPosition.x
-		const offsetTop = endScreenPosition.y - startScreenPosition.y
+		const newMouseOffsetLeft = endScreenPosition.x - startScreenPosition.x
+		const newMouseoffsetTop = endScreenPosition.y - startScreenPosition.y
 
 		if (direction === "horizontal") {
 			// 计算当前滑块的偏移量
-			const newOffsetLeft = Math.min(Math.max(0, newScrollbarOffset + offsetLeft), maxScrollLength)
+			const currentScrollbarOffsetLeft = Math.min(Math.max(0, startScrollbarOffset + newMouseOffsetLeft), maxScrollLength)
 
-			scrollbarItemRef.current.setAttribute("style", `transform:translateX(${newOffsetLeft}px);}px`)
-			record.current.currentOffsetLeft = newOffsetLeft
+			updateScrollbarTranslate(currentScrollbarOffsetLeft)
+
+			record.current.currentOffsetLeft = currentScrollbarOffsetLeft
 
 			// 计算并记录当前偏移量
 			const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetLeft
+
+			// 提交最新容器偏移
 			dispatch(
 				updateContainerOffsetDispatch({
 					offsetLeft: isNaN(currentOffsetLeft) ? 0 : currentOffsetLeft,
 				})
 			)
 		} else {
-			const newOffsetTop = Math.min(Math.max(0, newScrollbarOffset + offsetTop), maxScrollLength)
-			scrollbarItemRef.current.setAttribute("style", `transform:translateY(${newOffsetTop}px);}px`)
-			record.current.currentOffsetTop = newOffsetTop
-
+			const currentScrollbarOffsetTop = Math.min(Math.max(0, startScrollbarOffset + newMouseoffsetTop), maxScrollLength)
+			updateScrollbarTranslate(currentScrollbarOffsetTop)
+			record.current.currentOffsetTop = currentScrollbarOffsetTop
 			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetTop
 
 			dispatch(
@@ -188,7 +170,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 				})
 			)
 		}
-	}, [direction, scrollbarMaxScroll, dispatch])
+	}, [direction, scrollbarMaxScroll, dispatch, scrollbarOffset, updateScrollbarTranslate])
 
 	useEffect(() => {
 		canvasContainerRef.current = {
@@ -201,41 +183,14 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft,
 			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop,
 		}
-
-		if (direction === "horizontal") {
-			const ratio = scrollbarItemLength() / canvasStore.containerMaxWidth
-			record.current.ratio = ratio
-		} else {
-			const ratio = scrollbarItemLength() / canvasStore.containerMaxHeight
-			record.current.ratio = ratio
-		}
 	}, [scrollbarItemLength, direction, canvasStore])
 
 	const recordStartPosition = useCallback(
 		(screenX: number, screenY: number) => {
-			const { canvasContainerMaxWidth, canvasContainerMaxHeight, canvasContainerWidth, canvasContainerHeight } = canvasContainerRef.current
-
 			if (direction === "horizontal") {
-				const maxOffset = canvasContainerMaxWidth - canvasContainerWidth
-				const currentOffset = record.current.startOffsetLeft + record.current.offsetLeft
-
-				if (currentOffset < 0) {
-					record.current.startOffsetLeft = 0
-				} else if (currentOffset > maxOffset) {
-					record.current.startOffsetLeft = maxOffset
-				} else {
-					record.current.startOffsetLeft = record.current.startOffsetLeft + record.current.offsetLeft
-				}
+				record.current.startOffsetLeft = record.current.currentOffsetLeft
 			} else {
-				const maxOffset = canvasContainerMaxHeight - canvasContainerHeight
-				const currentOffset = record.current.startOffsetTop + record.current.offsetTop
-				if (currentOffset < 0) {
-					record.current.startOffsetTop = 0
-				} else if (currentOffset > maxOffset) {
-					record.current.startOffsetTop = maxOffset
-				} else {
-					record.current.startOffsetTop = record.current.startOffsetTop + record.current.offsetTop
-				}
+				record.current.startOffsetTop = record.current.currentOffsetTop
 			}
 
 			record.current.startScreenPosition = {
@@ -265,6 +220,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		[recordStartPosition]
 	)
 
+	//TODO: 适配移动端触摸事件
 	const handleTouchStart = useCallback(
 		(e: TouchEvent) => {
 			record.current.isTouchStart = true
@@ -276,16 +232,12 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	const handleMouseUp = useCallback(() => {
 		if (!record.current.isMouseDown) return
 		record.current.isMouseDown = false
-
-		record.current.offsetPercent = scrollPercent()
-	}, [scrollPercent])
+	}, [])
 
 	const handleTouchEnd = useCallback(() => {
 		if (record.current.isTouchStart) return
 		record.current.isTouchStart = false
-
-		record.current.offsetPercent = scrollPercent()
-	}, [scrollPercent])
+	}, [])
 
 	const handleTouchMove = useCallback(
 		(e: TouchEvent) => {
@@ -308,7 +260,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 	const handleResize = useDebounce(() => {
 		calcOffset()
-	}, 10)
+	}, 50)
 
 	useEffect(() => {
 		window.addEventListener("mouseup", handleMouseUp)
