@@ -53,6 +53,13 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 对其起始位置
 		const offset = drawLineWidth / 2
 
+		const getOfs = (scrollLeft: number, scrollTop: number) => {
+			return {
+				ofsLeft: Math.round((scrollLeft ?? 0) * dpr),
+				ofsTop: Math.round((scrollTop ?? 0) * dpr),
+			}
+		}
+
 		const startMark = () => {
 			beginPath()
 		}
@@ -64,9 +71,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 		const drawHorizontalHeader = (offsetTop?: number) => {
 			const startY = drawLineWidth
-			const ofs = Math.round((offsetTop ?? 0) * dpr)
 
-			for (let i = 0; i < height + ofs; i++) {
+			const { ofsTop } = getOfs(0, offsetTop ?? 0)
+
+			for (let i = 0; i < height + ofsTop; i++) {
 				if (i === 0) {
 					markLine(
 						{
@@ -90,15 +98,15 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else if (i % (cellHeight + drawLineWidth) === 0) {
-					if (i < ofs + drawLineWidth + cellHeight) continue
+					if (i < ofsTop + drawLineWidth + cellHeight) continue
 					markLine(
 						{
 							x: offset,
-							y: i - ofs,
+							y: i - ofsTop,
 						},
 						{
 							x: cellWidth + drawLineWidth,
-							y: i - ofs,
+							y: i - ofsTop,
 						}
 					)
 				}
@@ -107,9 +115,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 		const drawVerticalHeader = (offsetLeft?: number) => {
 			const startX = drawLineWidth
-			const ofs = Math.round((offsetLeft ?? 0) * dpr)
 
-			for (let i = 0; i < width + ofs; i++) {
+			const { ofsLeft } = getOfs(offsetLeft ?? 0, 0)
+
+			for (let i = 0; i < width + ofsLeft; i++) {
 				if (i === 0) {
 					markLine(
 						{
@@ -133,15 +142,15 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else if (i % (cellWidth + drawLineWidth) === 0) {
-					if (i < ofs + drawLineWidth + cellWidth) continue
+					if (i < ofsLeft + drawLineWidth + cellWidth) continue
 
 					markLine(
 						{
-							x: i - ofs,
+							x: i - ofsLeft,
 							y: offset,
 						},
 						{
-							x: i - ofs,
+							x: i - ofsLeft,
 							y: cellHeight + drawLineWidth,
 						}
 					)
@@ -194,13 +203,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const { width, height } = canvasState.currentCanvasSize
 			const dpr = getDpr()
 
-			const cellWidth = Math.round(_cellWidth * dpr)
-			const cellHeight = Math.round(_cellHeight * dpr)
-
-			const ofsLeft = Math.round((scrollLeft ?? 0) * dpr)
-			const ofsTop = Math.round((scrollTop ?? 0) * dpr)
-
 			const drawFontsize = 16 * dpr
+
+			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
 
 			const columnLabels = getColumnLabel(Math.ceil(width + ofsLeft / cellWidth))
 			let columnCount = 0
@@ -266,5 +271,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		drawTableFrame,
 	}
 }
+
+export type TableCanvasType = ReturnType<typeof TableCanvas>
 
 export default TableCanvas
