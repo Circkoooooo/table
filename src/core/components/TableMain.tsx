@@ -35,17 +35,16 @@ const TableMain = () => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
 
-		const { drawAll, drawHeaderText } = canvasOperate.drawTableFrame(cellWidth, cellHeight, {
-			lineWidth: lineWidth,
+		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, {
+			lineWidth,
 			lineColor: "#bebfb9",
 		})
 
 		const offsetLeft = canvasStore.containerOffsetLeft
 		const offsetTop = canvasStore.containerOffsetTop
 
-		drawHeaderText(offsetLeft, offsetTop)
 		drawAll(offsetLeft, offsetTop)
-	}, [canvasStore])
+	}, [canvasStore, tableDataStore])
 
 	//更新滚动内容的尺寸
 	const handleResize = useCallback(() => {

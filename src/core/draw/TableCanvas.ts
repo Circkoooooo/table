@@ -1,4 +1,5 @@
 import { CustomCanvas, DrawLineProperty } from "."
+import { CellData } from "../cellDataHandler"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 const TableCanvas = (canvas: HTMLCanvasElement) => {
@@ -27,7 +28,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 	 * @param cellHeight
 	 * @param drawLineProperty
 	 */
-	const drawTableFrame = (_cellWidth: number, _cellHeight: number, _drawLineProperty?: DrawLineProperty) => {
+	const drawTableFrame = (_cellWidth: number, _cellHeight: number, tableCellData: CellData, _drawLineProperty?: DrawLineProperty) => {
 		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
@@ -211,7 +212,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let columnCount = 0
 
 			// clip
-			clipRect(cellWidth + dpr, 0, width, cellHeight + dpr)
+			clipRect(cellWidth + drawLineWidth, 0, width, cellHeight + drawLineWidth)
 			// render columnLabels
 			for (let i = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth) {
 				if (i === 0) continue
@@ -236,6 +237,36 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			restoreClip()
 		}
 
+		const drawBodyText = (scrollLeft: number = 0, scrollTop: number = 0, cellData?: CellData) => {
+			const { fillText } = drawText()
+			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+
+			const drawFontsize = 16 * dpr
+
+			let row = 0
+			let column = 0
+			clipRect(cellWidth + drawLineWidth, cellHeight + drawLineWidth, width, height)
+			for (let j = 0; j < height + ofsTop; j += cellHeight + drawLineWidth) {
+				if (j === 0) continue
+
+				for (let i = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth) {
+					if (i === 0) continue
+
+					const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
+					const positionY = j + cellHeight / 2 + drawLineWidth - ofsTop
+
+					const currentColumn = column
+					const currentRow = row
+					const currentValue = (cellData && cellData[currentRow] && cellData[currentRow][currentColumn]) ?? ""
+
+					fillText(`${currentValue}`, positionX, positionY, drawFontsize, "center", "middle")
+					column++
+				}
+				row++
+			}
+			restoreClip()
+		}
+
 		const drawAll = (offsetLeft?: number, offsetTop?: number) => {
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
 			offsetTop && (drawTableState.offsetTop = offsetTop)
@@ -254,6 +285,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			drawHorizontalHeader(offsetTop)
 			drawVerticalHeader(offsetLeft)
 			closeMarkAndDraw()
+
+			drawBodyText(offsetLeft, offsetTop, tableCellData)
 		}
 
 		return {
@@ -263,6 +296,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			drawBodyHorizontal,
 			drawBodyVertical,
 			drawHeaderText,
+			drawBodyText,
 		}
 	}
 
