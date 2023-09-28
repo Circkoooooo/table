@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react"
+import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/TableMain-styled"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { updateContainerOffsetDispatch } from "../redux/canvas/canvasSlice"
@@ -66,6 +66,10 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		canvasContainerMaxOffsetTop: 0,
 	})
 
+	const getDpr = () => {
+		return window.devicePixelRatio
+	}
+
 	/**
 	 * 滚动条容器的总滚动长度
 	 */
@@ -114,7 +118,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	}, [scrollbarItemLength, scrollbarContainerLength])
 
 	const scrollbarOffset = useCallback(() => {
-		return direction === "horizontal" ? record.current.startOffsetLeft : record.current.startOffsetTop
+		return direction === "horizontal" ? record.current.startOffsetLeft * getDpr() : record.current.startOffsetTop * getDpr()
 	}, [direction])
 
 	const updateScrollbarTranslate = useCallback(
@@ -143,7 +147,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 		if (direction === "horizontal") {
 			// 计算当前滑块的偏移量
-			const currentScrollbarOffsetLeft = Math.min(Math.max(0, startScrollbarOffset + newMouseOffsetLeft), maxScrollLength)
+			const currentScrollbarOffsetLeft = Math.min(Math.max(0, startScrollbarOffset + newMouseOffsetLeft) / getDpr(), maxScrollLength)
 
 			updateScrollbarTranslate(currentScrollbarOffsetLeft)
 
@@ -159,7 +163,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 				})
 			)
 		} else {
-			const currentScrollbarOffsetTop = Math.min(Math.max(0, startScrollbarOffset + newMouseoffsetTop), maxScrollLength)
+			const currentScrollbarOffsetTop = Math.min(Math.max(0, startScrollbarOffset + newMouseoffsetTop) / getDpr(), maxScrollLength)
 			updateScrollbarTranslate(currentScrollbarOffsetTop)
 			record.current.currentOffsetTop = currentScrollbarOffsetTop
 			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetTop
