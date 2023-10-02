@@ -50,8 +50,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const cellWidth = Math.round(_cellWidth * dpr)
 		const cellHeight = Math.round(_cellHeight * dpr)
 
+		const cellRenderLogicWidth = drawLineWidth * 2 + cellWidth
+		const cellRenderLogicHeight = drawLineWidth * 2 + cellHeight
+
 		// 对其起始位置
-		const offset = drawLineWidth / 2
+		const offsetStart = drawLineWidth
 
 		const startMark = () => {
 			beginPath()
@@ -62,87 +65,64 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			closePath()
 		}
 
-		const drawHorizontalHeader = (offsetTop?: number) => {
-			const startY = drawLineWidth
-			const ofs = Math.round((offsetTop ?? 0) * dpr)
+		const drawHorizontalHeader = (scrollTop?: number) => {
+			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0; i < height + ofs; i++) {
-				if (i === 0) {
+			for (let i = 0, lineIndex = 1; i < height + ofs; i += cellRenderLogicHeight - drawLineWidth, lineIndex++) {
+				if (lineIndex > 2) {
+					if (i - ofs < cellRenderLogicHeight) continue
+
 					markLine(
 						{
-							x: offset,
-							y: startY,
-						},
-						{
-							x: width,
-							y: startY,
-						}
-					)
-				} else if (i === cellHeight + drawLineWidth) {
-					markLine(
-						{
-							x: offset,
-							y: cellHeight + drawLineWidth,
-						},
-						{
-							x: width,
-							y: cellHeight + drawLineWidth,
-						}
-					)
-				} else if (i % (cellHeight + drawLineWidth) === 0) {
-					if (i < ofs + drawLineWidth + cellHeight) continue
-					markLine(
-						{
-							x: offset,
+							x: offsetStart,
 							y: i - ofs,
 						},
 						{
 							x: cellWidth + drawLineWidth,
 							y: i - ofs,
+						}
+					)
+				} else {
+					markLine(
+						{
+							x: offsetStart,
+							y: i,
+						},
+						{
+							x: width + ofs,
+							y: i,
 						}
 					)
 				}
 			}
 		}
 
-		const drawVerticalHeader = (offsetLeft?: number) => {
-			const startX = drawLineWidth
-			const ofs = Math.round((offsetLeft ?? 0) * dpr)
+		const drawVerticalHeader = (scrollLeft?: number) => {
+			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0; i < width + ofs; i++) {
-				if (i === 0) {
-					markLine(
-						{
-							x: startX,
-							y: offset,
-						},
-						{
-							x: startX,
-							y: height,
-						}
-					)
-				} else if (i === cellWidth + drawLineWidth) {
-					markLine(
-						{
-							x: cellWidth + drawLineWidth,
-							y: offset,
-						},
-						{
-							x: cellWidth + drawLineWidth,
-							y: height,
-						}
-					)
-				} else if (i % (cellWidth + drawLineWidth) === 0) {
-					if (i < ofs + drawLineWidth + cellWidth) continue
+			for (let i = 0, lineIndex = 1; i < width + ofs; i += cellRenderLogicWidth - drawLineWidth, lineIndex++) {
+				if (lineIndex > 2) {
+					if (i - ofs < cellRenderLogicWidth) continue
 
 					markLine(
 						{
 							x: i - ofs,
-							y: offset,
+							y: offsetStart,
 						},
 						{
 							x: i - ofs,
-							y: cellHeight + drawLineWidth,
+							y: cellRenderLogicHeight,
+						}
+					)
+				} else {
+					markLine(
+						{
+							x: i,
+							y: offsetStart,
+						},
+						{
+							x: i,
+							y: height,
 						}
 					)
 				}
@@ -152,17 +132,17 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyHorizontal = (scrollTop?: number) => {
 			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0; i < height + ofs; i += cellHeight + drawLineWidth) {
-				if (i < ofs + drawLineWidth + cellHeight) continue
+			for (let i = 0, lineIndex = 1; i < height + ofs; i += cellHeight + drawLineWidth, lineIndex++) {
+				if (lineIndex <= 2 || i < ofs + drawLineWidth + cellHeight) continue
 
 				markLine(
 					{
-						x: offset + cellWidth,
-						y: i - ofs,
+						x: offsetStart + cellWidth,
+						y: i,
 					},
 					{
-						x: width,
-						y: i - ofs,
+						x: width + offsetStart,
+						y: i,
 					}
 				)
 			}
@@ -171,17 +151,17 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyVertical = (scrollLeft?: number) => {
 			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0; i < width + ofs; i += cellWidth + drawLineWidth) {
-				if (i < ofs + drawLineWidth + cellWidth) continue
+			for (let i = 0, lineIndex = 1; i < width + ofs; i += cellWidth + drawLineWidth, lineIndex++) {
+				if (lineIndex <= 2 || i < ofs + drawLineWidth + cellWidth) continue
 
 				markLine(
 					{
-						x: i - ofs,
-						y: offset + cellHeight,
+						x: i,
+						y: cellHeight + offsetStart + dpr,
 					},
 					{
-						x: i - ofs,
-						y: height,
+						x: i,
+						y: height + offsetStart + dpr,
 					}
 				)
 			}
