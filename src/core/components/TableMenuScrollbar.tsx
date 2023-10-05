@@ -135,46 +135,49 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	)
 
 	// 计算并设置最新的滑块位置
-	const calcOffset = useCallback(() => {
-		if (!scrollbarItemRef.current) return null
-		const { startScreenPosition, endScreenPosition } = record.current
+	const calcOffset = useCallback(
+		(isMobile?: boolean) => {
+			if (!scrollbarItemRef.current) return null
+			const { startScreenPosition, endScreenPosition } = record.current
 
-		const maxScrollLength = scrollbarMaxScroll()
-		const startScrollbarOffset = scrollbarOffset()
+			const maxScrollLength = scrollbarMaxScroll()
+			const startScrollbarOffset = scrollbarOffset()
 
-		const newMouseOffsetLeft = endScreenPosition.x - startScreenPosition.x
-		const newMouseoffsetTop = endScreenPosition.y - startScreenPosition.y
+			const newMouseOffsetLeft = isMobile ? startScreenPosition.x - endScreenPosition.x : endScreenPosition.x - startScreenPosition.x
+			const newMouseoffsetTop = isMobile ? startScreenPosition.y - endScreenPosition.y : endScreenPosition.y - startScreenPosition.y
 
-		if (direction === "horizontal") {
-			// 计算当前滑块的偏移量
-			const currentScrollbarOffsetLeft = Math.min(Math.max(0, startScrollbarOffset + newMouseOffsetLeft) / getDpr(), maxScrollLength)
+			if (direction === "horizontal") {
+				// 计算当前滑块的偏移量
+				const currentScrollbarOffsetLeft = Math.min(Math.max(0, startScrollbarOffset + newMouseOffsetLeft) / getDpr(), maxScrollLength)
 
-			updateScrollbarTranslate(currentScrollbarOffsetLeft)
+				updateScrollbarTranslate(currentScrollbarOffsetLeft)
 
-			record.current.currentOffsetLeft = currentScrollbarOffsetLeft
+				record.current.currentOffsetLeft = currentScrollbarOffsetLeft
 
-			// 计算并记录当前偏移量
-			const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetLeft
+				// 计算并记录当前偏移量
+				const currentOffsetLeft = (record.current.currentOffsetLeft / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetLeft
 
-			// 提交最新容器偏移
-			dispatch(
-				updateContainerOffsetDispatch({
-					offsetLeft: isNaN(currentOffsetLeft) ? 0 : currentOffsetLeft,
-				})
-			)
-		} else {
-			const currentScrollbarOffsetTop = Math.min(Math.max(0, startScrollbarOffset + newMouseoffsetTop) / getDpr(), maxScrollLength)
-			updateScrollbarTranslate(currentScrollbarOffsetTop)
-			record.current.currentOffsetTop = currentScrollbarOffsetTop
-			const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetTop
+				// 提交最新容器偏移
+				dispatch(
+					updateContainerOffsetDispatch({
+						offsetLeft: isNaN(currentOffsetLeft) ? 0 : currentOffsetLeft,
+					})
+				)
+			} else {
+				const currentScrollbarOffsetTop = Math.min(Math.max(0, startScrollbarOffset + newMouseoffsetTop) / getDpr(), maxScrollLength)
+				updateScrollbarTranslate(currentScrollbarOffsetTop)
+				record.current.currentOffsetTop = currentScrollbarOffsetTop
+				const currentOffsetTop = (record.current.currentOffsetTop / maxScrollLength) * canvasContainerRef.current.canvasContainerMaxOffsetTop
 
-			dispatch(
-				updateContainerOffsetDispatch({
-					offsetTop: isNaN(currentOffsetTop) ? 0 : currentOffsetTop,
-				})
-			)
-		}
-	}, [direction, scrollbarMaxScroll, dispatch, scrollbarOffset, updateScrollbarTranslate])
+				dispatch(
+					updateContainerOffsetDispatch({
+						offsetTop: isNaN(currentOffsetTop) ? 0 : currentOffsetTop,
+					})
+				)
+			}
+		},
+		[direction, scrollbarMaxScroll, dispatch, scrollbarOffset, updateScrollbarTranslate]
+	)
 
 	useEffect(() => {
 		canvasContainerRef.current = {
@@ -224,7 +227,6 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		[recordStartPosition]
 	)
 
-	//TODO: 适配移动端触摸事件
 	const handleTouchStart = useCallback(
 		(e: TouchEvent) => {
 			record.current.isTouchStart = true
@@ -245,10 +247,11 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 	const handleTouchMove = useCallback(
 		(e: TouchEvent) => {
+			e.preventDefault()
 			if (!record.current.isTouchStart) return
 			const targetTouch = e.targetTouches[0]
 			recordEndPosition(targetTouch.screenX, targetTouch.screenY)
-			calcOffset()
+			calcOffset(true)
 		},
 		[calcOffset]
 	)
@@ -270,7 +273,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		window.addEventListener("mouseup", handleMouseUp)
 		window.addEventListener("touchend", handleTouchEnd)
 		window.addEventListener("mousemove", handleMouseMove)
-		window.addEventListener("touchmove", handleTouchMove)
+		window.addEventListener("touchmove", handleTouchMove, { passive: false })
 		window.addEventListener("touchstart", handleTouchStart)
 		return () => {
 			window.removeEventListener("mouseup", handleMouseUp)

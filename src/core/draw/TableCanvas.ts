@@ -91,7 +91,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else {
-					console.log(offsetStart, drawLineWidth)
 					markLine(
 						{
 							x: offsetStart / 2,
