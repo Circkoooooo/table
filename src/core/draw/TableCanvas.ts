@@ -55,7 +55,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const cellRenderLogicHeight = Math.round(drawLineWidth * 2 + cellHeight)
 
 		// 对其起始位置
-		const offsetStart = drawLineWidth
+		const offsetStart = Math.round(drawLineWidth / 2)
 
 		const getOfs = (scrollLeft: number, scrollTop: number) => {
 			return {
@@ -91,6 +91,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else {
+					console.log(offsetStart, drawLineWidth)
 					markLine(
 						{
 							x: offsetStart / 2,
