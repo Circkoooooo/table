@@ -1,32 +1,44 @@
 import styled, { css } from "styled-components"
 
-const DEFAULT_OFFSET = 0.5
-
 interface HighlightBorderItemProps {
 	$rowIndex?: number
 	$columnIndex?: number
 	$offsetLeft: number
 	$offsetTop: number
+	$width: number
+	$height: number
+	$borderWidth: number
 }
 
-export const HighlightBorderContainer = styled.div`
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	transform: translate(${DEFAULT_OFFSET + 102}px, ${DEFAULT_OFFSET + 32}px);
-	overflow: hidden;
-`
+export const HighlightBorderContainer = styled.div<{
+	$offsetLeft: number
+	$offsetTop: number
+}>(({ $offsetLeft, $offsetTop }) => {
+	return css`
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
+	`
+})
 
-export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop }) => {
+export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth }) => {
 	if (!$rowIndex || !$columnIndex) return null
 
 	return css`
 		position: absolute;
-		border: 1px solid red;
-		width: 102px;
-		height: 32px;
-		left: ${101 * $rowIndex}px;
-		top: ${$columnIndex * 31}px;
-		transform: translate(${-$offsetLeft}px, ${-$offsetTop}px);
+		width: ${$width}px;
+		height: ${$height}px;
+		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
+
+		&:after {
+			box-sizing: border-box;
+			position: absolute;
+			content: "";
+			border: ${$borderWidth}px solid red;
+			height: 100%;
+			width: 100%;
+		}
 	`
 })

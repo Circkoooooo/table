@@ -4,7 +4,7 @@ import TableCanvas, { TableCanvasType } from "../draw/TableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { HighlightBorderNew } from "./HighlightBorder/HighlightBorder"
+import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -85,8 +85,8 @@ const TableMain = () => {
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
+					<HighlightBorder />
 					<TableCanvasContainer ref={tableMainContainerRef}>
-						<HighlightBorderNew />
 						<canvas ref={canvasRef}></canvas>
 					</TableCanvasContainer>
 					<TableVerticalScrollbarContainer>

@@ -104,7 +104,6 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 			if (!context) return
 
 			const offset = getPixelOffset(canvasState.canvasLineWidth) ?? 0
-
 			context.moveTo(start.x + offset, start.y + offset)
 			context.lineTo(end.x + offset, end.y + offset)
 		}
