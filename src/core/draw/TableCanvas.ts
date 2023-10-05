@@ -82,7 +82,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 					markLine(
 						{
-							x: offsetStart,
+							x: offsetStart - drawLineWidth,
 							y: i - ofs,
 						},
 						{
@@ -93,7 +93,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				} else {
 					markLine(
 						{
-							x: offsetStart,
+							x: offsetStart - drawLineWidth,
 							y: i,
 						},
 						{
@@ -126,7 +126,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					markLine(
 						{
 							x: i,
-							y: offsetStart,
+							y: offsetStart - drawLineWidth,
 						},
 						{
 							x: i,
