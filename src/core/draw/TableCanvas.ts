@@ -51,8 +51,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const cellWidth = Math.round(_cellWidth * dpr)
 		const cellHeight = Math.round(_cellHeight * dpr)
 
-		const cellRenderLogicWidth = drawLineWidth * 2 + cellWidth
-		const cellRenderLogicHeight = drawLineWidth * 2 + cellHeight
+		const cellRenderLogicWidth = Math.round(drawLineWidth * 2 + cellWidth) //逻辑高度 为盒子的总高度
+		const cellRenderLogicHeight = Math.round(drawLineWidth * 2 + cellHeight)
 
 		// 对其起始位置
 		const offsetStart = drawLineWidth
@@ -76,29 +76,29 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawHorizontalHeader = (scrollTop?: number) => {
 			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 1; i < height + ofs; i += cellRenderLogicHeight - drawLineWidth, lineIndex++) {
-				if (lineIndex > 2) {
+			for (let i = 0, lineIndex = 0; i < height + ofs; i += cellRenderLogicHeight - drawLineWidth, lineIndex++) {
+				if (lineIndex > 1) {
 					if (i - ofs < cellRenderLogicHeight) continue
 
 					markLine(
 						{
-							x: offsetStart - drawLineWidth,
-							y: i - ofs,
+							x: offsetStart / 2,
+							y: lineIndex * (cellRenderLogicHeight - drawLineWidth) + offsetStart - ofs, //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
 						},
 						{
-							x: cellWidth + drawLineWidth,
-							y: i - ofs,
+							x: cellRenderLogicWidth,
+							y: lineIndex * (cellRenderLogicHeight - drawLineWidth) + offsetStart - ofs,
 						}
 					)
 				} else {
 					markLine(
 						{
-							x: offsetStart - drawLineWidth,
-							y: i,
+							x: offsetStart / 2,
+							y: lineIndex === 0 ? offsetStart : cellRenderLogicHeight,
 						},
 						{
-							x: width + ofs,
-							y: i,
+							x: width,
+							y: lineIndex === 0 ? offsetStart : cellRenderLogicHeight,
 						}
 					)
 				}
@@ -108,28 +108,28 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawVerticalHeader = (scrollLeft?: number) => {
 			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 1; i < width + ofs; i += cellRenderLogicWidth - drawLineWidth, lineIndex++) {
-				if (lineIndex > 2) {
+			for (let i = 0, lineIndex = 0; i < width + ofs; i += cellRenderLogicWidth - drawLineWidth, lineIndex++) {
+				if (lineIndex > 1) {
 					if (i - ofs < cellRenderLogicWidth) continue
 
 					markLine(
 						{
-							x: i - ofs,
-							y: offsetStart,
+							x: lineIndex * (cellRenderLogicWidth - drawLineWidth) + offsetStart - ofs,
+							y: offsetStart / 2,
 						},
 						{
-							x: i - ofs,
+							x: lineIndex * (cellRenderLogicWidth - drawLineWidth) + offsetStart - ofs,
 							y: cellRenderLogicHeight,
 						}
 					)
 				} else {
 					markLine(
 						{
-							x: i,
-							y: offsetStart - drawLineWidth,
+							x: lineIndex === 0 ? offsetStart : cellRenderLogicWidth,
+							y: offsetStart / 2,
 						},
 						{
-							x: i,
+							x: lineIndex === 0 ? offsetStart : cellRenderLogicWidth,
 							y: height,
 						}
 					)
@@ -140,17 +140,17 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyHorizontal = (scrollTop?: number) => {
 			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 1; i < height + ofs; i += cellHeight + drawLineWidth, lineIndex++) {
-				if (lineIndex <= 2 || i < ofs + drawLineWidth + cellHeight) continue
+			for (let i = 0, lineIndex = 0; i < height + ofs; i += cellHeight + drawLineWidth, lineIndex++) {
+				if (lineIndex < 2 || i < ofs + drawLineWidth + cellHeight) continue
 
 				markLine(
 					{
-						x: offsetStart + cellWidth,
-						y: i - ofs,
+						x: cellRenderLogicWidth,
+						y: lineIndex * (cellRenderLogicHeight - drawLineWidth) + offsetStart - ofs,
 					},
 					{
 						x: width + offsetStart,
-						y: i - ofs,
+						y: lineIndex * (cellRenderLogicHeight - drawLineWidth) + offsetStart - ofs,
 					}
 				)
 			}
@@ -159,17 +159,17 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyVertical = (scrollLeft?: number) => {
 			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 1; i < width + ofs; i += cellWidth + drawLineWidth, lineIndex++) {
-				if (lineIndex <= 2 || i < ofs + drawLineWidth + cellWidth) continue
+			for (let i = 0, lineIndex = 0; i < width + ofs; i += cellWidth + drawLineWidth, lineIndex++) {
+				if (lineIndex < 2 || i < ofs + drawLineWidth + cellWidth) continue
 
 				markLine(
 					{
-						x: i - ofs,
-						y: cellHeight + offsetStart + dpr,
+						x: lineIndex * (cellRenderLogicWidth - drawLineWidth) + offsetStart - ofs,
+						y: cellRenderLogicHeight,
 					},
 					{
-						x: i - ofs,
-						y: height + offsetStart + dpr,
+						x: lineIndex * (cellRenderLogicWidth - drawLineWidth) + offsetStart - ofs,
+						y: height + offsetStart,
 					}
 				)
 			}
@@ -190,25 +190,31 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let columnCount = 0
 
 			// clip
-			clipRect(cellWidth + drawLineWidth, 0, width, cellHeight + drawLineWidth)
+			clipRect(cellRenderLogicWidth - drawLineWidth, 0, width, cellRenderLogicHeight - drawLineWidth)
 			// render columnLabels
-			for (let i = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth) {
-				if (i === 0) continue
-				const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
-				const positionY = cellHeight / 2 + drawLineWidth
+			for (let i = 0, textIndex = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth, textIndex++) {
+				if (textIndex === 0) continue
+
+				/**
+				 * offsetStart为每个绘制都有的初始偏移
+				 * cellRenderLogicWidth - drawLineWidth为除了第一个后，排除了cell边框的偏移量
+				 */
+				const positionX = offsetStart + textIndex * (cellRenderLogicWidth - drawLineWidth) + cellRenderLogicWidth / 2 - ofsLeft
+				const positionY = offsetStart + cellRenderLogicHeight / 2
 				fillText(columnLabels[columnCount] ?? 0, positionX, positionY, drawFontsize, "center", "middle")
 				columnCount++
 			}
 			restoreClip()
 
-			clipRect(0, cellHeight + dpr, cellWidth + dpr, height)
+			clipRect(0, cellRenderLogicHeight, cellRenderLogicWidth, height)
 			// render rowLabels
 			const rowLabels = getRowLabel(Math.ceil(height + ofsTop / cellHeight))
 			let rowCount = 0
-			for (let i = 0; i < height + ofsTop; i += cellHeight + drawLineWidth) {
-				if (i === 0) continue
-				const positionX = drawLineWidth + cellWidth / 2
-				const positionY = i + cellHeight / 2 + drawLineWidth - ofsTop
+			for (let i = 0, textIndex = 0; i < height + ofsTop; i += cellHeight + drawLineWidth, textIndex++) {
+				if (textIndex === 0) continue
+
+				const positionX = offsetStart + cellRenderLogicWidth / 2
+				const positionY = textIndex * (cellRenderLogicHeight - drawLineWidth) + cellRenderLogicHeight / 2 - ofsTop
 				fillText(rowLabels[rowCount], positionX, positionY, drawFontsize, "center", "middle")
 				rowCount++
 			}
