@@ -190,7 +190,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let columnCount = 0
 
 			// clip
-			clipRect(cellRenderLogicWidth - drawLineWidth, 0, width, cellRenderLogicHeight - drawLineWidth)
+			clipRect(cellRenderLogicWidth, 0, width, cellRenderLogicHeight)
 			// render columnLabels
 			for (let i = 0, textIndex = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth, textIndex++) {
 				if (textIndex === 0) continue
