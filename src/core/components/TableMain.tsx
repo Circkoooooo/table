@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
-import TableCanvas, { TableCanvasType } from "../draw/TableCanvas"
+import TableCanvas, { TableCanvasType, calcLogicSize } from "../draw/TableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
+import { InteractionPanel } from "./InteractionPanel"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -19,6 +20,14 @@ const TableMain = () => {
 	const dispatch = useAppDispatch()
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const tableDataStore = useAppSelector((state) => state.tableData)
+
+	const [tableCanvasInfo, setTableCanvasInfo] = useState(() => {
+		const { cellLogicWidth, cellLogicHeight } = calcLogicSize(cellWidth, cellHeight, lineWidth)
+		return {
+			cellLogicWidth,
+			cellLogicHeight,
+		}
+	})
 
 	const initTableCanvas = () => {
 		if (tableMainContainerRef.current === null || canvasRef.current === null) return
@@ -58,7 +67,7 @@ const TableMain = () => {
 		dispatch(
 			updateContainerMaxSizeDispatch({
 				maxWidth: 3000,
-				maxHeight: 3000,
+				maxHeight: 300,
 			})
 		)
 	}, [dispatch])
@@ -85,8 +94,9 @@ const TableMain = () => {
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
-					<HighlightBorder />
+					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight} />
 					<TableCanvasContainer ref={tableMainContainerRef}>
+						<InteractionPanel />
 						<canvas ref={canvasRef}></canvas>
 					</TableCanvasContainer>
 					<TableVerticalScrollbarContainer>

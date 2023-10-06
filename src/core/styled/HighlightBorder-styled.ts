@@ -13,8 +13,10 @@ interface HighlightBorderItemProps {
 export const HighlightBorderContainer = styled.div<{
 	$offsetLeft: number
 	$offsetTop: number
-}>(({ $offsetLeft, $offsetTop }) => {
+	$isRender: boolean
+}>(({ $offsetLeft, $offsetTop, $isRender }) => {
 	return css`
+		display: ${$isRender ? "" : "none"};
 		position: absolute;
 		width: 100%;
 		height: 100%;
