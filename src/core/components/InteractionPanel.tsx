@@ -8,12 +8,13 @@ import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/
  * @returns
  */
 const InteractionPanel = () => {
-	const stateCanvas = useAppSelector((state) => state.canvas)
+	const canvasStore = useAppSelector((state) => state.canvas)
 	const dispatch = useAppDispatch()
 
 	const interactionRecord = useRef({
 		isMosuedown: false,
 		isMousemove: false,
+		isEdit: false,
 	})
 
 	/**
@@ -50,19 +51,19 @@ const InteractionPanel = () => {
 		const logicWidth = 102
 		const logicHeight = 32
 
-		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : Math.round(mousePositon.left + stateCanvas.containerOffsetLeft)
-		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + stateCanvas.containerOffsetTop)
+		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
+		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			xIndex: getIndex(ofsLeft, lineWidth, logicWidth),
-			yIndex: getIndex(ofsTop, lineWidth, logicHeight),
+			rowIndex: getIndex(ofsLeft, lineWidth, logicWidth),
+			columnIndex: getIndex(ofsTop, lineWidth, logicHeight),
 		}
 
 		dispatch(
 			mousedownDispatch({
 				cellIndex: {
-					rowIndex: index.xIndex,
-					columnIndex: index.yIndex,
+					rowIndex: index.rowIndex,
+					columnIndex: index.columnIndex,
 				},
 			})
 		)
@@ -85,8 +86,8 @@ const InteractionPanel = () => {
 		const lineWidth = 1
 		const logicWidth = 102
 		const logicHeight = 32
-		const ofsLeft = Math.round(mousePositon.left + stateCanvas.containerOffsetLeft)
-		const ofsTop = Math.round(mousePositon.top + stateCanvas.containerOffsetTop)
+		const ofsLeft = Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
+		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
 			xIndex: getIndex(ofsLeft, lineWidth, logicWidth),
@@ -112,7 +113,9 @@ const InteractionPanel = () => {
 		dispatch(mouseupDispatch())
 	}
 
-	return <InteractionPanelContainer onMouseDown={(e) => InteractionMousedown(e)} onMouseMove={(e) => InteractionMousemove(e)} onMouseUp={() => InteractionMouseup()} />
+	return (
+		<InteractionPanelContainer data-testid="interaction-panel" onMouseDown={(e) => InteractionMousedown(e)} onMouseMove={(e) => InteractionMousemove(e)} onMouseUp={() => InteractionMouseup()} />
+	)
 }
 
 export { InteractionPanel }

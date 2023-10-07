@@ -1,6 +1,6 @@
-import React, { useMemo } from "react"
+import React, { memo, useEffect, useMemo, useRef, useState } from "react"
 import { useAppSelector } from "../../redux/hooks"
-import { HighlightBorderContainer, HighlightBorderItem } from "../../styled/HighlightBorder-styled"
+import { HighlightBorderContainer, HighlightBorderItem, HightlightBorderEditInputItem } from "../../styled/HighlightBorder-styled"
 import isIndexEqual from "../../tools/isIndexEqual"
 import { isTableHeader } from "../../tools/isIndexHeader"
 interface HighlightBorderProps {
@@ -20,14 +20,14 @@ type BorderProperty = {
 }
 
 const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellLogicHeight }) => {
-	const stateCanvas = useAppSelector((state) => state.canvas)
-	const stateInteraction = useAppSelector((state) => state.interaction)
+	const canvasStore = useAppSelector((state) => state.canvas)
+	const interactionStore = useAppSelector((state) => state.interaction)
 
 	/**
 	 * 根据mousedown和mousemove的索引来解析需要渲染的边框属性
 	 */
 	const parsedInteractionIndex = useMemo(() => {
-		const { mousedownIndex, mousemoveIndex } = stateInteraction
+		const { mousedownIndex, mousemoveIndex } = interactionStore
 
 		if (!mousedownIndex || !mousemoveIndex) return null
 
@@ -53,11 +53,11 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 			endColumnIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
 
 			if (mousedownIndex.rowIndex === 0) {
-				rowCellCount = Math.floor(stateCanvas.containerMaxWidth / cellLogicWidth)
+				rowCellCount = Math.floor(canvasStore.containerMaxWidth / cellLogicWidth)
 				columnCellCount += endColumnIndex - startColumnIndex
 			}
 			if (mousedownIndex.columnIndex === 0) {
-				columnCellCount = Math.floor(stateCanvas.containerMaxHeight / cellLogicHeight)
+				columnCellCount = Math.floor(canvasStore.containerMaxHeight / cellLogicHeight)
 				rowCellCount += endRowIndex - startRowIndex
 			}
 		} else if (isMulti) {
@@ -77,7 +77,7 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 			rowCellCount,
 			columnCellCount,
 		}
-	}, [stateInteraction, stateCanvas, cellLogicHeight, cellLogicWidth])
+	}, [interactionStore, canvasStore, cellLogicHeight, cellLogicWidth])
 
 	const borderProperty = useMemo<BorderProperty>(() => {
 		const lineWidth = 1
@@ -99,8 +99,8 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 			property.isRender = true
 			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = parsedInteractionIndex
 
-			property.offsetLeftIndex = startRowIndex * (cellLogicWidth - lineWidth) - stateCanvas.containerOffsetLeft
-			property.offsetTopIndex = startColumnIndex * (cellLogicHeight - lineWidth) - stateCanvas.containerOffsetTop
+			property.offsetLeftIndex = startRowIndex * (cellLogicWidth - lineWidth) - canvasStore.containerOffsetLeft
+			property.offsetTopIndex = startColumnIndex * (cellLogicHeight - lineWidth) - canvasStore.containerOffsetTop
 			property.width = rowCellCount * (cellLogicWidth - lineWidth)
 			property.height = columnCellCount * (cellLogicHeight - lineWidth)
 		}
@@ -112,7 +112,7 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 		})
 
 		return newProperty
-	}, [stateCanvas, cellLogicHeight, cellLogicWidth, parsedInteractionIndex])
+	}, [canvasStore, cellLogicHeight, cellLogicWidth, parsedInteractionIndex])
 
 	return (
 		<HighlightBorderContainer $isRender={borderProperty.isRender} $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
