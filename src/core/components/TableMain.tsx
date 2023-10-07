@@ -48,6 +48,8 @@ const TableMain = () => {
 		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, {
 			lineWidth,
 			lineColor: "#bebfb9",
+			maxRenderWidth: canvasStore.containerMaxWidth,
+			maxRenderHeight: canvasStore.containerMaxHeight,
 		})
 
 		const offsetLeft = canvasStore.containerOffsetLeft
@@ -67,7 +69,7 @@ const TableMain = () => {
 		dispatch(
 			updateContainerMaxSizeDispatch({
 				maxWidth: 3000,
-				maxHeight: 300,
+				maxHeight: 1000,
 			})
 		)
 	}, [dispatch])

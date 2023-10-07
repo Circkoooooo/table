@@ -64,6 +64,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 对其起始位置
 		const offsetStart = Math.round(drawLineWidth / 2)
 
+		//最大渲染尺寸
+		const maxRenderWidth = _drawLineProperty?.maxRenderWidth ?? 0
+		const maxRenderHeight = _drawLineProperty?.maxRenderHeight ?? 0
+
 		const getOfs = (scrollLeft: number, scrollTop: number) => {
 			return {
 				ofsLeft: Math.round((scrollLeft ?? 0) * dpr),
@@ -83,7 +87,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawHorizontalHeader = (scrollTop?: number) => {
 			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 0; i < height + ofs; i += cellLogicHeight - drawLineWidth, lineIndex++) {
+			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
 				if (lineIndex > 1) {
 					if (i - ofs < cellLogicHeight) continue
 
@@ -115,7 +119,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawVerticalHeader = (scrollLeft?: number) => {
 			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 0; i < width + ofs; i += cellLogicWidth - drawLineWidth, lineIndex++) {
+			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
 				if (lineIndex > 1) {
 					if (i - ofs < cellLogicWidth) continue
 
@@ -137,7 +141,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						},
 						{
 							x: lineIndex === 0 ? offsetStart : cellLogicWidth,
-							y: height,
+							y: maxRenderHeight,
 						}
 					)
 				}
@@ -147,7 +151,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyHorizontal = (scrollTop?: number) => {
 			const ofs = Math.round((scrollTop ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 0; i < height + ofs; i += cellHeight + drawLineWidth, lineIndex++) {
+			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
 				if (lineIndex < 2 || i < ofs + drawLineWidth + cellHeight) continue
 
 				markLine(
@@ -166,7 +170,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyVertical = (scrollLeft?: number) => {
 			const ofs = Math.round((scrollLeft ?? 0) * dpr)
 
-			for (let i = 0, lineIndex = 0; i < width + ofs; i += cellWidth + drawLineWidth, lineIndex++) {
+			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, lineIndex++) {
 				if (lineIndex < 2 || i < ofs + drawLineWidth + cellWidth) continue
 
 				markLine(
@@ -176,7 +180,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					},
 					{
 						x: lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofs,
-						y: height + offsetStart,
+						y: maxRenderHeight,
 					}
 				)
 			}
@@ -197,9 +201,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let columnCount = 0
 
 			// clip
-			clipRect(cellLogicWidth, 0, width, cellLogicHeight)
+			clipRect(cellLogicWidth, 0, maxRenderWidth - cellLogicWidth, cellLogicHeight)
 			// render columnLabels
-			for (let i = 0, textIndex = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth, textIndex++) {
+			for (let i = 0, textIndex = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, textIndex++) {
 				if (textIndex === 0) continue
 
 				/**
@@ -213,11 +217,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 			restoreClip()
 
-			clipRect(0, cellLogicHeight, cellLogicWidth, height)
+			clipRect(0, cellLogicHeight, cellLogicWidth, maxRenderHeight - cellLogicHeight)
 			// render rowLabels
 			const rowLabels = getRowLabel(Math.ceil(height + ofsTop / cellHeight))
 			let rowCount = 0
-			for (let i = 0, textIndex = 0; i < height + ofsTop; i += cellHeight + drawLineWidth, textIndex++) {
+			for (let i = 0, textIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, textIndex++) {
 				if (textIndex === 0) continue
 
 				const positionX = offsetStart + cellLogicWidth / 2
@@ -237,10 +241,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let row = 0
 			let column = 0
 			clipRect(cellWidth + drawLineWidth, cellHeight + drawLineWidth, width, height)
-			for (let j = 0; j < height + ofsTop; j += cellHeight + drawLineWidth) {
+			for (let j = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth) {
 				if (j === 0) continue
 
-				for (let i = 0; i < width + ofsLeft; i += cellWidth + drawLineWidth) {
+				for (let i = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth) {
 					if (i === 0) continue
 
 					const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
