@@ -1,8 +1,8 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from "react"
+import React, { useMemo } from "react"
+import { parseInteractionIndex } from "../../parseInteractionIndex"
 import { useAppSelector } from "../../redux/hooks"
-import { HighlightBorderContainer, HighlightBorderItem, HightlightBorderEditInputItem } from "../../styled/HighlightBorder-styled"
-import isIndexEqual from "../../tools/isIndexEqual"
-import { isTableHeader } from "../../tools/isIndexHeader"
+import { HighlightBorderContainer, HighlightBorderItem } from "../../styled/HighlightBorder-styled"
+
 interface HighlightBorderProps {
 	cellLogicWidth: number
 	cellLogicHeight: number
@@ -23,62 +23,6 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const interactionStore = useAppSelector((state) => state.interaction)
 
-	/**
-	 * 根据mousedown和mousemove的索引来解析需要渲染的边框属性
-	 */
-	const parsedInteractionIndex = useMemo(() => {
-		const { mousedownIndex, mousemoveIndex } = interactionStore
-
-		if (!mousedownIndex || !mousemoveIndex) return null
-
-		//记录的初始的点击索引
-		let startRowIndex = mousedownIndex.rowIndex
-		let startColumnIndex = mousedownIndex.columnIndex
-		let endRowIndex = mousedownIndex.rowIndex
-		let endColumnIndex = mousedownIndex.columnIndex
-		let rowCellCount = 1
-		let columnCellCount = 1
-		const bodyStartIndex = 1
-
-		//判断是否是拖动状态
-		const isMulti = !isIndexEqual(mousedownIndex, mousemoveIndex)
-
-		const isHeader = isTableHeader(mousedownIndex.rowIndex, mousedownIndex.columnIndex)
-
-		if (isHeader) {
-			//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
-			startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
-			startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
-			endRowIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
-			endColumnIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
-
-			if (mousedownIndex.rowIndex === 0) {
-				rowCellCount = Math.floor(canvasStore.containerMaxWidth / cellLogicWidth)
-				columnCellCount += endColumnIndex - startColumnIndex
-			}
-			if (mousedownIndex.columnIndex === 0) {
-				columnCellCount = Math.floor(canvasStore.containerMaxHeight / cellLogicHeight)
-				rowCellCount += endRowIndex - startRowIndex
-			}
-		} else if (isMulti) {
-			//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
-			startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
-			startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
-			endRowIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
-			endColumnIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
-
-			rowCellCount += endRowIndex - startRowIndex
-			columnCellCount += endColumnIndex - startColumnIndex
-		}
-
-		return {
-			startRowIndex: startRowIndex - bodyStartIndex,
-			startColumnIndex: startColumnIndex - bodyStartIndex,
-			rowCellCount,
-			columnCellCount,
-		}
-	}, [interactionStore, canvasStore, cellLogicHeight, cellLogicWidth])
-
 	const borderProperty = useMemo<BorderProperty>(() => {
 		const lineWidth = 1
 		const borderWidth = 2
@@ -94,11 +38,15 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 			height: 0,
 		}
 
-		// 如果有鼠标交互信息，则记录isRender为true和起始索引和长度，否则isRender为false不渲染
-		if (parsedInteractionIndex !== null) {
-			property.isRender = true
-			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = parsedInteractionIndex
+		const { mousedownIndex, mousemoveIndex } = interactionStore
+		const { containerMaxWidth, containerMaxHeight } = canvasStore
 
+		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, containerMaxWidth, containerMaxHeight, cellLogicWidth, cellLogicHeight)
+
+		if (interactionIndex) {
+			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex
+
+			property.isRender = true
 			property.offsetLeftIndex = startRowIndex * (cellLogicWidth - lineWidth) - canvasStore.containerOffsetLeft
 			property.offsetTopIndex = startColumnIndex * (cellLogicHeight - lineWidth) - canvasStore.containerOffsetTop
 			property.width = rowCellCount * (cellLogicWidth - lineWidth)
@@ -112,7 +60,7 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 		})
 
 		return newProperty
-	}, [canvasStore, cellLogicHeight, cellLogicWidth, parsedInteractionIndex])
+	}, [canvasStore, cellLogicHeight, cellLogicWidth, interactionStore])
 
 	return (
 		<HighlightBorderContainer $isRender={borderProperty.isRender} $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
