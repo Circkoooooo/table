@@ -17,7 +17,14 @@ export const tableDataSlice = createSlice({
 	name: "table-data",
 	initialState,
 	reducers: {
-		inputDispatch: (state, action: PayloadAction<DispatchInput>) => {},
+		inputDispatch: (state, action: PayloadAction<DispatchInput>) => {
+			const {
+				cellIndex: { rowIndex, columnIndex },
+				newValue,
+			} = action.payload
+
+			state.cellData[rowIndex][columnIndex] = newValue
+		},
 	},
 })
 

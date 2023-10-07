@@ -6,6 +6,7 @@ import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
 import { InteractionPanel } from "./InteractionPanel"
+import { CellInput } from "./CellInput/CellInput"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -96,7 +97,10 @@ const TableMain = () => {
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
-					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight} />
+					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight}>
+						<CellInput cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight} />
+					</HighlightBorder>
+
 					<TableCanvasContainer ref={tableMainContainerRef}>
 						<InteractionPanel />
 						<canvas ref={canvasRef}></canvas>

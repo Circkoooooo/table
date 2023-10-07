@@ -44,3 +44,19 @@ export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowI
 		}
 	`
 })
+
+export const HightlightBorderEditInputItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth }) => {
+	if (!$rowIndex || !$columnIndex) return null
+
+	return css`
+		position: absolute;
+		min-width: ${$width}px;
+		min-height: ${$height}px;
+		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
+		max-width: 400px;
+		max-height: 300px;
+		overflow: auto;
+
+		outline: ${$borderWidth}px solid blue;
+	`
+})

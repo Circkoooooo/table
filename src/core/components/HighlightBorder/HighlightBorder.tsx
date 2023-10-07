@@ -6,6 +6,7 @@ import { HighlightBorderContainer, HighlightBorderItem } from "../../styled/High
 interface HighlightBorderProps {
 	cellLogicWidth: number
 	cellLogicHeight: number
+	children?: React.ReactNode
 }
 
 type BorderProperty = {
@@ -19,7 +20,7 @@ type BorderProperty = {
 	height: number
 }
 
-const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellLogicHeight }) => {
+const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellLogicHeight, children }) => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const interactionStore = useAppSelector((state) => state.interaction)
 
@@ -64,6 +65,7 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 
 	return (
 		<HighlightBorderContainer $isRender={borderProperty.isRender} $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
+			{children}
 			<HighlightBorderItem
 				$borderWidth={borderProperty.borderWidth}
 				$rowIndex={1}
