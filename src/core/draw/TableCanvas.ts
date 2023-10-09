@@ -243,7 +243,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			clipRect(cellWidth + drawLineWidth * 2 + offsetStart, cellHeight + drawLineWidth * 2 + offsetStart, width, height)
 
-			for (let j = 0, row = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth, row++) {
+			for (let j = 0, row = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth + offsetStart, row++) {
 				if (j === 0) continue
 
 				for (let i = 0, column = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, column++) {
