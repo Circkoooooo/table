@@ -68,6 +68,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const maxRenderWidth = _drawLineProperty?.maxRenderWidth ?? 0
 		const maxRenderHeight = _drawLineProperty?.maxRenderHeight ?? 0
 
+		// 单元格内边距
+		const padding = 10
+
 		const getOfs = (scrollLeft: number, scrollTop: number) => {
 			return {
 				ofsLeft: Math.round((scrollLeft ?? 0) * dpr),
@@ -260,7 +263,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						cellLogicWidth - drawLineWidth,
 						cellLogicHeight - 2 * drawLineWidth
 					)
-					fillText(`${currentValue}`, positionX, positionY, drawFontsize, "center", "middle")
+					fillText(`${currentValue}`, positionX - (cellLogicWidth - drawLineWidth * 2) / 2 + padding, positionY, drawFontsize, "left", "middle")
 					restoreClip()
 				}
 			}

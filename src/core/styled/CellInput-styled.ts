@@ -13,7 +13,7 @@ export const CellInputItem = styled.div<CellInputContainerProps>(({ $width, $hei
 		min-height: ${$height}px;
 		max-width: 400px;
 		max-height: 300px;
-		text-align: center;
+		text-align: left;
 		outline: none;
 		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
 		padding: 6px;
