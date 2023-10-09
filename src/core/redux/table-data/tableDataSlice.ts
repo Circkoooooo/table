@@ -18,12 +18,10 @@ export const tableDataSlice = createSlice({
 	initialState,
 	reducers: {
 		inputDispatch: (state, action: PayloadAction<DispatchInput>) => {
-			const {
-				cellIndex: { rowIndex, columnIndex },
-				newValue,
-			} = action.payload
+			const { cellIndex, newValue } = action.payload
 
-			state.cellData[rowIndex][columnIndex] = newValue
+			// +1 是为了让起始索引从body开始
+			state.cellData[cellIndex.rowIndex + 1][cellIndex.columnIndex + 1] = newValue
 		},
 	},
 })

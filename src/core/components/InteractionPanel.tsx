@@ -2,6 +2,7 @@ import { useRef } from "react"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { InteractionPanelContainer } from "../styled/InteractionPanel-styled"
 import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
+import isIndexEqual from "../tools/isIndexEqual"
 
 /**
  * 尺寸和canvas画布容器尺寸一致，用来监听鼠标事件来更新边框的属性
@@ -9,6 +10,7 @@ import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/
  */
 const InteractionPanel = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
+	const interactionStore = useAppSelector((state) => state.interaction)
 	const dispatch = useAppDispatch()
 
 	const interactionRecord = useRef({
@@ -35,7 +37,7 @@ const InteractionPanel = () => {
 	}
 
 	const InteractionMousedown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		interactionRecord.current.isMosuedown = true
+		e.preventDefault() //防止触发使输入框失焦
 
 		const containerTargetRect = (e.target as HTMLDivElement).getBoundingClientRect()
 		const containerPositon = {
@@ -55,9 +57,15 @@ const InteractionPanel = () => {
 		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			rowIndex: getIndex(ofsLeft, lineWidth, logicWidth),
-			columnIndex: getIndex(ofsTop, lineWidth, logicHeight),
+			rowIndex: getIndex(ofsTop, lineWidth, logicHeight),
+			columnIndex: getIndex(ofsLeft, lineWidth, logicWidth),
 		}
+
+		// 记录组件内部维护的点击值
+		interactionRecord.current.isMosuedown = true
+
+		// 正在处于编辑状态，则不触发点击
+		if (isIndexEqual(interactionStore.mousedownIndex, index) && interactionStore.isEdit) return
 
 		dispatch(
 			mousedownDispatch({
@@ -70,9 +78,6 @@ const InteractionPanel = () => {
 	}
 
 	const InteractionMousemove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		if (!interactionRecord.current.isMosuedown) return
-		interactionRecord.current.isMousemove = true
-
 		const containerTargetRect = (e.target as HTMLDivElement).getBoundingClientRect()
 		const containerPositon = {
 			left: containerTargetRect.left,
@@ -90,15 +95,19 @@ const InteractionPanel = () => {
 		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			xIndex: getIndex(ofsLeft, lineWidth, logicWidth),
-			yIndex: getIndex(ofsTop, lineWidth, logicHeight),
+			rowIndex: getIndex(ofsTop, lineWidth, logicHeight),
+			columnIndex: getIndex(ofsLeft, lineWidth, logicWidth),
 		}
 
+		// 记录组件内部维护的移动值
+		interactionRecord.current.isMousemove = true
+
+		if (!interactionRecord.current.isMosuedown) return
 		dispatch(
 			mousemoveDispatch({
 				cellIndex: {
-					rowIndex: index.xIndex,
-					columnIndex: index.yIndex,
+					rowIndex: index.rowIndex,
+					columnIndex: index.columnIndex,
 				},
 			})
 		)

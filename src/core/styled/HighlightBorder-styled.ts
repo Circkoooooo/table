@@ -8,15 +8,14 @@ interface HighlightBorderItemProps {
 	$width: number
 	$height: number
 	$borderWidth: number
+	$isRender: boolean
 }
 
 export const HighlightBorderContainer = styled.div<{
 	$offsetLeft: number
 	$offsetTop: number
-	$isRender: boolean
-}>(({ $offsetLeft, $offsetTop, $isRender }) => {
+}>(({ $offsetLeft, $offsetTop }) => {
 	return css`
-		display: ${$isRender ? "" : "none"};
 		position: absolute;
 		width: 100%;
 		height: 100%;
@@ -25,8 +24,8 @@ export const HighlightBorderContainer = styled.div<{
 	`
 })
 
-export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth }) => {
-	if (!$rowIndex || !$columnIndex) return null
+export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth, $isRender }) => {
+	if (!$rowIndex || !$columnIndex || !$isRender) return null
 
 	return css`
 		position: absolute;
@@ -42,21 +41,5 @@ export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowI
 			height: 100%;
 			width: 100%;
 		}
-	`
-})
-
-export const HightlightBorderEditInputItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth }) => {
-	if (!$rowIndex || !$columnIndex) return null
-
-	return css`
-		position: absolute;
-		min-width: ${$width}px;
-		min-height: ${$height}px;
-		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
-		max-width: 400px;
-		max-height: 300px;
-		overflow: auto;
-
-		outline: ${$borderWidth}px solid blue;
 	`
 })

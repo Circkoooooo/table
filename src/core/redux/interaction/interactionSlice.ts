@@ -30,6 +30,7 @@ const interactionSlice = createSlice({
 
 			const { rowIndex, columnIndex } = cellIndex
 			const { mousedownIndex } = state
+
 			const tempInteractionInfo: typeof state = {
 				...state,
 				isMousedown: true,

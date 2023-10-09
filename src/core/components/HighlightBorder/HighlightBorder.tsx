@@ -47,7 +47,12 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 		if (interactionIndex) {
 			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex
 
-			property.isRender = true
+			if (interactionStore.isEdit) {
+				property.isRender = false
+			} else {
+				property.isRender = true
+			}
+
 			property.offsetLeftIndex = startRowIndex * (cellLogicWidth - lineWidth) - canvasStore.containerOffsetLeft
 			property.offsetTopIndex = startColumnIndex * (cellLogicHeight - lineWidth) - canvasStore.containerOffsetTop
 			property.width = rowCellCount * (cellLogicWidth - lineWidth)
@@ -64,9 +69,10 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 	}, [canvasStore, cellLogicHeight, cellLogicWidth, interactionStore])
 
 	return (
-		<HighlightBorderContainer $isRender={borderProperty.isRender} $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
+		<HighlightBorderContainer $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
 			{children}
 			<HighlightBorderItem
+				$isRender={borderProperty.isRender}
 				$borderWidth={borderProperty.borderWidth}
 				$rowIndex={1}
 				$columnIndex={4}

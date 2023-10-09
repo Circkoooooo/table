@@ -238,13 +238,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			const drawFontsize = 16 * dpr
 
-			let row = 0
-			let column = 0
 			clipRect(cellWidth + drawLineWidth, cellHeight + drawLineWidth, width, height)
-			for (let j = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth) {
+			for (let j = 0, row = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth, row++) {
 				if (j === 0) continue
 
-				for (let i = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth) {
+				for (let i = 0, column = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, column++) {
 					if (i === 0) continue
 
 					const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
@@ -252,12 +250,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 					const currentColumn = column
 					const currentRow = row
+
 					const currentValue = (cellData && cellData[currentRow] && cellData[currentRow][currentColumn]) ?? ""
 
 					fillText(`${currentValue}`, positionX, positionY, drawFontsize, "center", "middle")
-					column++
 				}
-				row++
 			}
 			restoreClip()
 		}

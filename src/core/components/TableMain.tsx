@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
 import TableCanvas, { TableCanvasType, calcLogicSize } from "../draw/TableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
@@ -15,8 +15,9 @@ const cellHeight = 30
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
 	const canvasRef = useRef<HTMLCanvasElement>(null)
-
 	const tableCanvasOperate = useRef<TableCanvasType | null>(null)
+
+	const interactionStore = useAppSelector((state) => state.interaction)
 
 	const dispatch = useAppDispatch()
 	const canvasStore = useAppSelector((state) => state.canvas)
@@ -75,6 +76,19 @@ const TableMain = () => {
 		)
 	}, [dispatch])
 
+	//cell input
+	const isRender = useMemo(() => {
+		return interactionStore.isEdit
+	}, [interactionStore])
+
+	const offsetIndex = useMemo(() => {
+		const bodyStartIndex = 1
+		return {
+			rowIndex: (interactionStore.editIndex?.rowIndex ?? 0) - bodyStartIndex,
+			columnIndex: (interactionStore.editIndex?.columnIndex ?? 0) - bodyStartIndex,
+		}
+	}, [interactionStore])
+
 	useEffect(() => {
 		if (!tableMainContainerRef || !canvasRef) return
 
@@ -93,12 +107,31 @@ const TableMain = () => {
 		flushTable()
 	}, [flushTable, handleResize])
 
+	const cellInputCurrentValue = useMemo(() => {
+		const cellData = tableDataStore.cellData
+		const mousedownIndex = interactionStore.mousedownIndex
+
+		if (!cellData || !mousedownIndex) return ""
+
+		const { rowIndex, columnIndex } = mousedownIndex
+		return cellData[rowIndex] && cellData[rowIndex][columnIndex] === null ? "" : `${cellData[rowIndex][columnIndex]}`
+	}, [interactionStore.mousedownIndex, tableDataStore.cellData])
+
 	return (
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
 					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight}>
-						<CellInput cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight} />
+						<CellInput
+							isRender={isRender}
+							offsetRowIndex={offsetIndex.rowIndex}
+							offsetColumnIndex={offsetIndex.columnIndex}
+							cellLogicWidth={tableCanvasInfo.cellLogicWidth}
+							cellLogicHeight={tableCanvasInfo.cellLogicHeight}
+							offsetLeft={canvasStore.containerOffsetLeft}
+							offsetTop={canvasStore.containerOffsetTop}
+							initialValue={cellInputCurrentValue}
+						/>
 					</HighlightBorder>
 
 					<TableCanvasContainer ref={tableMainContainerRef}>
