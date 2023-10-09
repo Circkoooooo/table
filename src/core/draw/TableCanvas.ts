@@ -239,6 +239,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const drawFontsize = 16 * dpr
 
 			clipRect(cellWidth + drawLineWidth * 2 + offsetStart, cellHeight + drawLineWidth * 2 + offsetStart, width, height)
+
 			for (let j = 0, row = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth, row++) {
 				if (j === 0) continue
 
@@ -263,7 +264,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					restoreClip()
 				}
 			}
-			restoreClip()
 		}
 
 		const drawAll = (offsetLeft?: number, offsetTop?: number) => {
