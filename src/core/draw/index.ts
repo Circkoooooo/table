@@ -160,6 +160,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 	const clipRect = (startX: number, startY: number, endX: number, endY: number) => {
 		const context = getCanvasContext()
 		context?.save()
+		context?.beginPath()
 		context?.rect(startX, startY, endX, endY)
 		context?.clip()
 	}
