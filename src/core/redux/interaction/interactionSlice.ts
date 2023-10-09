@@ -87,9 +87,12 @@ const interactionSlice = createSlice({
 
 			return tempInteractionInfo
 		},
+		cancelEditDispatch: (state) => {
+			state.isEdit = false
+		},
 	},
 })
 
-export const { mousedownDispatch, mousemoveDispatch, mouseupDispatch } = interactionSlice.actions
+export const { mousedownDispatch, mousemoveDispatch, mouseupDispatch, cancelEditDispatch } = interactionSlice.actions
 
 export default interactionSlice.reducer

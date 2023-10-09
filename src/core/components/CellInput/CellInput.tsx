@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 import { CellInputItem } from "../../styled/CellInput-styled"
 import { useAppDispatch } from "../../redux/hooks"
 import { inputDispatch } from "../../redux/table-data/tableDataSlice"
+import { cancelEditDispatch } from "../../redux/interaction/interactionSlice"
 
 interface CellInputProps {
 	cellLogicWidth: number
@@ -46,6 +47,7 @@ export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogic
 
 	const handleBlur = (e: React.FocusEvent<HTMLDivElement, Element>) => {
 		commitInput(`${e.target.innerText}`)
+		dispatch(cancelEditDispatch())
 	}
 
 	const handleFocus = () => {
