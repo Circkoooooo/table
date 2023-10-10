@@ -8,8 +8,8 @@ type CellDataState = {
 
 const initialState: CellDataState = {
 	cellData: createEmptyCellData({
-		rowNum: 26,
-		columnNum: 26,
+		rowNum: 27,
+		columnNum: 27,
 	}),
 }
 

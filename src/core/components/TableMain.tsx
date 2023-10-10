@@ -23,7 +23,7 @@ const TableMain = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const tableDataStore = useAppSelector((state) => state.tableData)
 
-	const [tableCanvasInfo, setTableCanvasInfo] = useState(() => {
+	const [tableCanvasInfo] = useState(() => {
 		const { cellLogicWidth, cellLogicHeight } = calcLogicSize(cellWidth, cellHeight, lineWidth)
 		return {
 			cellLogicWidth,
@@ -70,8 +70,8 @@ const TableMain = () => {
 		)
 		dispatch(
 			updateContainerMaxSizeDispatch({
-				maxWidth: 3000,
-				maxHeight: 1000,
+				maxWidth: window.devicePixelRatio * (102 * 27),
+				maxHeight: window.devicePixelRatio * (32 * 27),
 			})
 		)
 	}, [dispatch])
@@ -114,6 +114,7 @@ const TableMain = () => {
 		if (!cellData || !mousedownIndex) return ""
 
 		const { rowIndex, columnIndex } = mousedownIndex
+
 		return cellData[rowIndex] && cellData[rowIndex][columnIndex] === null ? "" : `${cellData[rowIndex][columnIndex]}`
 	}, [interactionStore.mousedownIndex, tableDataStore.cellData])
 
