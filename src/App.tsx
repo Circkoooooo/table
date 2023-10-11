@@ -1,6 +1,5 @@
 import "./App.css"
 import Background from "./layout/Background"
-import Table from "./core/Table"
 
 function App() {
 	const contextMenuListenerCallback = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -10,9 +9,6 @@ function App() {
 	return (
 		<Background
 			{...{
-				HeaderSlot: <div>header</div>,
-				MainSlot: <Table />,
-				// AsideSlot: <div>aside</div>,
 				onContextMenu: contextMenuListenerCallback,
 			}}
 		/>

@@ -1,24 +1,35 @@
-import React, { ReactNode } from "react"
-import { Header, Main, Body, Aside, Content } from "./Background-styled"
+import React from "react"
+import { Header, Main, Body, Content } from "./Background-styled"
+import { HeaderItemContainer } from "../core/styled/Header/Header-styled"
+import { ItemFontsize } from "../core/components/HeaderComponents/ItemFontSize"
+import { ConfigProvider } from "antd"
+import { ANTD_THEME } from "../configs/antd-theme"
+import { Provider } from "react-redux"
+import store from "../core/redux/store"
+import { TableMain } from "../core/components/TableMain"
 
 interface BackgroundProps {
-	HeaderSlot?: ReactNode
-	MainSlot?: ReactNode
-	AsideSlot?: ReactNode
 	onContextMenu: (mouseEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }
 
-const Background: React.FC<BackgroundProps> = ({ HeaderSlot, MainSlot, AsideSlot, onContextMenu }) => {
+const Background: React.FC<BackgroundProps> = ({ onContextMenu }) => {
 	return (
-		<>
-			<Body data-testid="body" onContextMenu={(event) => onContextMenu(event)}>
-				<Header>{HeaderSlot}</Header>
-				<Main>
-					{AsideSlot && <Aside>{AsideSlot}</Aside>}
-					<Content>{MainSlot}</Content>
-				</Main>
-			</Body>
-		</>
+		<ConfigProvider theme={ANTD_THEME}>
+			<Provider store={store}>
+				<Body data-testid="body" onContextMenu={(event) => onContextMenu(event)}>
+					<Header>
+						<HeaderItemContainer>
+							<ItemFontsize />
+						</HeaderItemContainer>
+					</Header>
+					<Main>
+						<Content>
+							<TableMain />
+						</Content>
+					</Main>
+				</Body>
+			</Provider>
+		</ConfigProvider>
 	)
 }
 
