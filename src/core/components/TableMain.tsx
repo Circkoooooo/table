@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
+import { updateCellDataInfo } from "../redux/table-data/tableDataSlice"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -31,11 +32,13 @@ const TableMain = () => {
 		}
 	})
 
+	// 初始化画布
 	const initTableCanvas = () => {
 		if (tableMainContainerRef.current === null || canvasRef.current === null) return
 		tableCanvasOperate.current = TableCanvas(canvasRef.current)
 	}
 
+	// 更新画布尺寸
 	const updateTableCanvasSize = () => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
@@ -50,8 +53,8 @@ const TableMain = () => {
 		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, {
 			lineWidth,
 			lineColor: "#bebfb9",
-			maxRenderWidth: canvasStore.containerMaxWidth,
-			maxRenderHeight: canvasStore.containerMaxHeight,
+			maxRenderRowCount: tableDataStore.cellDataInfo.rowNum,
+			maxRenderColumnCount: tableDataStore.cellDataInfo.columnNum,
 		})
 
 		const offsetLeft = canvasStore.containerOffsetLeft
@@ -70,11 +73,11 @@ const TableMain = () => {
 		)
 		dispatch(
 			updateContainerMaxSizeDispatch({
-				maxWidth: window.devicePixelRatio * (102 * 27),
-				maxHeight: window.devicePixelRatio * (32 * 27),
+				maxWidth: 102 * tableDataStore.cellDataInfo.columnNum + 100, //100为额外渲染长度，TODO:提取为变量
+				maxHeight: 32 * tableDataStore.cellDataInfo.rowNum + 100,
 			})
 		)
-	}, [dispatch])
+	}, [dispatch, tableDataStore])
 
 	//cell input
 	const isRender = useMemo(() => {

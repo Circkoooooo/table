@@ -5,3 +5,8 @@ export type DispatchInput = {
 	cellIndex: IndexType
 	newValue: CellDataElement
 }
+
+export type DispatchCellData = {
+	cellDataRow: number
+	cellDataColumn: number
+}

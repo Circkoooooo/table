@@ -64,8 +64,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const offsetStart = Math.round(drawLineWidth / 2)
 
 		//最大渲染尺寸
-		const maxRenderRowCellCount = 26
-		const maxRenderColumnCellCount = 26
+		const maxRenderRowCellCount = _drawLineProperty?.maxRenderRowCount ?? 0
+		const maxRenderColumnCellCount = _drawLineProperty?.maxRenderColumnCount ?? 0
 		const maxRenderWidth = offsetStart + cellLogicWidth + maxRenderColumnCellCount * (cellLogicWidth - drawLineWidth)
 		const maxRenderHeight = offsetStart + cellLogicHeight + maxRenderRowCellCount * (cellLogicHeight - drawLineWidth)
 

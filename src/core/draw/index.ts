@@ -6,8 +6,8 @@ export type Coordinate = {
 export type DrawLineProperty = {
 	lineColor?: string
 	lineWidth?: number
-	maxRenderWidth?: number
-	maxRenderHeight?: number
+	maxRenderRowCount?: number
+	maxRenderColumnCount?: number
 }
 /**
  *
