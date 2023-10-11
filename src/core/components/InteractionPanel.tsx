@@ -11,6 +11,7 @@ import isIndexEqual from "../tools/isIndexEqual"
 const InteractionPanel = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const interactionStore = useAppSelector((state) => state.interaction)
+	const tableDataStore = useAppSelector((state) => state.tableData)
 	const dispatch = useAppDispatch()
 
 	const interactionRecord = useRef({
@@ -57,8 +58,8 @@ const InteractionPanel = () => {
 		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			rowIndex: getIndex(ofsTop, lineWidth, logicHeight),
-			columnIndex: getIndex(ofsLeft, lineWidth, logicWidth),
+			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的点击值
@@ -95,8 +96,8 @@ const InteractionPanel = () => {
 		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			rowIndex: getIndex(ofsTop, lineWidth, logicHeight),
-			columnIndex: getIndex(ofsLeft, lineWidth, logicWidth),
+			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的移动值
