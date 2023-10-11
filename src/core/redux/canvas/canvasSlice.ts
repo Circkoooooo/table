@@ -1,6 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { DispatchUpdateContainerSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize } from "./canvasSlice.types"
 
+export type DrawConfig = {
+	fontSize: number
+}
+
 export type CanvasRecord = {
 	containerWidth: number
 	containerHeight: number
@@ -10,6 +14,7 @@ export type CanvasRecord = {
 	containerOffsetTop: number
 	containerMaxOffsetLeft: number
 	containerMaxOffsetTop: number
+	drawConfig: DrawConfig
 }
 
 const initialState: CanvasRecord = {
@@ -21,6 +26,9 @@ const initialState: CanvasRecord = {
 	containerMaxHeight: 0,
 	containerMaxOffsetLeft: 0,
 	containerMaxOffsetTop: 0,
+	drawConfig: {
+		fontSize: 16,
+	},
 }
 
 const calcMaxOffset = (width: number, height: number, maxWidth: number, maxHeight: number) => {

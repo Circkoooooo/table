@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
-import { updateCellDataInfo } from "../redux/table-data/tableDataSlice"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -60,7 +59,7 @@ const TableMain = () => {
 		const offsetLeft = canvasStore.containerOffsetLeft
 		const offsetTop = canvasStore.containerOffsetTop
 
-		drawAll(offsetLeft, offsetTop)
+		drawAll(canvasStore.drawConfig, offsetLeft, offsetTop)
 	}, [canvasStore, tableDataStore])
 
 	//更新滚动内容的尺寸
@@ -73,8 +72,8 @@ const TableMain = () => {
 		)
 		dispatch(
 			updateContainerMaxSizeDispatch({
-				maxWidth: 102 * tableDataStore.cellDataInfo.columnNum + 100, //100为额外渲染长度，TODO:提取为变量
-				maxHeight: 32 * tableDataStore.cellDataInfo.rowNum + 100,
+				maxWidth: 102 * tableDataStore.cellDataInfo.columnNum + 102, //100为额外渲染长度，TODO:提取为变量
+				maxHeight: 32 * tableDataStore.cellDataInfo.rowNum + 32,
 			})
 		)
 	}, [dispatch, tableDataStore])

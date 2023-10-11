@@ -1,5 +1,6 @@
 import { CustomCanvas, DrawLineProperty } from "."
 import { CellData } from "../cellDataHandler"
+import { DrawConfig } from "../redux/canvas/canvasSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
@@ -41,6 +42,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawTableState = {
 			offsetTop: 0,
 			offsetLeft: 0,
+			fontSize: 0,
 		}
 
 		let dpr = getDpr()
@@ -72,11 +74,17 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 单元格内边距
 		const padding = 10
 
-		const getOfs = (scrollLeft: number, scrollTop: number) => {
+		// 获取渲染偏移量，即滚动条滚动距离
+		const getOfs = () => {
 			return {
-				ofsLeft: Math.round((scrollLeft ?? 0) * dpr),
-				ofsTop: Math.round((scrollTop ?? 0) * dpr),
+				ofsLeft: Math.round((drawTableState.offsetLeft ?? 0) * dpr),
+				ofsTop: Math.round((drawTableState.offsetTop ?? 0) * dpr),
 			}
+		}
+
+		// 获取渲染字体大小
+		const getFontSize = () => {
+			return drawTableState.fontSize
 		}
 
 		const startMark = () => {
@@ -89,7 +97,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		const drawHorizontalHeader = (scrollLeft: number = 0, scrollTop: number = 0) => {
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
 				if (lineIndex > 1) {
@@ -121,7 +129,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		const drawVerticalHeader = (scrollLeft: number = 0, scrollTop: number = 0) => {
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
 				if (lineIndex > 1) {
@@ -153,7 +161,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		const drawBodyHorizontal = (scrollLeft: number = 0, scrollTop: number = 0) => {
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
 				if (lineIndex < 2 || i < ofsTop + drawLineWidth + cellHeight) continue
@@ -172,7 +180,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		const drawBodyVertical = (scrollLeft: number = 0, scrollTop: number = 0) => {
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
 				if (lineIndex < 2 || i < ofsLeft + drawLineWidth + cellWidth) continue
@@ -199,7 +207,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			const drawFontsize = 16 * dpr
 
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
 			const columnLabels = getColumnLabel(Math.ceil(width + ofsLeft / cellWidth))
 			let columnCount = 0
@@ -236,11 +244,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			restoreClip()
 		}
 
-		const drawBodyText = (scrollLeft: number = 0, scrollTop: number = 0, cellData?: CellData) => {
+		const drawBodyText = (cellData?: CellData) => {
 			const { fillText } = drawText()
-			const { ofsLeft, ofsTop } = getOfs(scrollLeft, scrollTop)
+			const { ofsLeft, ofsTop } = getOfs()
 
-			const drawFontsize = 16 * dpr
+			const drawFontsize = getFontSize()
 
 			clipRect(cellWidth + drawLineWidth * 2 + offsetStart, cellHeight + drawLineWidth * 2 + offsetStart, width, height)
 
@@ -270,26 +278,28 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawAll = (offsetLeft?: number, offsetTop?: number) => {
+		const drawAll = (drawConfig: DrawConfig, offsetLeft?: number, offsetTop?: number) => {
+			const { fontSize } = drawConfig
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
 			offsetTop && (drawTableState.offsetTop = offsetTop)
+			drawTableState.fontSize = fontSize
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
 			drawHeaderText(offsetLeft, offsetTop)
 
 			startMark()
 			updateStrokeColor("#E0E0E0")
-			drawBodyHorizontal(offsetLeft, offsetTop)
-			drawBodyVertical(offsetLeft, offsetTop)
+			drawBodyHorizontal()
+			drawBodyVertical()
 			closeMarkAndDraw()
 
 			startMark()
 			updateStrokeColor(drawLineProperty.lineColor)
-			drawHorizontalHeader(offsetLeft, offsetTop)
-			drawVerticalHeader(offsetLeft, offsetTop)
+			drawHorizontalHeader()
+			drawVerticalHeader()
 			closeMarkAndDraw()
 
-			drawBodyText(offsetLeft, offsetTop, tableCellData)
+			drawBodyText(tableCellData)
 		}
 
 		return {
