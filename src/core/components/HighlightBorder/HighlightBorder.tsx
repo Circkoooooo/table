@@ -23,6 +23,7 @@ type BorderProperty = {
 const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellLogicHeight, children }) => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const interactionStore = useAppSelector((state) => state.interaction)
+	const tableDataStore = useAppSelector((state) => state.tableData)
 
 	const borderProperty = useMemo<BorderProperty>(() => {
 		const lineWidth = 1
@@ -40,9 +41,8 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 		}
 
 		const { mousedownIndex, mousemoveIndex } = interactionStore
-		const { containerMaxWidth, containerMaxHeight } = canvasStore
 
-		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, containerMaxWidth, containerMaxHeight, cellLogicWidth, cellLogicHeight)
+		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, tableDataStore.cellDataInfo.rowNum, tableDataStore.cellDataInfo.columnNum)
 
 		if (interactionIndex) {
 			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex

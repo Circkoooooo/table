@@ -12,14 +12,7 @@ import { IndexType } from "./types/table.type"
  * @param cellLogicHeight
  * @returns
  */
-export const parseInteractionIndex = (
-	mousedownIndex: IndexType | null,
-	mousemoveIndex: IndexType | null,
-	containerMaxWidth: number,
-	containerMaxHeight: number,
-	cellLogicWidth: number,
-	cellLogicHeight: number
-) => {
+export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemoveIndex: IndexType | null, rowNumber: number, columnNumber: number) => {
 	if (!mousedownIndex || !mousemoveIndex) return null
 
 	//记录的初始的点击索引
@@ -44,12 +37,12 @@ export const parseInteractionIndex = (
 		endRowIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
 
 		if (mousedownIndex.rowIndex === 0) {
-			columnCellCount = Math.floor(containerMaxHeight / cellLogicHeight)
+			columnCellCount = rowNumber
 			rowCellCount += endRowIndex - startRowIndex
 		}
 
 		if (mousedownIndex.columnIndex === 0) {
-			rowCellCount = Math.floor(containerMaxWidth / cellLogicWidth)
+			rowCellCount = columnNumber
 			columnCellCount += endColumnIndex - startColumnIndex
 		}
 	} else if (isMulti) {
