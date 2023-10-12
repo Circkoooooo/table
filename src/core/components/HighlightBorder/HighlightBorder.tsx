@@ -66,7 +66,7 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicWidth, cellL
 		})
 
 		return newProperty
-	}, [canvasStore, cellLogicHeight, cellLogicWidth, interactionStore])
+	}, [canvasStore, cellLogicHeight, cellLogicWidth, interactionStore, tableDataStore])
 
 	return (
 		<HighlightBorderContainer $offsetLeft={cellLogicWidth} $offsetTop={cellLogicHeight}>
