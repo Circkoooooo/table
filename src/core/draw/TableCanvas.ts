@@ -84,7 +84,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 		// 获取渲染字体大小
 		const getFontSize = () => {
-			return drawTableState.fontSize
+			return drawTableState.fontSize * dpr
 		}
 
 		const startMark = () => {
@@ -203,9 +203,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawHeaderText = (scrollLeft: number = 0, scrollTop: number = 0) => {
 			const { fillText } = drawText()
 			const { width, height } = canvasState.currentCanvasSize
-			const dpr = getDpr()
 
-			const drawFontsize = 16 * dpr
+			const drawFontsize = getFontSize()
 
 			const { ofsLeft, ofsTop } = getOfs()
 
