@@ -51,7 +51,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		currentOffsetTop: 0,
 		offsetLeft: 0, //记录过程中产生的偏移量
 		offsetTop: 0,
-		startOffsetLeft: 0, //开始记录时滑块的便宜
+		startOffsetLeft: 0, //开始记录时滑块的偏移
 		startOffsetTop: 0,
 	})
 
@@ -192,6 +192,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		}
 	}, [scrollbarItemLength, direction, canvasStore])
 
+	// 记录滚动开始的鼠标位置
 	const recordStartPosition = useCallback(
 		(screenX: number, screenY: number) => {
 			if (direction === "horizontal") {
@@ -212,6 +213,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		[direction]
 	)
 
+	// 记录滚动结束的鼠标位置
 	const recordEndPosition = (screenX: number, screenY: number) => {
 		record.current.endScreenPosition = {
 			x: screenX,
@@ -256,6 +258,24 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		[calcOffset]
 	)
 
+	// 鼠标滚轮实现滚动
+	const handleWheel = useDebounce((e: WheelEvent) => {
+		if (record.current.isMouseDown || direction === "horizontal") return
+
+		const { endScreenPosition } = record.current
+
+		const { x, y } = endScreenPosition
+		const deltaY = e.deltaY
+		const maxScroll = scrollbarMaxScroll()
+
+		if (deltaY > 0) {
+			recordEndPosition(x, Math.max(0, Math.min(maxScroll * window.devicePixelRatio, y + 20)))
+		} else {
+			recordEndPosition(x, Math.max(0, Math.min(maxScroll * window.devicePixelRatio, y - 20)))
+		}
+		calcOffset()
+	}, 14)
+
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (!record.current.isMouseDown) return
@@ -275,13 +295,15 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		window.addEventListener("mousemove", handleMouseMove)
 		window.addEventListener("touchmove", handleTouchMove, { passive: false })
 		window.addEventListener("touchstart", handleTouchStart)
+		window.addEventListener("wheel", (e) => handleWheel(e))
+
 		return () => {
 			window.removeEventListener("mouseup", handleMouseUp)
 			window.removeEventListener("touchend", handleTouchEnd)
 			window.removeEventListener("mousemove", handleMouseMove)
 			window.removeEventListener("touchmove", handleTouchMove)
 		}
-	}, [handleMouseUp, handleTouchEnd, handleMouseMove, handleTouchMove, handleTouchStart])
+	}, [handleMouseUp, handleTouchEnd, handleMouseMove, handleTouchMove, handleTouchStart, handleWheel])
 
 	useEffect(() => {
 		window.addEventListener("resize", handleResize)
