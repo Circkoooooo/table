@@ -96,7 +96,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			closePath()
 		}
 
-		const drawHorizontalHeader = (scrollLeft: number = 0, scrollTop: number = 0) => {
+		const drawHorizontalHeader = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
@@ -128,7 +128,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawVerticalHeader = (scrollLeft: number = 0, scrollTop: number = 0) => {
+		const drawVerticalHeader = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
@@ -160,7 +160,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawBodyHorizontal = (scrollLeft: number = 0, scrollTop: number = 0) => {
+		const drawBodyHorizontal = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
@@ -179,7 +179,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			}
 		}
 
-		const drawBodyVertical = (scrollLeft: number = 0, scrollTop: number = 0) => {
+		const drawBodyVertical = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
@@ -200,7 +200,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		/**
 		 * 渲染表格中的文字
 		 */
-		const drawHeaderText = (scrollLeft: number = 0, scrollTop: number = 0) => {
+		const drawHeaderText = () => {
 			const { fillText } = drawText()
 			const { width, height } = canvasState.currentCanvasSize
 
@@ -284,7 +284,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			drawTableState.fontSize = fontSize
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
-			drawHeaderText(offsetLeft, offsetTop)
+			drawHeaderText()
 
 			startMark()
 			updateStrokeColor("#E0E0E0")
