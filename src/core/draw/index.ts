@@ -148,10 +148,11 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		) => {
 			if (!context) return
 
+			const offset = getPixelOffset(canvasState.canvasLineWidth) ?? 0
 			context.font = `${fontSize}px Microsoft Yahei`
 			context.textAlign = textAlign
 			context.textBaseline = textBaseline
-			context?.fillText(text, x, y, maxWidth)
+			context.fillText(text, x + offset, y + offset, maxWidth)
 		}
 
 		return { fillText }
@@ -159,10 +160,11 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 
 	const clipRect = (startX: number, startY: number, endX: number, endY: number) => {
 		const context = getCanvasContext()
-		context?.save()
-		context?.beginPath()
-		context?.rect(startX, startY, endX, endY)
-		context?.clip()
+		if (!context) return
+		context.save()
+		context.beginPath()
+		context.rect(startX, startY, endX, endY)
+		context.clip()
 	}
 
 	const restoreClip = () => {
