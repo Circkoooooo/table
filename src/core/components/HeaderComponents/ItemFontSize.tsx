@@ -30,7 +30,7 @@ export const ItemFontsize = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 
 	return (
-		<HeaderItem>
+		<HeaderItem onWheel={(e) => e.stopPropagation()}>
 			<Select defaultValue={canvasStore.drawConfig.fontSize} style={{ width: 40, textAlign: "center" }} suffixIcon={null} popupMatchSelectWidth={80} options={options()} />
 		</HeaderItem>
 	)
