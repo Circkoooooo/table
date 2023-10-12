@@ -23,11 +23,20 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 	let rowCellCount = 1
 	let columnCellCount = 1
 	const bodyStartIndex = 1
+	let isRowColumnHeader = false
 
 	//判断是否是拖动状态
 	const isMulti = !isIndexEqual(mousedownIndex, mousemoveIndex)
-
 	const isHeader = isTableHeader(mousedownIndex.rowIndex, mousedownIndex.columnIndex)
+
+	const { rowIndex, columnIndex } = mousedownIndex
+
+	// 判断是否点击的选中所有行列的单元格
+	if (rowIndex === 0 && columnIndex === 0) {
+		isRowColumnHeader = true
+	} else {
+		isRowColumnHeader = false
+	}
 
 	if (isHeader) {
 		//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
@@ -36,16 +45,22 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 		endColumnIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
 		endRowIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
 
-		if (mousedownIndex.rowIndex === 0) {
+		if (rowIndex === 0) {
 			columnCellCount = rowNumber
 			rowCellCount += endRowIndex - startRowIndex
 		}
 
-		if (mousedownIndex.columnIndex === 0) {
+		if (columnIndex === 0) {
 			rowCellCount = columnNumber
 			columnCellCount += endColumnIndex - startColumnIndex
 		}
-	} else if (isMulti) {
+
+		// 判断是否点击的选中所有行列的单元格
+		if (rowIndex === 0 && columnIndex === 0) {
+			rowCellCount = columnNumber
+			columnCellCount = rowNumber
+		}
+	} else if (isMulti && !isRowColumnHeader) {
 		//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
 		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
 		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
