@@ -76,6 +76,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 单元格内边距
 		const padding = 10
 
+		const getStaticConfig = {
+			headerFontSize: () => headerFontSize * window.devicePixelRatio,
+		}
+
 		// 获取渲染偏移量，即滚动条滚动距离
 		const getOfs = () => {
 			return {
@@ -206,7 +210,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const { fillText } = drawText()
 			const { width, height } = canvasState.currentCanvasSize
 
-			const drawFontsize = headerFontSize
+			const drawFontsize = getStaticConfig.headerFontSize()
 
 			const { ofsLeft, ofsTop } = getOfs()
 
