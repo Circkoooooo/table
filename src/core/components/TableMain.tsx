@@ -49,7 +49,7 @@ const TableMain = () => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
 
-		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, {
+		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, canvasStore.tableStaticConfig, {
 			lineWidth,
 			lineColor: "#bebfb9",
 			maxRenderRowCount: tableDataStore.cellDataInfo.rowNum,
@@ -126,6 +126,7 @@ const TableMain = () => {
 				<TableRowContainer>
 					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight}>
 						<CellInput
+							fontSize={canvasStore.drawConfig.fontSize}
 							isRender={isRender}
 							offsetRowIndex={offsetIndex.rowIndex}
 							offsetColumnIndex={offsetIndex.columnIndex}

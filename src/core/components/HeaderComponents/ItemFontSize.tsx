@@ -1,6 +1,8 @@
+import { useDispatch } from "react-redux"
 import { useAppSelector } from "../../redux/hooks"
 import { HeaderItem } from "../../styled/Header/Header-styled"
 import { Select } from "antd"
+import { updateDrawConfigFontSize } from "../../redux/canvas/canvasSlice"
 
 const options = () => {
 	const value: number[] = []
@@ -29,9 +31,24 @@ const options = () => {
 export const ItemFontsize = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 
+	const dispatch = useDispatch()
+
 	return (
 		<HeaderItem onWheel={(e) => e.stopPropagation()}>
-			<Select defaultValue={canvasStore.drawConfig.fontSize} style={{ width: 40, textAlign: "center" }} suffixIcon={null} popupMatchSelectWidth={80} options={options()} />
+			<Select
+				onChange={(value) =>
+					dispatch(
+						updateDrawConfigFontSize({
+							value,
+						})
+					)
+				}
+				defaultValue={canvasStore.drawConfig.fontSize}
+				style={{ width: 40, textAlign: "center" }}
+				suffixIcon={null}
+				popupMatchSelectWidth={80}
+				options={options()}
+			/>
 		</HeaderItem>
 	)
 }

@@ -12,3 +12,7 @@ export type DispatchUpdateOffsetSize = {
 	offsetLeft?: number
 	offsetTop?: number
 }
+
+export type DispatchUpdateDrawConfigFontSize = {
+	value: number
+}

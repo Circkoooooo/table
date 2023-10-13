@@ -5,8 +5,9 @@ interface CellInputContainerProps {
 	$height: number
 	$offsetLeft: number
 	$offsetTop: number
+	$fontSize: number
 }
-export const CellInputItem = styled.div<CellInputContainerProps>(({ $width, $height, $offsetLeft, $offsetTop }) => {
+export const CellInputItem = styled.div<CellInputContainerProps>(({ $width, $height, $offsetLeft, $offsetTop, $fontSize = 16 }) => {
 	return css`
 		position: absolute;
 		min-width: ${$width}px;
@@ -17,7 +18,7 @@ export const CellInputItem = styled.div<CellInputContainerProps>(({ $width, $hei
 		outline: none;
 		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
 		padding: 6px;
-		font-size: 16px;
+		font-size: ${$fontSize}px;
 
 		&:after {
 			z-index: -1;

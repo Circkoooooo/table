@@ -13,9 +13,10 @@ interface CellInputProps {
 	offsetLeft: number
 	offsetTop: number
 	initialValue: string
+	fontSize: number
 }
 
-export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogicWidth, isRender, offsetRowIndex, offsetColumnIndex, initialValue, offsetLeft = 0, offsetTop = 0 }) => {
+export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogicWidth, isRender, offsetRowIndex, offsetColumnIndex, initialValue, offsetLeft = 0, offsetTop = 0, fontSize = 16 }) => {
 	const inputItemRef = useRef<HTMLDivElement | null>(null)
 
 	const inputRecordRef = useRef({
@@ -74,6 +75,7 @@ export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogic
 			contentEditable
 			$offsetLeft={offsetColumnIndex * (cellLogicWidth - 1) - offsetLeft}
 			$offsetTop={offsetRowIndex * (cellLogicHeight - 1) - offsetTop}
+			$fontSize={fontSize}
 			onFocus={() => handleFocus()}
 			onInput={(e) => handleInput(e)}
 			onBlur={(e) => handleBlur(e)}

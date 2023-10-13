@@ -1,6 +1,6 @@
 import { CustomCanvas, DrawLineProperty } from "."
 import { CellData } from "../cellDataHandler"
-import { DrawConfig } from "../redux/canvas/canvasSlice"
+import { DrawConfig, StaticConfig } from "../redux/canvas/canvasSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
@@ -35,9 +35,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 	 * @param cellHeight
 	 * @param drawLineProperty
 	 */
-	const drawTableFrame = (_cellWidth: number, _cellHeight: number, tableCellData: CellData, _drawLineProperty?: DrawLineProperty) => {
+	const drawTableFrame = (_cellWidth: number, _cellHeight: number, tableCellData: CellData, _staticConfig: StaticConfig, _drawLineProperty?: DrawLineProperty) => {
 		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine, closePath } = drawLine()
+
+		const { headerFontSize } = _staticConfig
 
 		const drawTableState = {
 			offsetTop: 0,
@@ -204,7 +206,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const { fillText } = drawText()
 			const { width, height } = canvasState.currentCanvasSize
 
-			const drawFontsize = getFontSize()
+			const drawFontsize = headerFontSize
 
 			const { ofsLeft, ofsTop } = getOfs()
 
