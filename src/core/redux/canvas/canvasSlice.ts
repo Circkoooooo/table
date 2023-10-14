@@ -1,32 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
-import { DispatchUpdateContainerSize, DispatchUpdateDrawConfigFontSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize } from "./canvasSlice.types"
-
-/**
- * 表格绘制中动态修改的配置
- */
-export type DrawConfig = {
-	fontSize: number
-}
-
-/**
- * 表格绘制中默认不修改内容的配置
- */
-export type StaticConfig = {
-	headerFontSize: number
-}
-
-export type CanvasRecord = {
-	containerWidth: number
-	containerHeight: number
-	containerMaxWidth: number
-	containerMaxHeight: number
-	containerOffsetLeft: number
-	containerOffsetTop: number
-	containerMaxOffsetLeft: number
-	containerMaxOffsetTop: number
-	tableStaticConfig: StaticConfig
-	drawConfig: DrawConfig
-}
+import { CanvasRecord, DispatchUpdateContainerSize, DispatchUpdateDrawConfigFontSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize } from "./canvasSlice.types"
 
 const initialState: CanvasRecord = {
 	containerWidth: 0,
@@ -43,6 +16,28 @@ const initialState: CanvasRecord = {
 	},
 	drawConfig: {
 		fontSize: 16,
+	},
+	tableRowColumnCellConfig: {
+		rowHeight: [
+			{
+				index: 0,
+				value: 10,
+			},
+			{
+				index: 4,
+				value: 60,
+			},
+		],
+		columnWidth: [
+			{
+				index: 0,
+				value: 10,
+			},
+			{
+				index: 4,
+				value: 60,
+			},
+		],
 	},
 }
 
