@@ -27,13 +27,17 @@ const InteractionPanel = () => {
 	 * @param logicSize
 	 * @returns
 	 */
-	const getIndex = (num: number, lineWidth: number, logicSize: number) => {
-		let ofsLeftTemp = num
+	const getIndex = (num: number, lineWidth: number, logicSize: number, direction: "row" | "column") => {
+		let ofsStartTemp = num
 		let index = 0
-		while (ofsLeftTemp >= logicSize) {
-			ofsLeftTemp -= index === 0 ? logicSize : logicSize - lineWidth
+
+		const lengthConfigArr = direction === "row" ? canvasStore.tableRowColumnCellConfig.rowHeight : canvasStore.tableRowColumnCellConfig.columnWidth
+		while (ofsStartTemp >= logicSize) {
+			const currentIndex = index
+			ofsStartTemp -= logicSize - lineWidth + (lengthConfigArr.find((item) => item.index === currentIndex)?.value || 0)
 			index++
 		}
+
 		return index
 	}
 
@@ -58,8 +62,8 @@ const InteractionPanel = () => {
 		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight), tableDataStore.cellDataInfo.rowNum),
-			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth), tableDataStore.cellDataInfo.columnNum),
+			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight, "row"), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth, "column"), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的点击值
@@ -92,12 +96,13 @@ const InteractionPanel = () => {
 		const lineWidth = 1
 		const logicWidth = 102
 		const logicHeight = 32
+
 		const ofsLeft = Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
 		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const index = {
-			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight), tableDataStore.cellDataInfo.rowNum),
-			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth), tableDataStore.cellDataInfo.columnNum),
+			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight, "row"), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth, "column"), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的移动值
