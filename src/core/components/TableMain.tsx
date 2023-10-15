@@ -4,9 +4,10 @@ import TableCanvas, { TableCanvasType, calcLogicSize } from "../draw/TableCanvas
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { HighlightBorder } from "./HighlightBorder/HighlightBorder"
+import { HighlightBorder, HighlightBorderProperty } from "./HighlightBorder/HighlightBorder"
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
+import { parseInteractionIndex } from "../parseInteractionIndex"
 
 const lineWidth = 1
 const cellWidth = 100
@@ -48,8 +49,7 @@ const TableMain = () => {
 	const flushTable = useCallback(() => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
-
-		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, canvasStore.tableStaticConfig, {
+		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, canvasStore.tableStaticConfig, canvasStore.tableRowColumnCellConfig, {
 			lineWidth,
 			lineColor: "#bebfb9",
 			maxRenderRowCount: tableDataStore.cellDataInfo.rowNum,
@@ -79,16 +79,8 @@ const TableMain = () => {
 	}, [dispatch, tableDataStore])
 
 	//cell input
-	const isRender = useMemo(() => {
+	const isEditing = useMemo(() => {
 		return interactionStore.isEdit
-	}, [interactionStore])
-
-	const offsetIndex = useMemo(() => {
-		const bodyStartIndex = 1
-		return {
-			rowIndex: (interactionStore.editIndex?.rowIndex ?? 0) - bodyStartIndex,
-			columnIndex: (interactionStore.editIndex?.columnIndex ?? 0) - bodyStartIndex,
-		}
 	}, [interactionStore])
 
 	useEffect(() => {
@@ -109,31 +101,109 @@ const TableMain = () => {
 		flushTable()
 	}, [flushTable, handleResize])
 
+	/**
+	 * 在mousedownIndex更改之后，更新最新的当前单元格显示的内容。
+	 *
+	 * 如果是点击的头部行或者列 ，则返回空字符串。
+	 */
 	const cellInputCurrentValue = useMemo(() => {
 		const cellData = tableDataStore.cellData
 		const mousedownIndex = interactionStore.mousedownIndex
 
-		if (!cellData || !mousedownIndex) return ""
-
+		if (!cellData || !mousedownIndex) return null
 		const { rowIndex, columnIndex } = mousedownIndex
+		if (rowIndex === 0 || columnIndex === 0) return null
 
-		return cellData[rowIndex] && cellData[rowIndex][columnIndex] === null ? "" : `${cellData[rowIndex][columnIndex]}`
+		const bodyRowIndex = rowIndex - 1
+		const bodyColumnIndex = columnIndex - 1
+		return cellData[bodyRowIndex] && cellData[bodyRowIndex][bodyColumnIndex]
 	}, [interactionStore.mousedownIndex, tableDataStore.cellData])
+
+	/**
+	 * 记录高亮边框所在位置和尺寸
+	 */
+	const highlightBorderProperty = useMemo<HighlightBorderProperty>(() => {
+		const lineWidth = 1
+		const borderWidth = 2
+
+		const { cellLogicHeight, cellLogicWidth } = tableCanvasInfo
+
+		let property: HighlightBorderProperty = {
+			borderOffsetLeft: 0,
+			borderOffsetTop: 0,
+			borderWidth: 0,
+			offsetLeft: 0,
+			offsetTop: 0,
+			width: 0,
+			height: 0,
+		}
+
+		const { mousedownIndex, mousemoveIndex } = interactionStore
+
+		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, tableDataStore.cellDataInfo.rowNum, tableDataStore.cellDataInfo.columnNum)
+
+		if (interactionIndex) {
+			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex
+
+			/****** 根据索引获取额外的尺寸和偏移 ******/
+			const rowHeightArrs = canvasStore.tableRowColumnCellConfig.rowHeight
+			const columnWidthArrs = canvasStore.tableRowColumnCellConfig.columnWidth
+			let extraHeight = 0
+			let extraWidth = 0
+
+			//额外的上方偏移。选中单元格上方非默认高度的额外高度之和。
+			let extraOffsetTop = rowHeightArrs
+				.filter(({ index }) => index < startRowIndex)
+				.map((item) => item.value)
+				.reduce((pre, cur) => pre + cur, 0)
+
+			let extraOffsetLeft = columnWidthArrs
+				.filter(({ index }) => index < startColumnIndex)
+				.map((item) => item.value)
+				.reduce((pre, cur) => pre + cur, 0)
+
+			rowHeightArrs
+				.filter(({ index }) => index >= startRowIndex && index < startRowIndex + columnCellCount)
+				.forEach(({ value }) => {
+					extraHeight += value
+				})
+
+			columnWidthArrs
+				.filter(({ index }) => index >= startColumnIndex && index < startColumnIndex + rowCellCount)
+				.forEach(({ value }) => {
+					extraWidth += value
+				})
+
+			property.offsetLeft = startColumnIndex * (cellLogicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
+			property.offsetTop = startRowIndex * (cellLogicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
+			property.width = rowCellCount * (cellLogicWidth - lineWidth) + extraWidth
+			property.height = columnCellCount * (cellLogicHeight - lineWidth) + extraHeight
+		}
+
+		const newProperty = Object.assign(property, {
+			borderOffsetLeft: cellLogicWidth,
+			borderOffsetTop: cellLogicHeight,
+			borderWidth: borderWidth,
+		})
+
+		return newProperty
+	}, [canvasStore, interactionStore, tableDataStore, tableCanvasInfo])
 
 	return (
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
-					<HighlightBorder cellLogicWidth={tableCanvasInfo.cellLogicWidth} cellLogicHeight={tableCanvasInfo.cellLogicHeight}>
+					<HighlightBorder
+						isRender={!isEditing}
+						highlightBorderProperty={highlightBorderProperty}
+						cellLogicWidth={tableCanvasInfo.cellLogicWidth}
+						cellLogicHeight={tableCanvasInfo.cellLogicHeight}
+					>
 						<CellInput
+							editIndex={interactionStore.editIndex}
+							isRender={isEditing}
+							highlightBorderProperty={highlightBorderProperty}
 							fontSize={canvasStore.drawConfig.fontSize}
-							isRender={isRender}
-							offsetRowIndex={offsetIndex.rowIndex}
-							offsetColumnIndex={offsetIndex.columnIndex}
-							cellLogicWidth={tableCanvasInfo.cellLogicWidth}
-							cellLogicHeight={tableCanvasInfo.cellLogicHeight}
-							offsetLeft={canvasStore.containerOffsetLeft}
-							offsetTop={canvasStore.containerOffsetTop}
 							initialValue={cellInputCurrentValue}
 						/>
 					</HighlightBorder>
