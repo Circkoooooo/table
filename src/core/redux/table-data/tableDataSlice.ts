@@ -12,8 +12,8 @@ type CellDataState = {
 
 const initialState: CellDataState = {
 	cellData: createEmptyCellData({
-		rowNum: 27,
-		columnNum: 27,
+		rowNum: 26,
+		columnNum: 26,
 	}),
 	cellDataInfo: {
 		rowNum: 26,
@@ -39,8 +39,8 @@ export const tableDataSlice = createSlice({
 			}
 
 			const newEmptyCellData = createEmptyCellData({
-				rowNum: cellDataRow + 1,
-				columnNum: cellDataColumn + 1,
+				rowNum: cellDataRow,
+				columnNum: cellDataColumn,
 			})
 
 			// copy
@@ -56,9 +56,7 @@ export const tableDataSlice = createSlice({
 		},
 		inputDispatch: (state, action: PayloadAction<DispatchInput>) => {
 			const { cellIndex, newValue } = action.payload
-
-			// +1 是为了让起始索引从body开始
-			state.cellData[cellIndex.rowIndex + 1][cellIndex.columnIndex + 1] = newValue
+			state.cellData[cellIndex.rowIndex][cellIndex.columnIndex] = newValue
 		},
 	},
 })

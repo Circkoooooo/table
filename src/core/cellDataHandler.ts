@@ -6,7 +6,7 @@ interface FullTableEmptyDataParams {
 	columnNum: number
 }
 
-export type CellDataElement = string | number | null
+export type CellDataElement = string | null
 
 export type CellData = CellDataElement[][]
 

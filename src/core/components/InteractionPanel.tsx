@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { InteractionPanelContainer } from "../styled/InteractionPanel-styled"
 import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
+import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
 
 /**
  * 尺寸和canvas画布容器尺寸一致，用来监听鼠标事件来更新边框的属性
@@ -19,27 +20,6 @@ const InteractionPanel = () => {
 		isMousemove: false,
 		isEdit: false,
 	})
-
-	/**
-	 * 第一个单元格包含边框，所以全逻辑宽度以内都为该单元格的索引
-	 * 后面所有单元格之间由于重叠了边框，所以需要以逻辑宽度减去边框宽度
-	 * @param num
-	 * @param logicSize
-	 * @returns
-	 */
-	const getIndex = (num: number, lineWidth: number, logicSize: number, direction: "row" | "column") => {
-		let ofsStartTemp = num
-		let index = 0
-
-		const lengthConfigArr = direction === "row" ? canvasStore.tableRowColumnCellConfig.rowHeight : canvasStore.tableRowColumnCellConfig.columnWidth
-		while (ofsStartTemp >= logicSize) {
-			const currentIndex = index
-			ofsStartTemp -= logicSize - lineWidth + (lengthConfigArr.find((item) => item.index === currentIndex)?.value || 0)
-			index++
-		}
-
-		return index
-	}
 
 	const InteractionMousedown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		e.preventDefault() //防止触发使输入框失焦
@@ -58,12 +38,14 @@ const InteractionPanel = () => {
 		const logicWidth = 102
 		const logicHeight = 32
 
+		// 鼠标的偏移量。如果小于逻辑尺寸，则在头部，否则在body。如果在body上移动，则值需要加上滚动条偏移
 		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
 		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
+		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
 		const index = {
-			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight, "row"), tableDataStore.cellDataInfo.rowNum),
-			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth, "column"), tableDataStore.cellDataInfo.columnNum),
+			rowIndex: Math.min(getIndexByOffsetStart(ofsTop, lineWidth, logicHeight, rowHeight), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的点击值
@@ -100,9 +82,10 @@ const InteractionPanel = () => {
 		const ofsLeft = Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
 		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
+		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
 		const index = {
-			rowIndex: Math.min(getIndex(ofsTop, lineWidth, logicHeight, "row"), tableDataStore.cellDataInfo.rowNum),
-			columnIndex: Math.min(getIndex(ofsLeft, lineWidth, logicWidth, "column"), tableDataStore.cellDataInfo.columnNum),
+			rowIndex: Math.min(getIndexByOffsetStart(ofsTop, lineWidth, logicHeight, rowHeight), tableDataStore.cellDataInfo.rowNum),
+			columnIndex: Math.min(getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth), tableDataStore.cellDataInfo.columnNum),
 		}
 
 		// 记录组件内部维护的移动值

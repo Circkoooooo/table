@@ -1,22 +1,21 @@
 import React, { useEffect, useRef } from "react"
 import { CellInputItem } from "../../styled/CellInput-styled"
 import { useAppDispatch } from "../../redux/hooks"
-import { inputDispatch } from "../../redux/table-data/tableDataSlice"
 import { cancelEditDispatch } from "../../redux/interaction/interactionSlice"
+import { HighlightBorderProperty } from "../HighlightBorder/HighlightBorder"
+import { IndexType } from "../../types/table.type"
+import { inputDispatch } from "../../redux/table-data/tableDataSlice"
+import { CellDataElement } from "../../cellDataHandler"
 
 interface CellInputProps {
-	cellLogicWidth: number
-	cellLogicHeight: number
 	isRender: boolean
-	offsetRowIndex: number
-	offsetColumnIndex: number
-	offsetLeft: number
-	offsetTop: number
-	initialValue: string
 	fontSize: number
+	highlightBorderProperty: HighlightBorderProperty
+	initialValue: CellDataElement
+	editIndex: IndexType | null
 }
 
-export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogicWidth, isRender, offsetRowIndex, offsetColumnIndex, initialValue, offsetLeft = 0, offsetTop = 0, fontSize = 16 }) => {
+export const CellInput: React.FC<CellInputProps> = ({ highlightBorderProperty: { offsetLeft, offsetTop, width, height }, editIndex, isRender, initialValue }) => {
 	const inputItemRef = useRef<HTMLDivElement | null>(null)
 
 	const inputRecordRef = useRef({
@@ -30,11 +29,13 @@ export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogic
 
 	// 提交修改
 	const commitInput = (newValue: string) => {
+		if (!editIndex) return
+		const { rowIndex, columnIndex } = editIndex
 		dispatch(
 			inputDispatch({
 				cellIndex: {
-					rowIndex: offsetRowIndex,
-					columnIndex: offsetColumnIndex,
+					rowIndex: rowIndex - 1,
+					columnIndex: columnIndex - 1,
 				},
 				newValue: newValue.trim(),
 			})
@@ -42,7 +43,7 @@ export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogic
 	}
 
 	// 控制输入，记录实时内容
-	const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+	const handleInput = () => {
 		inputRecordRef.current.value = inputItemRef.current?.innerText ?? ""
 	}
 
@@ -70,14 +71,14 @@ export const CellInput: React.FC<CellInputProps> = ({ cellLogicHeight, cellLogic
 		<CellInputItem
 			tabIndex={-1}
 			ref={inputItemRef}
-			$width={cellLogicWidth}
-			$height={cellLogicHeight}
+			$width={width}
+			$height={height}
 			contentEditable
-			$offsetLeft={offsetColumnIndex * (cellLogicWidth - 1) - offsetLeft}
-			$offsetTop={offsetRowIndex * (cellLogicHeight - 1) - offsetTop}
-			$fontSize={fontSize}
+			$offsetLeft={offsetLeft}
+			$offsetTop={offsetTop}
+			$fontSize={16}
 			onFocus={() => handleFocus()}
-			onInput={(e) => handleInput(e)}
+			onInput={() => handleInput()}
 			onBlur={(e) => handleBlur(e)}
 		/>
 	)

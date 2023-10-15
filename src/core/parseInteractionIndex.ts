@@ -16,10 +16,10 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 	if (!mousedownIndex || !mousemoveIndex) return null
 
 	//记录的初始的点击索引
-	let startRowIndex = mousedownIndex.columnIndex
-	let startColumnIndex = mousedownIndex.rowIndex
-	let endRowIndex = mousedownIndex.columnIndex
-	let endColumnIndex = mousedownIndex.rowIndex
+	let startColumnIndex = mousedownIndex.columnIndex
+	let startRowIndex = mousedownIndex.rowIndex
+	let endColumnIndex = mousedownIndex.columnIndex
+	let endRowIndex = mousedownIndex.rowIndex
 	let rowCellCount = 1
 	let columnCellCount = 1
 	const bodyStartIndex = 1
@@ -40,17 +40,17 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 
 	if (isHeader) {
 		//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
-		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
-		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
-		endColumnIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
+		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
+		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
 		endRowIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
+		endColumnIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
 
-		if (rowIndex === 0) {
+		if (columnIndex === 0) {
 			columnCellCount = rowNumber
 			rowCellCount += endRowIndex - startRowIndex
 		}
 
-		if (columnIndex === 0) {
+		if (rowIndex === 0) {
 			rowCellCount = columnNumber
 			columnCellCount += endColumnIndex - startColumnIndex
 		}
@@ -62,13 +62,13 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 		}
 	} else if (isMulti && !isRowColumnHeader) {
 		//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
-		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
-		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
-		endColumnIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
-		endRowIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
+		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
+		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
+		endRowIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
+		endColumnIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
 
-		rowCellCount += endRowIndex - startRowIndex
-		columnCellCount += endColumnIndex - startColumnIndex
+		columnCellCount += endRowIndex - startRowIndex
+		rowCellCount += endColumnIndex - startColumnIndex
 	}
 
 	return {
