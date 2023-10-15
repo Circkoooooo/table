@@ -1,6 +1,6 @@
 import { CustomCanvas, DrawLineProperty } from "."
 import { CellData } from "../cellDataHandler"
-import { DrawConfig, StaticConfig } from "../redux/canvas/canvasSlice"
+import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
@@ -35,19 +35,27 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 	 * @param cellHeight
 	 * @param drawLineProperty
 	 */
-	const drawTableFrame = (_cellWidth: number, _cellHeight: number, tableCellData: CellData, _staticConfig: StaticConfig, _drawLineProperty?: DrawLineProperty) => {
+	const drawTableFrame = (
+		_cellWidth: number,
+		_cellHeight: number,
+		tableCellData: CellData,
+		_staticConfig: CanvasStaticConfig,
+		_tableRowColumnCellConfig: TableRowColumnCellConfig,
+		_drawLineProperty?: DrawLineProperty
+	) => {
+		let dpr = getDpr()
 		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
 		const { headerFontSize } = _staticConfig
+
+		const { rowHeight, columnWidth } = _tableRowColumnCellConfig
 
 		const drawTableState = {
 			offsetTop: 0,
 			offsetLeft: 0,
 			fontSize: 0,
 		}
-
-		let dpr = getDpr()
 
 		const drawLineProperty = {
 			..._drawLineProperty,
@@ -73,11 +81,15 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const maxRenderWidth = offsetStart + cellLogicWidth + maxRenderColumnCellCount * (cellLogicWidth - drawLineWidth)
 		const maxRenderHeight = offsetStart + cellLogicHeight + maxRenderRowCellCount * (cellLogicHeight - drawLineWidth)
 
-		// 单元格内边距
-		const padding = 10
+		//表格渲染主体部分需要偏移的量 = 头部行数或者列数
+		const startBodyOffset = {
+			headerLength: 1,
+		}
+		// canvas渲染的起始渲染位置偏移
+		const startPositionOffset = offsetStart + drawLineWidth
 
 		const getStaticConfig = {
-			headerFontSize: () => headerFontSize * window.devicePixelRatio,
+			headerFontSize: () => headerFontSize * dpr,
 		}
 
 		// 获取渲染偏移量，即滚动条滚动距离
@@ -102,21 +114,35 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			closePath()
 		}
 
+		//TODO: 修复全屏线条绘制不完整
+
 		const drawHorizontalHeader = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
+			let endLineOfCellIndex = 0
+			let sumRenderDiff = 0
+			let renderDiff = 0
+			let currentRenderY = 0
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
 				if (lineIndex > 1) {
-					if (i - ofsTop < cellLogicHeight) continue
+					// 额外偏移
+					const currentCellIndex = endLineOfCellIndex
+					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
+					if (currentConfig !== void 0) {
+						renderDiff = Math.round(currentConfig.value * dpr)
+						sumRenderDiff += renderDiff
+					}
+					currentRenderY = lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop + sumRenderDiff
+					endLineOfCellIndex++
 
 					markLine(
 						{
 							x: offsetStart / 2,
-							y: lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop, //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
+							y: Math.max(cellLogicHeight, currentRenderY), //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
 						},
 						{
 							x: cellLogicWidth,
-							y: lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop,
+							y: Math.max(cellLogicHeight, currentRenderY),
 						}
 					)
 				} else {
@@ -137,17 +163,29 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawVerticalHeader = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
+			let endLineOfCellIndex = 0
+			let sumRenderDiff = 0
+			let renderDiff = 0
+			let currentRenderX = 0
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
-				if (lineIndex > 1) {
-					if (i - ofsLeft < cellLogicWidth) continue
+				if (lineIndex >= 2) {
+					// 额外偏移
+					const currentCellIndex = endLineOfCellIndex
+					const currentConfig = columnWidth.find((item) => item.index === currentCellIndex)
+					if (currentConfig !== void 0) {
+						renderDiff = Math.round(currentConfig.value * dpr)
+						sumRenderDiff += renderDiff
+					}
+					currentRenderX = Math.round(lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff)
+					endLineOfCellIndex++
 
 					markLine(
 						{
-							x: lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft,
+							x: Math.max(cellLogicWidth, currentRenderX),
 							y: offsetStart / 2,
 						},
 						{
-							x: lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft,
+							x: Math.max(cellLogicWidth, currentRenderX),
 							y: cellLogicHeight,
 						}
 					)
@@ -169,35 +207,66 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawBodyHorizontal = () => {
 			const { ofsLeft, ofsTop } = getOfs()
 
+			let endLineOfCellIndex = 0
+			let sumRenderDiff = 0
+			let renderDiff = 0
+			let currentRenderY = 0
+			clipRect(cellLogicWidth, cellLogicHeight, maxRenderWidth, maxRenderHeight - ofsTop)
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
-				if (lineIndex < 2 || i < ofsTop + drawLineWidth + cellHeight) continue
+				if (lineIndex >= 2) {
+					const currentCellIndex = endLineOfCellIndex
+					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
+					if (currentConfig !== void 0) {
+						renderDiff = Math.round(currentConfig.value * dpr)
+						sumRenderDiff += renderDiff
+					}
+					currentRenderY = lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop + sumRenderDiff
+					endLineOfCellIndex++
+				}
+
+				if (currentRenderY < cellLogicHeight) continue
 
 				markLine(
 					{
 						x: cellLogicWidth,
-						y: lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop,
+						y: currentRenderY,
 					},
 					{
 						x: maxRenderWidth - ofsLeft,
-						y: lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop,
+						y: currentRenderY,
 					}
 				)
 			}
+			restoreClip()
 		}
 
 		const drawBodyVertical = () => {
 			const { ofsLeft, ofsTop } = getOfs()
-
+			let endLineOfCellIndex = 0
+			let sumRenderDiff = 0
+			let renderDiff = 0
+			let currentRenderX = 0
 			for (let i = 0, lineIndex = 0; i < maxRenderWidth; i += cellLogicWidth - drawLineWidth, lineIndex++) {
-				if (lineIndex < 2 || i < ofsLeft + drawLineWidth + cellWidth) continue
+				if (lineIndex >= 2) {
+					const currentCellIndex = endLineOfCellIndex
+					const currentConfig = columnWidth.find((item) => item.index === currentCellIndex)
+					if (currentConfig !== void 0) {
+						renderDiff = Math.round(currentConfig.value * dpr)
+						sumRenderDiff += renderDiff
+					}
+					currentRenderX = Math.round(lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff)
+					endLineOfCellIndex++
+				}
+
+				if (currentRenderX < cellLogicWidth) continue
 
 				markLine(
 					{
-						x: lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft,
-						y: offsetStart / 2,
+						x: currentRenderX,
+						y: offsetStart / 2 + cellLogicHeight,
 					},
 					{
-						x: lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft,
+						x: currentRenderX,
 						y: maxRenderHeight - offsetStart - ofsTop,
 					}
 				)
@@ -214,76 +283,91 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			const { ofsLeft, ofsTop } = getOfs()
 
+			const rowNum = 26
+			const columnNum = 26
+			const rowLabels = getRowLabel(rowNum)
 			const columnLabels = getColumnLabel(Math.ceil(width + ofsLeft / cellWidth))
-			let columnCount = 0
 
-			// clip
-			clipRect(cellLogicWidth, 0, maxRenderWidth - cellLogicWidth - ofsLeft, cellLogicHeight)
-			// render columnLabels
-			for (let i = 0, textIndex = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, textIndex++) {
-				if (textIndex === 0) continue
+			// 每个单元格左边所需偏移量
+			let currentSumRenderLeft = 0
+			let currentSumRenderTop = 0
+			const leftOffsetArr: number[] = new Array(columnNum).fill(0).map((item, index) => {
+				currentSumRenderLeft += Math.round((columnWidth.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				return currentSumRenderLeft
+			})
 
-				/**
-				 * offsetStart为每个绘制都有的初始偏移
-				 * cellLogicWidth - drawLineWidth为除了第一个后，排除了cell边框的偏移量
-				 */
-				const positionX = offsetStart + textIndex * (cellLogicWidth - drawLineWidth) + cellLogicWidth / 2 - ofsLeft
-				const positionY = offsetStart + cellLogicHeight / 2
-				fillText(columnLabels[columnCount] ?? 0, positionX, positionY, drawFontsize, "center", "middle")
-				columnCount++
+			const topOffsetArr: number[] = new Array(rowNum).fill(0).map((item, index) => {
+				currentSumRenderTop += Math.round((rowHeight.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				return currentSumRenderTop
+			})
+
+			clipRect(startPositionOffset, cellLogicHeight + startPositionOffset, cellLogicWidth + startPositionOffset, height)
+			for (let row = 0; row < rowNum; row++) {
+				const currentOffsetTop = topOffsetArr[row]
+				const currentRowOffsetTop = topOffsetArr[row + 1] - topOffsetArr[row]
+				const positionX = cellLogicWidth / 2 - startPositionOffset
+				const positionY = (cellLogicHeight + currentRowOffsetTop) / 2 + (row + startBodyOffset.headerLength) * (cellLogicHeight - drawLineWidth) + currentOffsetTop - ofsTop
+				fillText(rowLabels[row], positionX, positionY, drawFontsize, "center", "middle")
 			}
 			restoreClip()
 
-			clipRect(0, cellLogicHeight, cellLogicWidth, maxRenderHeight - cellLogicHeight - ofsTop)
-			// render rowLabels
-			const rowLabels = getRowLabel(Math.ceil(height + ofsTop / cellHeight))
-			let rowCount = 0
-			for (let i = 0, textIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, textIndex++) {
-				if (textIndex === 0) continue
-
-				const positionX = offsetStart + cellLogicWidth / 2
-				const positionY = textIndex * (cellLogicHeight - drawLineWidth) + cellLogicHeight / 2 - ofsTop
-				fillText(rowLabels[rowCount], positionX, positionY, drawFontsize, "center", "middle")
-				rowCount++
+			clipRect(cellLogicWidth + startPositionOffset, startPositionOffset, width, cellLogicHeight + startPositionOffset)
+			for (let column = 0; column < columnNum; column++) {
+				const currentOffsetLeft = leftOffsetArr[column]
+				const currentRowOffsetLeft = leftOffsetArr[column + 1] - leftOffsetArr[column]
+				const positionX = (cellLogicWidth + currentRowOffsetLeft) / 2 + (column + startBodyOffset.headerLength) * (cellLogicWidth - drawLineWidth) + currentOffsetLeft - ofsLeft
+				const positionY = cellLogicHeight / 2 - startPositionOffset
+				fillText(columnLabels[column], positionX, positionY, drawFontsize, "center", "middle")
 			}
 			restoreClip()
 		}
 
+		// 渲染body部分的字体
 		const drawBodyText = (cellData?: CellData) => {
 			const { fillText } = drawText()
 			const { ofsLeft, ofsTop } = getOfs()
-
 			const drawFontsize = getFontSize()
 
-			clipRect(cellWidth + drawLineWidth * 2 + offsetStart, cellHeight + drawLineWidth * 2 + offsetStart, width, height)
+			const rowNum = 26
+			const columnNum = 26
 
-			for (let j = 0, row = 0; j < maxRenderHeight; j += cellHeight + drawLineWidth, row++) {
-				if (j === 0) continue
+			// 每个单元格左边所需偏移量
+			let currentSumRenderLeft = 0
+			let currentSumRenderTop = 0
+			const leftOffsetArr: number[] = new Array(columnNum).fill(0).map((item, index) => {
+				currentSumRenderLeft += Math.round((columnWidth.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				return currentSumRenderLeft
+			})
 
-				for (let i = 0, column = 0; i < maxRenderWidth; i += cellWidth + drawLineWidth, column++) {
-					if (i === 0) continue
+			const topOffsetArr: number[] = new Array(rowNum).fill(0).map((item, index) => {
+				currentSumRenderTop += Math.round((rowHeight.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				return currentSumRenderTop
+			})
 
-					const positionX = i + drawLineWidth + cellWidth / 2 - ofsLeft
-					const positionY = j + cellHeight / 2 + drawLineWidth - ofsTop
+			clipRect(cellLogicWidth, cellLogicHeight, width, height)
 
-					const currentColumn = column
-					const currentRow = row
+			for (let row = 0; row < rowNum; row++) {
+				//diff值是每一个单元格相对于上一个单元格起始渲染位置的偏移量
+				const diffY = cellLogicHeight - drawLineWidth
+				const diffYMultiple = row + startBodyOffset.headerLength
+				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
 
-					const currentValue = (cellData && cellData[currentRow] && cellData[currentRow][currentColumn]) ?? ""
+				for (let column = 0; column < columnNum; column++) {
+					const diffX = cellLogicWidth - drawLineWidth
+					const diffXMultiple = column + startBodyOffset.headerLength
+					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
 
-					clipRect(
-						positionX - (cellLogicWidth - drawLineWidth * 2) / 2,
-						positionY - (cellLogicHeight - drawLineWidth * 2) / 2,
-						cellLogicWidth - drawLineWidth,
-						cellLogicHeight - 2 * drawLineWidth
-					)
-					fillText(`${currentValue}`, positionX - (cellLogicWidth - drawLineWidth * 2) / 2 + padding, positionY, drawFontsize, "left", "middle")
+					clipRect(currentPositionX, currentPositionY, ofsLeft + cellLogicWidth + currentPositionX - startPositionOffset, ofsTop + cellLogicHeight + currentPositionY - startPositionOffset)
+
+					const currentValue = `${(cellData && cellData[row][column]) || ""}`
+					fillText(currentValue, currentPositionX + offsetStart, currentPositionY + offsetStart, drawFontsize, "left", "top")
 					restoreClip()
 				}
 			}
+			restoreClip()
 		}
 
-		const drawAll = (drawConfig: DrawConfig, offsetLeft?: number, offsetTop?: number) => {
+		const drawAll = (drawConfig: CanvasDrawConfig, offsetLeft?: number, offsetTop?: number) => {
 			const { fontSize } = drawConfig
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
 			offsetTop && (drawTableState.offsetTop = offsetTop)

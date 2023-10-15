@@ -31,7 +31,7 @@ const initialState: CanvasRecord = {
 		columnWidth: [
 			{
 				index: 0,
-				value: 10,
+				value: 100,
 			},
 			{
 				index: 4,
