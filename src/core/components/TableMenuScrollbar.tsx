@@ -3,6 +3,7 @@ import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/T
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { updateContainerOffsetDispatch } from "../redux/canvas/canvasSlice"
 import useDebounce from "../../hooks/useDebounce"
+import { calcSumExtraSize } from "../calcSumExtraSize"
 
 type ScrollbarRecord = {
 	isMouseDown: boolean
@@ -180,6 +181,15 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	)
 
 	useEffect(() => {
+		const dpr = getDpr()
+		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
+		const { sumLeftExtra, sumTopExtra } = calcSumExtraSize(
+			{
+				rowHeight,
+				columnWidth,
+			},
+			dpr
+		)
 		canvasContainerRef.current = {
 			canvasContainerWidth: canvasStore.containerWidth,
 			canvasContainerHeight: canvasStore.containerHeight,
@@ -187,8 +197,8 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			canvasContainerMaxHeight: canvasStore.containerMaxHeight,
 			canvasContainerOffsetLeft: canvasStore.containerOffsetLeft,
 			canvasContainerOffsetTop: canvasStore.containerOffsetTop,
-			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft,
-			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop,
+			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft + sumLeftExtra,
+			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop + sumTopExtra,
 		}
 	}, [scrollbarItemLength, direction, canvasStore])
 
