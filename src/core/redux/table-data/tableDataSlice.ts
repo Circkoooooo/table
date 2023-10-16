@@ -2,12 +2,14 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { CellData, createEmptyCellData } from "../../cellDataHandler"
 import { DispatchCellData, DispatchInput } from "./tableDataSlice.types"
 
+export type CellDataInfoNumConfig = {
+	rowNum: number
+	columnNum: number
+}
+
 type CellDataState = {
 	cellData: CellData
-	cellDataInfo: {
-		rowNum: number
-		columnNum: number
-	}
+	cellDataInfo: CellDataInfoNumConfig
 }
 
 const initialState: CellDataState = {
