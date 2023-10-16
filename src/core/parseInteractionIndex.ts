@@ -42,17 +42,17 @@ export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemov
 		//判断拖动尾位置和首位置的索引哪个靠前，靠前的为起始索引
 		startRowIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.rowIndex, mousemoveIndex.rowIndex))
 		startColumnIndex = Math.max(bodyStartIndex, Math.min(mousedownIndex.columnIndex, mousemoveIndex.columnIndex))
-		endRowIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
-		endColumnIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
+		endRowIndex = Math.max(mousedownIndex.rowIndex, mousemoveIndex.rowIndex)
+		endColumnIndex = Math.max(mousedownIndex.columnIndex, mousemoveIndex.columnIndex)
 
 		if (columnIndex === 0) {
-			columnCellCount = rowNumber
-			rowCellCount += endRowIndex - startRowIndex
+			columnCellCount += endRowIndex - startRowIndex
+			rowCellCount = columnNumber
 		}
 
 		if (rowIndex === 0) {
-			rowCellCount = columnNumber
-			columnCellCount += endColumnIndex - startColumnIndex
+			rowCellCount += endColumnIndex - startColumnIndex
+			columnCellCount = rowNumber
 		}
 
 		// 判断是否点击的选中所有行列的单元格
