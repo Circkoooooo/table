@@ -88,7 +88,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			headerLength: 1,
 		}
 		// canvas渲染的起始渲染位置偏移
-		const startPositionOffset = offsetStart + drawLineWidth
+		const startRenderPositionOffset = offsetStart + drawLineWidth
 
 		// table data的info
 		const rowNum = 26
@@ -175,7 +175,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
 						},
 						{
-							x: maxRenderWidth - ofsLeft + sumLeftExtra,
+							x: Math.max(cellLogicWidth, maxRenderWidth - ofsLeft + sumLeftExtra),
 							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
 						}
 					)
@@ -307,24 +307,23 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			const rowLabels = getRowLabel(rowNum)
 			const columnLabels = getColumnLabel(columnNum)
-			console.log(rowLabels)
 
-			clipRect(startPositionOffset, cellLogicHeight + startPositionOffset, cellLogicWidth + startPositionOffset, height)
+			clipRect(startRenderPositionOffset, cellLogicHeight + startRenderPositionOffset, cellLogicWidth + startRenderPositionOffset, height)
 			for (let row = 0; row < rowNum; row++) {
 				const currentOffsetTop = topOffsetArr[row]
 				const currentRowOffsetTop = topOffsetArr[row + 1] - topOffsetArr[row]
-				const positionX = cellLogicWidth / 2 - startPositionOffset
+				const positionX = cellLogicWidth / 2 - startRenderPositionOffset
 				const positionY = (cellLogicHeight + currentRowOffsetTop) / 2 + (row + startBodyOffset.headerLength) * (cellLogicHeight - drawLineWidth) + currentOffsetTop - ofsTop
 				fillText(rowLabels[row], positionX, positionY, drawFontsize, "center", "middle")
 			}
 			restoreClip()
 
-			clipRect(cellLogicWidth + startPositionOffset, startPositionOffset, width, cellLogicHeight + startPositionOffset)
+			clipRect(cellLogicWidth + startRenderPositionOffset, startRenderPositionOffset, width, cellLogicHeight + startRenderPositionOffset)
 			for (let column = 0; column < columnNum; column++) {
 				const currentOffsetLeft = leftOffsetArr[column]
 				const currentRowOffsetLeft = leftOffsetArr[column + 1] - leftOffsetArr[column]
 				const positionX = (cellLogicWidth + currentRowOffsetLeft) / 2 + (column + startBodyOffset.headerLength) * (cellLogicWidth - drawLineWidth) + currentOffsetLeft - ofsLeft
-				const positionY = cellLogicHeight / 2 - startPositionOffset
+				const positionY = cellLogicHeight / 2 - startRenderPositionOffset
 				fillText(columnLabels[column], positionX, positionY, drawFontsize, "center", "middle")
 			}
 			restoreClip()
@@ -352,20 +351,23 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				return currentSumRenderTop
 			})
 
-			clipRect(cellLogicWidth, cellLogicHeight, width, height)
+			clipRect(cellLogicWidth + offsetStart, cellLogicHeight + offsetStart, width, height)
 
 			for (let row = 0; row < rowNum; row++) {
 				//diff值是每一个单元格相对于上一个单元格起始渲染位置的偏移量
 				const diffY = cellLogicHeight - drawLineWidth
-				const diffYMultiple = row + startBodyOffset.headerLength
+				const diffYMultiple = row + startBodyOffset.headerLength //当前渲染的行数
 				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
+				const currentExtraRenderY = topOffsetArr[row + 1] - topOffsetArr[row] //每个单元格相对于默认单元格高度额外需要渲染的长度
 
 				for (let column = 0; column < columnNum; column++) {
 					const diffX = cellLogicWidth - drawLineWidth
 					const diffXMultiple = column + startBodyOffset.headerLength
 					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
-
-					clipRect(currentPositionX, currentPositionY, ofsLeft + cellLogicWidth + currentPositionX - startPositionOffset, ofsTop + cellLogicHeight + currentPositionY - startPositionOffset)
+					const currentExtraRenderX = leftOffsetArr[column + 1] - leftOffsetArr[column]
+					const positionEndX = cellLogicWidth + currentExtraRenderX - startRenderPositionOffset
+					const positionEndY = cellLogicHeight + currentExtraRenderY - startRenderPositionOffset
+					clipRect(currentPositionX, currentPositionY, positionEndX, positionEndY)
 
 					const currentValue = `${(cellData && cellData[row][column]) || ""}`
 					fillText(currentValue, currentPositionX + offsetStart, currentPositionY + offsetStart, drawFontsize, "left", "top")

@@ -190,6 +190,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			},
 			dpr
 		)
+		const scrollExtra = 100
 		canvasContainerRef.current = {
 			canvasContainerWidth: canvasStore.containerWidth,
 			canvasContainerHeight: canvasStore.containerHeight,
@@ -197,8 +198,8 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			canvasContainerMaxHeight: canvasStore.containerMaxHeight,
 			canvasContainerOffsetLeft: canvasStore.containerOffsetLeft,
 			canvasContainerOffsetTop: canvasStore.containerOffsetTop,
-			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft + sumLeftExtra,
-			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop + sumTopExtra,
+			canvasContainerMaxOffsetLeft: canvasStore.containerMaxOffsetLeft + sumLeftExtra + scrollExtra,
+			canvasContainerMaxOffsetTop: canvasStore.containerMaxOffsetTop + sumTopExtra + scrollExtra,
 		}
 	}, [scrollbarItemLength, direction, canvasStore])
 
@@ -321,7 +322,7 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 	return (
 		<TableMenuScrollbarContainer dirction={direction} ref={scrollbarContainerRef}>
-			<TableMenuScrollbarItem $scrollBarLength={scrollbarItemLength()} dirction={direction} ref={scrollbarItemRef} onTouchStart={(e) => {}} onMouseDown={(e) => handleMouseDown(e)} />
+			<TableMenuScrollbarItem $scrollBarLength={scrollbarItemLength()} dirction={direction} ref={scrollbarItemRef} onMouseDown={(e) => handleMouseDown(e)} />
 		</TableMenuScrollbarContainer>
 	)
 }
