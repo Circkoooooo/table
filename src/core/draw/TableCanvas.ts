@@ -1,4 +1,6 @@
 import { CustomCanvas, DrawLineProperty } from "."
+import { calcOffsetArr } from "../calcOffsetArr"
+import { calcSumExtraSize } from "../calcSumExtraSize"
 import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { getColumnLabel, getRowLabel } from "../ruler"
@@ -88,6 +90,29 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// canvas渲染的起始渲染位置偏移
 		const startPositionOffset = offsetStart + drawLineWidth
 
+		// table data的info
+		const rowNum = 26
+		const columnNum = 26
+
+		const { sumLeftExtra, sumTopExtra } = calcSumExtraSize(
+			{
+				rowHeight,
+				columnWidth,
+			},
+			dpr
+		)
+		const { leftOffsetArr, topOffsetArr } = calcOffsetArr(
+			{
+				rowNum,
+				columnNum,
+			},
+			{
+				rowHeight,
+				columnWidth,
+			},
+			dpr
+		)
+
 		const getStaticConfig = {
 			headerFontSize: () => headerFontSize * dpr,
 		}
@@ -113,8 +138,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			strokeLine()
 			closePath()
 		}
-
-		//TODO: 修复全屏线条绘制不完整
 
 		const drawHorizontalHeader = () => {
 			const { ofsLeft, ofsTop } = getOfs()
@@ -152,7 +175,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
 						},
 						{
-							x: maxRenderWidth - ofsLeft,
+							x: maxRenderWidth - ofsLeft + sumLeftExtra,
 							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
 						}
 					)
@@ -197,7 +220,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						},
 						{
 							x: lineIndex === 0 ? offsetStart : cellLogicWidth,
-							y: maxRenderHeight - offsetStart - ofsTop,
+							y: maxRenderHeight - offsetStart - ofsTop + sumTopExtra,
 						}
 					)
 				}
@@ -211,7 +234,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let sumRenderDiff = 0
 			let renderDiff = 0
 			let currentRenderY = 0
-			clipRect(cellLogicWidth, cellLogicHeight, maxRenderWidth, maxRenderHeight - ofsTop)
+
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
 				if (lineIndex >= 2) {
 					const currentCellIndex = endLineOfCellIndex
@@ -228,16 +251,15 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 				markLine(
 					{
-						x: cellLogicWidth,
+						x: cellLogicWidth + offsetStart,
 						y: currentRenderY,
 					},
 					{
-						x: maxRenderWidth - ofsLeft,
+						x: maxRenderWidth - offsetStart - ofsLeft + sumLeftExtra,
 						y: currentRenderY,
 					}
 				)
 			}
-			restoreClip()
 		}
 
 		const drawBodyVertical = () => {
@@ -267,7 +289,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					},
 					{
 						x: currentRenderX,
-						y: maxRenderHeight - offsetStart - ofsTop,
+						y: maxRenderHeight - offsetStart - ofsTop + sumTopExtra,
 					}
 				)
 			}
@@ -283,23 +305,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 			const { ofsLeft, ofsTop } = getOfs()
 
-			const rowNum = 26
-			const columnNum = 26
 			const rowLabels = getRowLabel(rowNum)
-			const columnLabels = getColumnLabel(Math.ceil(width + ofsLeft / cellWidth))
-
-			// 每个单元格左边所需偏移量
-			let currentSumRenderLeft = 0
-			let currentSumRenderTop = 0
-			const leftOffsetArr: number[] = new Array(columnNum).fill(0).map((item, index) => {
-				currentSumRenderLeft += Math.round((columnWidth.find((item) => item.index === index - 1)?.value || 0) * dpr)
-				return currentSumRenderLeft
-			})
-
-			const topOffsetArr: number[] = new Array(rowNum).fill(0).map((item, index) => {
-				currentSumRenderTop += Math.round((rowHeight.find((item) => item.index === index - 1)?.value || 0) * dpr)
-				return currentSumRenderTop
-			})
+			const columnLabels = getColumnLabel(columnNum)
+			console.log(rowLabels)
 
 			clipRect(startPositionOffset, cellLogicHeight + startPositionOffset, cellLogicWidth + startPositionOffset, height)
 			for (let row = 0; row < rowNum; row++) {
