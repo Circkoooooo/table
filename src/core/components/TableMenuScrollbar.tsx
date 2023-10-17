@@ -287,20 +287,18 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			let currentY = 0
 			if (deltaY > 0) {
 				currentY = Math.max(0, Math.min(maxScroll * dpr, y + step))
-				recordEndPosition(x, currentY)
 			} else {
 				currentY = Math.max(0, Math.min(maxScroll * dpr, y - step))
-				recordEndPosition(x, currentY)
 			}
+			recordEndPosition(x, currentY)
 		} else {
 			let currentX = 0
 			if (deltaX > 0) {
 				currentX = Math.max(0, Math.min(maxScroll * dpr, x - step))
-				recordEndPosition(currentX, y)
 			} else {
 				currentX = Math.max(0, Math.min(maxScroll * dpr, x + step))
-				recordEndPosition(currentX, y)
 			}
+			recordEndPosition(currentX, y)
 		}
 
 		calcOffset()
