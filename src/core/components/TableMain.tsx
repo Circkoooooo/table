@@ -49,12 +49,20 @@ const TableMain = () => {
 	const flushTable = useCallback(() => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
-		const { drawAll } = canvasOperate.drawTableFrame(cellWidth, cellHeight, tableDataStore.cellData, canvasStore.tableStaticConfig, canvasStore.tableRowColumnCellConfig, {
-			lineWidth,
-			lineColor: "#bebfb9",
-			maxRenderRowCount: tableDataStore.cellDataInfo.rowNum,
-			maxRenderColumnCount: tableDataStore.cellDataInfo.columnNum,
-		})
+		const { drawAll } = canvasOperate.drawTableFrame(
+			cellWidth,
+			cellHeight,
+			tableDataStore.cellData,
+			tableDataStore.cellDataInfo,
+			canvasStore.tableStaticConfig,
+			canvasStore.tableRowColumnCellConfig,
+			{
+				lineWidth,
+				lineColor: "#bebfb9",
+				maxRenderRowCount: tableDataStore.cellDataInfo.rowNum,
+				maxRenderColumnCount: tableDataStore.cellDataInfo.columnNum,
+			}
+		)
 
 		const offsetLeft = canvasStore.containerOffsetLeft
 		const offsetTop = canvasStore.containerOffsetTop

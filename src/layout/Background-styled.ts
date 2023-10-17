@@ -1,7 +1,6 @@
 import styled from "styled-components"
 
 const BackgroundConfig = {
-	headerHeight: "64px",
 	border: "1px solid rgba(0, 0, 0, 0.1)",
 }
 
@@ -15,8 +14,10 @@ export const Body = styled.div`
 export const Header = styled.header`
 	background-color: #fff;
 	width: 100%;
-	height: ${BackgroundConfig.headerHeight};
 	border-bottom: ${BackgroundConfig.border};
+	display: flex;
+	flex-direction: column;
+	padding: 4px 20px;
 `
 
 export const Main = styled.main`

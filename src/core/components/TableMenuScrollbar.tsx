@@ -271,19 +271,36 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 
 	// 鼠标滚轮实现滚动
 	const handleWheel = useDebounce((e: WheelEvent) => {
-		if (record.current.isMouseDown || direction === "horizontal") return
+		if (record.current.isMouseDown) return
 
 		const { endScreenPosition } = record.current
-
 		const { x, y } = endScreenPosition
+		const dpr = getDpr()
+
 		const deltaY = e.deltaY
+		const deltaX = e.deltaX
 		const maxScroll = scrollbarMaxScroll()
 
-		if (deltaY > 0) {
-			recordEndPosition(x, Math.max(0, Math.min(maxScroll * window.devicePixelRatio, y + 20)))
+		const step = 10
+
+		if (direction === "vertical") {
+			let currentY = 0
+			if (deltaY > 0) {
+				currentY = Math.max(0, Math.min(maxScroll * dpr, y + step))
+			} else {
+				currentY = Math.max(0, Math.min(maxScroll * dpr, y - step))
+			}
+			recordEndPosition(x, currentY)
 		} else {
-			recordEndPosition(x, Math.max(0, Math.min(maxScroll * window.devicePixelRatio, y - 20)))
+			let currentX = 0
+			if (deltaX > 0) {
+				currentX = Math.max(0, Math.min(maxScroll * dpr, x - step))
+			} else {
+				currentX = Math.max(0, Math.min(maxScroll * dpr, x + step))
+			}
+			recordEndPosition(currentX, y)
 		}
+
 		calcOffset()
 	}, 14)
 

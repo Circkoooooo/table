@@ -31,6 +31,8 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicHeight, cell
 				$height={height}
 				$offsetLeft={offsetLeft}
 				$offsetTop={offsetTop}
+				$cellLogicWidth={cellLogicWidth}
+				$cellLogicHeight={cellLogicHeight}
 			/>
 		</HighlightBorderContainer>
 	)

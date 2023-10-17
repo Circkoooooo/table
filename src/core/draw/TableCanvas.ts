@@ -3,6 +3,7 @@ import { calcOffsetArr } from "../calcOffsetArr"
 import { calcSumExtraSize } from "../calcSumExtraSize"
 import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
+import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
@@ -20,7 +21,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		},
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -41,6 +42,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		_cellWidth: number,
 		_cellHeight: number,
 		tableCellData: CellData,
+		_tableCellDataInfo: CellDataInfoNumConfig,
 		_staticConfig: CanvasStaticConfig,
 		_tableRowColumnCellConfig: TableRowColumnCellConfig,
 		_drawLineProperty?: DrawLineProperty
@@ -91,8 +93,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const startRenderPositionOffset = offsetStart + drawLineWidth
 
 		// table data的info
-		const rowNum = 26
-		const columnNum = 26
+		const rowNum = _tableCellDataInfo.rowNum
+		const columnNum = _tableCellDataInfo.columnNum
 
 		const { sumLeftExtra, sumTopExtra } = calcSumExtraSize(
 			{
@@ -335,9 +337,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const { ofsLeft, ofsTop } = getOfs()
 			const drawFontsize = getFontSize()
 
-			const rowNum = 26
-			const columnNum = 26
-
 			// 每个单元格左边所需偏移量
 			let currentSumRenderLeft = 0
 			let currentSumRenderTop = 0
@@ -377,11 +376,24 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			restoreClip()
 		}
 
+		/**
+		 * 渲染头部的背景颜色
+		 */
+		const fillHeaderBackground = (color: string) => {
+			const { ofsLeft, ofsTop } = getOfs()
+			const endX = cellLogicWidth + columnNum * (cellLogicWidth - drawLineWidth) - ofsLeft + sumLeftExtra
+			const endY = cellLogicHeight + rowNum * (cellLogicHeight - drawLineWidth) - ofsTop + sumTopExtra
+			fillRect(offsetStart, offsetStart, endX, cellLogicHeight, color)
+			fillRect(offsetStart, offsetStart, cellLogicWidth, endY, color)
+		}
+
 		const drawAll = (drawConfig: CanvasDrawConfig, offsetLeft?: number, offsetTop?: number) => {
 			const { fontSize } = drawConfig
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
 			offsetTop && (drawTableState.offsetTop = offsetTop)
 			drawTableState.fontSize = fontSize
+
+			fillHeaderBackground("#f9fafb")
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
 			drawHeaderText()
