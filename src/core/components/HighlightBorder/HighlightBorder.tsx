@@ -25,8 +25,6 @@ const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicHeight, cell
 			<HighlightBorderItem
 				$isRender={isRender && width !== 0 && height !== 0}
 				$borderWidth={borderWidth}
-				$rowIndex={1}
-				$columnIndex={4}
 				$width={width}
 				$height={height}
 				$offsetLeft={offsetLeft}
