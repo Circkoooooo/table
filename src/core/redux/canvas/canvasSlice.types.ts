@@ -29,6 +29,15 @@ export type CanvasDrawConfig = {
  */
 export type CanvasStaticConfig = {
 	headerFontSize: number
+	cellDefaultSize: {
+		height: number
+		width: number
+	}
+	cellDefaultLineWidth: number
+	cellDefaultLogicSize: {
+		width: number
+		height: number
+	}
 }
 
 export type TableRowColumnCellConfigExtraSizeConfig = Array<{
@@ -49,7 +58,7 @@ export type CanvasRecord = {
 	containerOffsetTop: number
 	containerMaxOffsetLeft: number
 	containerMaxOffsetTop: number
-	tableStaticConfig: CanvasStaticConfig
+	readonly tableStaticConfig: CanvasStaticConfig
 	drawConfig: CanvasDrawConfig
 	tableRowColumnCellConfig: TableRowColumnCellConfig
 }

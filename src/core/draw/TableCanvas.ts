@@ -357,15 +357,18 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				const diffY = cellLogicHeight - drawLineWidth
 				const diffYMultiple = row + startBodyOffset.headerLength //当前渲染的行数
 				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
-				const currentExtraRenderY = topOffsetArr[row + 1] - topOffsetArr[row] //每个单元格相对于默认单元格高度额外需要渲染的长度
+
+				const currentExtraY = topOffsetArr[row + 1] - topOffsetArr[row]
 
 				for (let column = 0; column < columnNum; column++) {
 					const diffX = cellLogicWidth - drawLineWidth
 					const diffXMultiple = column + startBodyOffset.headerLength
 					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
-					const currentExtraRenderX = leftOffsetArr[column + 1] - leftOffsetArr[column]
-					const positionEndX = cellLogicWidth + currentExtraRenderX - startRenderPositionOffset
-					const positionEndY = cellLogicHeight + currentExtraRenderY - startRenderPositionOffset
+
+					const currentExtraX = leftOffsetArr[column + 1] - leftOffsetArr[column]
+
+					const positionEndX = cellLogicWidth - startRenderPositionOffset + currentExtraX
+					const positionEndY = cellLogicHeight - startRenderPositionOffset + currentExtraY
 					clipRect(currentPositionX, currentPositionY, positionEndX, positionEndY)
 
 					const currentValue = `${(cellData && cellData[row][column]) || ""}`
