@@ -3,6 +3,7 @@ import { calcOffsetArr } from "../calcOffsetArr"
 import { calcSumExtraSize } from "../calcSumExtraSize"
 import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
+import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
 export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
@@ -41,6 +42,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		_cellWidth: number,
 		_cellHeight: number,
 		tableCellData: CellData,
+		_tableCellDataInfo: CellDataInfoNumConfig,
 		_staticConfig: CanvasStaticConfig,
 		_tableRowColumnCellConfig: TableRowColumnCellConfig,
 		_drawLineProperty?: DrawLineProperty
@@ -91,8 +93,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const startRenderPositionOffset = offsetStart + drawLineWidth
 
 		// table data的info
-		const rowNum = 26
-		const columnNum = 26
+		const rowNum = _tableCellDataInfo.rowNum
+		const columnNum = _tableCellDataInfo.columnNum
 
 		const { sumLeftExtra, sumTopExtra } = calcSumExtraSize(
 			{
@@ -334,9 +336,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const { fillText } = drawText()
 			const { ofsLeft, ofsTop } = getOfs()
 			const drawFontsize = getFontSize()
-
-			const rowNum = 26
-			const columnNum = 26
 
 			// 每个单元格左边所需偏移量
 			let currentSumRenderLeft = 0
