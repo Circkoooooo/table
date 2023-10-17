@@ -9,10 +9,6 @@ import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
 import { parseInteractionIndex } from "../parseInteractionIndex"
 
-const lineWidth = 1
-const cellWidth = 100
-const cellHeight = 30
-
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
 	const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -24,13 +20,12 @@ const TableMain = () => {
 	const canvasStore = useAppSelector((state) => state.canvas)
 	const tableDataStore = useAppSelector((state) => state.tableData)
 
-	const [tableCanvasInfo] = useState(() => {
-		const { cellLogicWidth, cellLogicHeight } = calcLogicSize(cellWidth, cellHeight, lineWidth)
-		return {
-			cellLogicWidth,
-			cellLogicHeight,
-		}
-	})
+	const { cellDefaultLogicSize, cellDefaultLineWidth, cellDefaultSize } = canvasStore.tableStaticConfig
+	const lineWidth = cellDefaultLineWidth
+	const logicWidth = cellDefaultLogicSize.width
+	const logicHeight = cellDefaultLogicSize.height
+	const cellWidth = cellDefaultSize.width
+	const cellHeight = cellDefaultSize.height
 
 	// 初始化画布
 	const initTableCanvas = () => {
@@ -68,10 +63,14 @@ const TableMain = () => {
 		const offsetTop = canvasStore.containerOffsetTop
 
 		drawAll(canvasStore.drawConfig, offsetLeft, offsetTop)
-	}, [canvasStore, tableDataStore])
+	}, [canvasStore, tableDataStore, cellWidth, cellHeight, lineWidth])
 
 	//更新滚动内容的尺寸
 	const handleResize = useCallback(() => {
+		const {
+			cellDefaultLogicSize: { height, width },
+		} = canvasStore.tableStaticConfig
+
 		dispatch(
 			updateContainerSizeDispatch({
 				containerWidth: tableMainContainerRef.current?.clientWidth ?? 0,
@@ -80,11 +79,11 @@ const TableMain = () => {
 		)
 		dispatch(
 			updateContainerMaxSizeDispatch({
-				maxWidth: 102 * tableDataStore.cellDataInfo.columnNum + 102, //100为额外渲染长度，TODO:提取为变量
-				maxHeight: 32 * tableDataStore.cellDataInfo.rowNum + 32,
+				maxWidth: width * (tableDataStore.cellDataInfo.columnNum + 1), // +1 为预设值的额外渲染的单元格，用于缓冲表格可视空间
+				maxHeight: height * (tableDataStore.cellDataInfo.rowNum + 1),
 			})
 		)
-	}, [dispatch, tableDataStore])
+	}, [dispatch, tableDataStore, canvasStore.tableStaticConfig])
 
 	//cell input
 	const isEditing = useMemo(() => {
@@ -134,8 +133,6 @@ const TableMain = () => {
 		const lineWidth = 1
 		const borderWidth = 2
 
-		const { cellLogicHeight, cellLogicWidth } = tableCanvasInfo
-
 		let property: HighlightBorderProperty = {
 			borderOffsetLeft: 0,
 			borderOffsetTop: 0,
@@ -182,31 +179,26 @@ const TableMain = () => {
 					extraWidth += value
 				})
 
-			property.offsetLeft = startColumnIndex * (cellLogicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
-			property.offsetTop = startRowIndex * (cellLogicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
-			property.width = rowCellCount * (cellLogicWidth - lineWidth) + extraWidth
-			property.height = columnCellCount * (cellLogicHeight - lineWidth) + extraHeight
+			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
+			property.offsetTop = startRowIndex * (logicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
+			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
+			property.height = columnCellCount * (logicHeight - lineWidth) + extraHeight
 		}
 
 		const newProperty = Object.assign(property, {
-			borderOffsetLeft: cellLogicWidth,
-			borderOffsetTop: cellLogicHeight,
+			borderOffsetLeft: logicWidth,
+			borderOffsetTop: logicHeight,
 			borderWidth: borderWidth,
 		})
 
 		return newProperty
-	}, [canvasStore, interactionStore, tableDataStore, tableCanvasInfo])
+	}, [canvasStore, interactionStore, tableDataStore, logicHeight, logicWidth])
 
 	return (
 		<>
 			<TableMainContainer>
 				<TableRowContainer>
-					<HighlightBorder
-						isRender={!isEditing}
-						highlightBorderProperty={highlightBorderProperty}
-						cellLogicWidth={tableCanvasInfo.cellLogicWidth}
-						cellLogicHeight={tableCanvasInfo.cellLogicHeight}
-					>
+					<HighlightBorder isRender={!isEditing} highlightBorderProperty={highlightBorderProperty} cellLogicWidth={logicWidth} cellLogicHeight={logicHeight}>
 						<CellInput
 							editIndex={interactionStore.editIndex}
 							isRender={isEditing}

@@ -13,6 +13,15 @@ const initialState: CanvasRecord = {
 	tableStaticConfig: {
 		//不可修改的配置
 		headerFontSize: 16, //头部文字的字体大小
+		cellDefaultSize: {
+			width: 100,
+			height: 30,
+		},
+		cellDefaultLineWidth: 1,
+		cellDefaultLogicSize: {
+			width: 102,
+			height: 32,
+		},
 	},
 	drawConfig: {
 		fontSize: 16,

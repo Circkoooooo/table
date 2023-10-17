@@ -21,6 +21,14 @@ const InteractionPanel = () => {
 		isEdit: false,
 	})
 
+	/**
+	 * 获取表格线条和逻辑尺寸的固定默认值
+	 */
+	const { cellDefaultLogicSize, cellDefaultLineWidth } = canvasStore.tableStaticConfig
+	const lineWidth = cellDefaultLineWidth
+	const logicWidth = cellDefaultLogicSize.width
+	const logicHeight = cellDefaultLogicSize.height
+
 	const InteractionMousedown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		e.preventDefault() //防止触发使输入框失焦
 
@@ -34,18 +42,21 @@ const InteractionPanel = () => {
 			top: e.clientY - containerPositon.top,
 		}
 
-		const lineWidth = 1
-		const logicWidth = 102
-		const logicHeight = 32
-
 		// 鼠标的偏移量。如果小于逻辑尺寸，则在头部，否则在body。如果在body上移动，则值需要加上滚动条偏移
 		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
 		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
+
+		const currentRowIndex = getIndexByOffsetStart(ofsTop, lineWidth, logicHeight, rowHeight)
+		const currentColumnIndex = getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth)
+		const maxRowIndex = tableDataStore.cellDataInfo.rowNum
+		const maxColumnIndex = tableDataStore.cellDataInfo.columnNum
+		if (currentRowIndex > maxRowIndex || currentColumnIndex > maxColumnIndex) return
+
 		const index = {
-			rowIndex: Math.min(getIndexByOffsetStart(ofsTop, lineWidth, logicHeight, rowHeight), tableDataStore.cellDataInfo.rowNum),
-			columnIndex: Math.min(getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth), tableDataStore.cellDataInfo.columnNum),
+			rowIndex: currentRowIndex,
+			columnIndex: currentColumnIndex,
 		}
 
 		// 记录组件内部维护的点击值
@@ -74,10 +85,6 @@ const InteractionPanel = () => {
 			left: e.clientX - containerPositon.left,
 			top: e.clientY - containerPositon.top,
 		}
-
-		const lineWidth = 1
-		const logicWidth = 102
-		const logicHeight = 32
 
 		const ofsLeft = Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
 		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
