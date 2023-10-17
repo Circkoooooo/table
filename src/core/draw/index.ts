@@ -158,6 +158,19 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		return { fillText }
 	}
 
+	/**
+	 * 绘制矩形
+	 */
+	const fillRect = (x: number, y: number, endX: number, endY: number, color: string = "#000000") => {
+		const context = getCanvasContext()
+		if (!context) return
+
+		const oldFillStyle = context.fillStyle
+		context.fillStyle = color
+		context.fillRect(x, y, endX, endY)
+		context.fillStyle = oldFillStyle
+	}
+
 	const clipRect = (startX: number, startY: number, endX: number, endY: number) => {
 		const context = getCanvasContext()
 		if (!context) return
@@ -204,6 +217,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		updateCanvasLineWidth,
 		clipRect,
 		restoreClip,
+		fillRect,
 	}
 }
 

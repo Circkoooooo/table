@@ -21,7 +21,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		},
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -376,11 +376,24 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			restoreClip()
 		}
 
+		/**
+		 * 渲染头部的背景颜色
+		 */
+		const fillHeaderBackground = (color: string) => {
+			const { ofsLeft, ofsTop } = getOfs()
+			const endX = cellLogicWidth + columnNum * (cellLogicWidth - drawLineWidth) - ofsLeft + sumLeftExtra
+			const endY = cellLogicHeight + rowNum * (cellLogicHeight - drawLineWidth) - ofsTop + sumTopExtra
+			fillRect(offsetStart, offsetStart, endX, cellLogicHeight, color)
+			fillRect(offsetStart, offsetStart, cellLogicWidth, endY, color)
+		}
+
 		const drawAll = (drawConfig: CanvasDrawConfig, offsetLeft?: number, offsetTop?: number) => {
 			const { fontSize } = drawConfig
 			offsetLeft && (drawTableState.offsetLeft = offsetLeft)
 			offsetTop && (drawTableState.offsetTop = offsetTop)
 			drawTableState.fontSize = fontSize
+
+			fillHeaderBackground("#f0f0f0")
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
 			drawHeaderText()
