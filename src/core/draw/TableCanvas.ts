@@ -6,13 +6,6 @@ import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "
 import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 
-export const calcLogicSize = (cellWidth: number, cellHeight: number, lineWidth: number) => {
-	return {
-		cellLogicWidth: Math.round(cellWidth + 2 * lineWidth),
-		cellLogicHeight: Math.round(cellHeight + 2 * lineWidth),
-	}
-}
-
 const TableCanvas = (canvas: HTMLCanvasElement) => {
 	const canvasState = {
 		currentCanvasSize: {
@@ -69,13 +62,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawLineWidth = (drawLineProperty && drawLineProperty.lineWidth && Math.round(drawLineProperty.lineWidth * dpr)) || Math.round(dpr)
 		drawLineProperty && (drawLineProperty.lineWidth = drawLineWidth)
 
-		// 单元格宽高，适配dpr缩放
-		const cellWidth = Math.round(_cellWidth * dpr)
-		const cellHeight = Math.round(_cellHeight * dpr)
-
-		// 更新logicWidth
-		const { cellLogicWidth, cellLogicHeight } = calcLogicSize(cellWidth, cellHeight, drawLineWidth)
-
+		const { width: cellLogicWidth, height: cellLogicHeight } = _staticConfig.cellDefaultLogicSize
 		// 对其起始位置
 		const offsetStart = Math.round(drawLineWidth / 2)
 
@@ -237,7 +224,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let renderDiff = 0
 			let currentRenderY = 0
 
-			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellHeight + drawLineWidth, lineIndex++) {
+			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
 				if (lineIndex >= 2) {
 					const currentCellIndex = endLineOfCellIndex
 					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
