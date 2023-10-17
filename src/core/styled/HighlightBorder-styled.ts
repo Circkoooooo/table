@@ -9,6 +9,8 @@ interface HighlightBorderItemProps {
 	$height: number
 	$borderWidth: number
 	$isRender: boolean
+	$cellLogicWidth: number
+	$cellLogicHeight: number
 }
 
 export const HighlightBorderContainer = styled.div<{
@@ -24,22 +26,27 @@ export const HighlightBorderContainer = styled.div<{
 	`
 })
 
-export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth, $isRender }) => {
-	if (!$rowIndex || !$columnIndex || !$isRender) return null
+export const HighlightBorderItem = styled.div<HighlightBorderItemProps>(
+	({ $rowIndex, $columnIndex, $offsetLeft, $offsetTop, $height, $width, $borderWidth, $isRender, $cellLogicHeight, $cellLogicWidth }) => {
+		if (!$rowIndex || !$columnIndex || !$isRender) return null
 
-	return css`
-		position: absolute;
-		width: ${$width}px;
-		height: ${$height}px;
-		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
-
-		&:after {
-			box-sizing: border-box;
+		return css`
 			position: absolute;
-			content: "";
-			border: ${$borderWidth}px solid red;
-			height: 100%;
-			width: 100%;
-		}
-	`
-})
+			width: ${$width}px;
+			height: ${$height}px;
+			transform: translate(${$offsetLeft}px, ${$offsetTop}px);
+			overflow: hidden;
+
+			&:after {
+				box-sizing: border-box;
+				position: absolute;
+				content: "";
+				border: ${$borderWidth}px solid blue;
+				height: 100%;
+				width: 100%;
+				background-color: rgba(0, 0, 0, 0.1);
+				opacity: 0.4;
+			}
+		`
+	}
+)

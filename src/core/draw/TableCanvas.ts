@@ -393,7 +393,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			offsetTop && (drawTableState.offsetTop = offsetTop)
 			drawTableState.fontSize = fontSize
 
-			fillHeaderBackground("#f0f0f0")
+			fillHeaderBackground("#f9fafb")
 
 			updateCanvasLineWidth(drawLineProperty.lineWidth)
 			drawHeaderText()
