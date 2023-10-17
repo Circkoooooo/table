@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { CellInputItem } from "../../styled/CellInput-styled"
-import { useAppDispatch } from "../../redux/hooks"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { cancelEditDispatch } from "../../redux/interaction/interactionSlice"
 import { HighlightBorderProperty } from "../HighlightBorder/HighlightBorder"
 import { IndexType } from "../../types/table.type"
@@ -21,6 +21,8 @@ export const CellInput: React.FC<CellInputProps> = ({ highlightBorderProperty: {
 	const inputRecordRef = useRef({
 		value: initialValue,
 	})
+
+	const canvasStore = useAppSelector((state) => state.canvas)
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
@@ -76,7 +78,7 @@ export const CellInput: React.FC<CellInputProps> = ({ highlightBorderProperty: {
 			contentEditable
 			$offsetLeft={offsetLeft}
 			$offsetTop={offsetTop}
-			$fontSize={16}
+			$fontSize={canvasStore.drawConfig.fontSize}
 			onFocus={() => handleFocus()}
 			onInput={() => handleInput()}
 			onBlur={(e) => handleBlur(e)}
