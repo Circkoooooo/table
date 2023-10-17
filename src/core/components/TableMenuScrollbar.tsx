@@ -225,11 +225,9 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	)
 
 	// 记录滚动结束的鼠标位置
-	const recordEndPosition = (screenX: number, screenY: number) => {
-		record.current.endScreenPosition = {
-			x: screenX,
-			y: screenY,
-		}
+	const recordEndPosition = (screenPosition: { screenX?: number; screenY?: number }) => {
+		screenPosition.screenX !== void 0 && (record.current.endScreenPosition.x = screenPosition.screenX)
+		screenPosition.screenY !== void 0 && (record.current.endScreenPosition.y = screenPosition.screenY)
 	}
 
 	const handleMouseDown = useCallback(
@@ -263,7 +261,10 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 			e.preventDefault()
 			if (!record.current.isTouchStart) return
 			const targetTouch = e.targetTouches[0]
-			recordEndPosition(targetTouch.screenX, targetTouch.screenY)
+			recordEndPosition({
+				screenX: targetTouch.screenX,
+				screenY: targetTouch.screenY,
+			})
 			calcOffset(true)
 		},
 		[calcOffset]
@@ -281,24 +282,28 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 		const deltaX = e.deltaX
 		const maxScroll = scrollbarMaxScroll()
 
-		const step = 10
+		const step = 20
 
 		if (direction === "vertical") {
 			let currentY = 0
 			if (deltaY > 0) {
 				currentY = Math.max(0, Math.min(maxScroll * dpr, y + step))
-			} else {
+			} else if (deltaY < 0) {
 				currentY = Math.max(0, Math.min(maxScroll * dpr, y - step))
 			}
-			recordEndPosition(x, currentY)
+			recordEndPosition({
+				screenY: currentY,
+			})
 		} else {
 			let currentX = 0
 			if (deltaX > 0) {
-				currentX = Math.max(0, Math.min(maxScroll * dpr, x - step))
-			} else {
 				currentX = Math.max(0, Math.min(maxScroll * dpr, x + step))
+			} else if (deltaX < 0) {
+				currentX = Math.max(0, Math.min(maxScroll * dpr, x - step))
 			}
-			recordEndPosition(currentX, y)
+			recordEndPosition({
+				screenX: currentX,
+			})
 		}
 
 		calcOffset()
@@ -307,7 +312,10 @@ const TableMenuScrollbar: React.FC<TableMenuScrollbarProps> = ({ direction }) =>
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (!record.current.isMouseDown) return
-			recordEndPosition(e.screenX, e.screenY)
+			recordEndPosition({
+				screenX: e.screenX,
+				screenY: e.screenY,
+			})
 			calcOffset()
 		},
 		[calcOffset]
