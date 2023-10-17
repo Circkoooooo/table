@@ -7,6 +7,7 @@ import { ANTD_THEME } from "../configs/antd-theme"
 import { Provider } from "react-redux"
 import store from "../core/redux/store"
 import { TableMain } from "../core/components/TableMain"
+import { HeaderTitle } from "../core/components/HeaderComponents/HeaderTitle"
 
 interface BackgroundProps {
 	onContextMenu: (mouseEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
@@ -18,6 +19,7 @@ const Background: React.FC<BackgroundProps> = ({ onContextMenu }) => {
 			<Provider store={store}>
 				<Body data-testid="body" onContextMenu={(event) => onContextMenu(event)}>
 					<Header>
+						<HeaderTitle />
 						<HeaderItemContainer>
 							<ItemFontsize />
 						</HeaderItemContainer>
