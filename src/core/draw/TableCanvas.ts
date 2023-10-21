@@ -62,7 +62,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const drawLineWidth = (drawLineProperty && drawLineProperty.lineWidth && Math.round(drawLineProperty.lineWidth * dpr)) || Math.round(dpr)
 		drawLineProperty && (drawLineProperty.lineWidth = drawLineWidth)
 
-		const { width: cellLogicWidth, height: cellLogicHeight } = _staticConfig.cellDefaultLogicSize
+		// 获取配置中逻辑尺寸并适配dpr
+		const _cellDefaultLogicSize = _staticConfig.cellDefaultLogicSize
+		const cellLogicWidth = _cellDefaultLogicSize.width * dpr
+		const cellLogicHeight = _cellDefaultLogicSize.height * dpr
+
 		// 对其起始位置
 		const offsetStart = Math.round(drawLineWidth / 2)
 
@@ -158,6 +162,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						}
 					)
 				} else {
+					//线条索引为0和1的时候绘制，也就是第1，2条线
 					markLine(
 						{
 							x: offsetStart / 2,
@@ -225,8 +230,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let currentRenderY = 0
 
 			for (let i = 0, lineIndex = 0; i < maxRenderHeight; i += cellLogicHeight - drawLineWidth, lineIndex++) {
+				//绘制线条的索引
 				if (lineIndex >= 2) {
-					const currentCellIndex = endLineOfCellIndex
+					const currentCellIndex = endLineOfCellIndex //当前绘制单元格的索引
 					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
 					if (currentConfig !== void 0) {
 						renderDiff = Math.round(currentConfig.value * dpr)
