@@ -14,7 +14,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		},
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect, measureText } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -303,7 +303,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			const rowLabels = getRowLabel(rowNum)
 			const columnLabels = getColumnLabel(columnNum)
 
-			clipRect(startRenderPositionOffset, cellLogicHeight + startRenderPositionOffset, cellLogicWidth + startRenderPositionOffset, height)
+			clipRect(startRenderPositionOffset, cellLogicHeight + startRenderPositionOffset, cellLogicWidth, height)
 			for (let row = 0; row < rowNum; row++) {
 				const currentOffsetTop = topOffsetArr[row]
 				const currentRowOffsetTop = topOffsetArr[row + 1] - topOffsetArr[row]
@@ -343,33 +343,37 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				return currentSumRenderTop
 			})
 
-			clipRect(cellLogicWidth + offsetStart, cellLogicHeight + offsetStart, width, height)
+			// clipRect(cellLogicWidth + offsetStart, cellLogicHeight + offsetStart, width, height)
 
 			for (let row = 0; row < rowNum; row++) {
 				//diff值是每一个单元格相对于上一个单元格起始渲染位置的偏移量
 				const diffY = cellLogicHeight - drawLineWidth
 				const diffYMultiple = row + startBodyOffset.headerLength //当前渲染的行数
-				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
-
+				//当前行在纵向距离上额外需要增加的偏移
 				const currentExtraY = topOffsetArr[row + 1] - topOffsetArr[row]
+
+				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
+				// 最终计算单元格高度
+				const currentCellHeight = Math.round(cellLogicHeight - startRenderPositionOffset + currentExtraY)
 
 				for (let column = 0; column < columnNum; column++) {
 					const diffX = cellLogicWidth - drawLineWidth
 					const diffXMultiple = column + startBodyOffset.headerLength
-					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
-
+					//当前列在横向距离上额外需要增加的偏移
 					const currentExtraX = leftOffsetArr[column + 1] - leftOffsetArr[column]
 
-					const positionEndX = cellLogicWidth - startRenderPositionOffset + currentExtraX
-					const positionEndY = cellLogicHeight - startRenderPositionOffset + currentExtraY
-					clipRect(currentPositionX, currentPositionY, positionEndX, positionEndY)
+					//当前单元格渲染的起始x值
+					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
+					// 最终计算单元格宽度
+					const currentCellWidth = Math.round(cellLogicWidth - startRenderPositionOffset + currentExtraX)
 
+					clipRect(currentPositionX, currentPositionY, currentCellWidth, currentCellHeight)
 					const currentValue = `${(cellData && cellData[row][column]) || ""}`
-					fillText(currentValue, currentPositionX + offsetStart, currentPositionY + offsetStart, drawFontsize, "left", "top")
+					fillText(currentValue, currentPositionX + offsetStart, currentPositionY + offsetStart, drawFontsize, "left", "top", currentCellWidth)
 					restoreClip()
 				}
 			}
-			restoreClip()
+			// restoreClip()
 		}
 
 		/**

@@ -144,7 +144,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 			fontSize: number = canvasState.fontSize,
 			textAlign: CanvasTextAlign = "start",
 			textBaseline: CanvasTextBaseline = "top",
-			maxWidth?: number
+			renderWidth?: number
 		) => {
 			if (!context) return
 
@@ -152,7 +152,42 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 			context.font = `${fontSize}px Microsoft Yahei`
 			context.textAlign = textAlign
 			context.textBaseline = textBaseline
-			context.fillText(text, x + offset, y + offset, maxWidth)
+
+			const measureFillText = measureText(text)
+			//换行
+			const splitTextArr = []
+			if (renderWidth && text !== "") {
+				// renderWidth来作为最大的渲染宽度，实现换行
+				let currentIndex = 0
+				let currentSplitStartIndex = 0
+
+				while (currentIndex < text.length) {
+					const currentText = text.slice(currentSplitStartIndex, currentIndex + 1)
+
+					const measureCurrentText = measureText(currentText)
+					const currentMeasureWidth = measureCurrentText?.width || 0
+
+					if (currentMeasureWidth > renderWidth) {
+						const splitText = text.slice(currentSplitStartIndex, currentIndex)
+						splitTextArr.push(splitText)
+						currentSplitStartIndex = currentIndex
+					}
+
+					if (currentIndex === text.length - 1) {
+						splitTextArr.push(text.slice(currentSplitStartIndex))
+					}
+
+					currentIndex++
+				}
+			} else {
+				splitTextArr.push(text)
+			}
+
+			//渲染每一行
+			splitTextArr.forEach((text, index) => {
+				const textOffset = index * (2 + (measureFillText?.actualBoundingBoxAscent || 0) + (measureFillText?.actualBoundingBoxDescent || 0))
+				context.fillText(text, x + offset, y + offset + textOffset)
+			})
 		}
 
 		return { fillText }
@@ -171,12 +206,12 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		context.fillStyle = oldFillStyle
 	}
 
-	const clipRect = (startX: number, startY: number, endX: number, endY: number) => {
+	const clipRect = (startX: number, startY: number, width: number, height: number) => {
 		const context = getCanvasContext()
 		if (!context) return
 		context.save()
 		context.beginPath()
-		context.rect(startX, startY, endX, endY)
+		context.rect(startX, startY, width, height)
 		context.clip()
 	}
 
