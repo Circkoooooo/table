@@ -14,7 +14,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		},
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect, measureText } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = CustomCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -41,7 +41,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		_drawLineProperty?: DrawLineProperty
 	) => {
 		let dpr = getDpr()
-		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
 		const { headerFontSize } = _staticConfig
