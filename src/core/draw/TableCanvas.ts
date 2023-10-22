@@ -5,6 +5,7 @@ import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
+import { CanvasRenderProperty } from "./types/tableCanvas"
 
 const TableCanvas = (canvas: HTMLCanvasElement) => {
 	const canvasState = {
@@ -38,9 +39,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		_tableCellDataInfo: CellDataInfoNumConfig,
 		_staticConfig: CanvasStaticConfig,
 		_tableRowColumnCellConfig: TableRowColumnCellConfig,
+		_canvasRenderProperty: CanvasRenderProperty,
 		_drawLineProperty?: DrawLineProperty
 	) => {
 		let dpr = getDpr()
+		const { width, height } = canvasState.currentCanvasSize
 		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
 		const { headerFontSize } = _staticConfig
@@ -74,6 +77,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		const maxRenderColumnCellCount = _drawLineProperty?.maxRenderColumnCount ?? 0
 		const maxRenderWidth = offsetStart + cellLogicWidth + maxRenderColumnCellCount * (cellLogicWidth - drawLineWidth)
 		const maxRenderHeight = offsetStart + cellLogicHeight + maxRenderRowCellCount * (cellLogicHeight - drawLineWidth)
+
+		// 可视区域渲染尺寸
+		const { renderWidth, renderHeight } = _canvasRenderProperty
 
 		//表格渲染主体部分需要偏移的量 = 头部行数或者列数
 		const startBodyOffset = {
@@ -109,7 +115,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			headerFontSize: () => headerFontSize * dpr,
 		}
 
-		// 获取渲染偏移量，即滚动条滚动距离
+		/**
+		 * 获取渲染偏移量，即滚动条滚动距离
+		 * @returns
+		 */
 		const getOfs = () => {
 			return {
 				ofsLeft: Math.round((drawTableState.offsetLeft ?? 0) * dpr),
@@ -293,30 +302,29 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		 */
 		const drawHeaderText = () => {
 			const { fillText } = drawText()
-			const { width, height } = canvasState.currentCanvasSize
-
 			const drawFontsize = getStaticConfig.headerFontSize()
-
 			const { ofsLeft, ofsTop } = getOfs()
-
 			const rowLabels = getRowLabel(rowNum)
 			const columnLabels = getColumnLabel(columnNum)
 
-			clipRect(startRenderPositionOffset, cellLogicHeight + startRenderPositionOffset, cellLogicWidth, height)
+			clipRect(startRenderPositionOffset, cellLogicHeight + startRenderPositionOffset, width, height)
 			for (let row = 0; row < rowNum; row++) {
-				const currentOffsetTop = topOffsetArr[row]
-				const currentRowOffsetTop = topOffsetArr[row + 1] - topOffsetArr[row]
-				const positionX = cellLogicWidth / 2 - startRenderPositionOffset
-				const positionY = (cellLogicHeight + currentRowOffsetTop) / 2 + (row + startBodyOffset.headerLength) * (cellLogicHeight - drawLineWidth) + currentOffsetTop - ofsTop
+				const currentOffsetPreRow = topOffsetArr[row]
+				const currentRowOffsetPreRow = topOffsetArr[row + 1] - topOffsetArr[row] //相对于上一行的额外偏移
+
+				const positionX = cellLogicWidth / 2 - startRenderPositionOffset //最终实际渲染位置
+				const positionY = (cellLogicHeight + currentRowOffsetPreRow) / 2 + (row + startBodyOffset.headerLength) * (cellLogicHeight - drawLineWidth) + currentOffsetPreRow - ofsTop
+
 				fillText(rowLabels[row], positionX, positionY, drawFontsize, "center", "middle")
 			}
 			restoreClip()
 
 			clipRect(cellLogicWidth + startRenderPositionOffset, startRenderPositionOffset, width, cellLogicHeight + startRenderPositionOffset)
 			for (let column = 0; column < columnNum; column++) {
-				const currentOffsetLeft = leftOffsetArr[column]
-				const currentRowOffsetLeft = leftOffsetArr[column + 1] - leftOffsetArr[column]
-				const positionX = (cellLogicWidth + currentRowOffsetLeft) / 2 + (column + startBodyOffset.headerLength) * (cellLogicWidth - drawLineWidth) + currentOffsetLeft - ofsLeft
+				const currentOffsetPreColumn = leftOffsetArr[column]
+				const currentRowOffsetPreColumn = leftOffsetArr[column + 1] - leftOffsetArr[column]
+
+				const positionX = (cellLogicWidth + currentRowOffsetPreColumn) / 2 + (column + startBodyOffset.headerLength) * (cellLogicWidth - drawLineWidth) + currentOffsetPreColumn - ofsLeft
 				const positionY = cellLogicHeight / 2 - startRenderPositionOffset
 				fillText(columnLabels[column], positionX, positionY, drawFontsize, "center", "middle")
 			}
@@ -342,14 +350,14 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				return currentSumRenderTop
 			})
 
-			// clipRect(cellLogicWidth + offsetStart, cellLogicHeight + offsetStart, width, height)
+			clipRect(cellLogicWidth + offsetStart, cellLogicHeight + offsetStart, width, 10000)
 
 			for (let row = 0; row < rowNum; row++) {
 				//diff值是每一个单元格相对于上一个单元格起始渲染位置的偏移量
 				const diffY = cellLogicHeight - drawLineWidth
 				const diffYMultiple = row + startBodyOffset.headerLength //当前渲染的行数
 				//当前行在纵向距离上额外需要增加的偏移
-				const currentExtraY = topOffsetArr[row + 1] - topOffsetArr[row]
+				const currentExtraY = (topOffsetArr[row + 1] === void 0 ? topOffsetArr[row] : topOffsetArr[row + 1]) - topOffsetArr[row]
 
 				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
 				// 最终计算单元格高度
@@ -372,7 +380,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					restoreClip()
 				}
 			}
-			// restoreClip()
+			restoreClip()
 		}
 
 		/**
