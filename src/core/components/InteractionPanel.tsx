@@ -4,6 +4,7 @@ import { InteractionPanelContainer } from "../styled/InteractionPanel-styled"
 import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
 import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
+import changeBodyCursor from "../tools/changeBodyCursor"
 
 /**
  * 尺寸和canvas画布容器尺寸一致，用来监听鼠标事件来更新边框的属性
@@ -93,6 +94,13 @@ const InteractionPanel = () => {
 		const index = {
 			rowIndex: Math.min(getIndexByOffsetStart(ofsTop, lineWidth, logicHeight, rowHeight), tableDataStore.cellDataInfo.rowNum),
 			columnIndex: Math.min(getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth), tableDataStore.cellDataInfo.columnNum),
+		}
+
+		// 鼠标在头部索引时的交互事件
+		if (index.columnIndex === 0 || index.rowIndex === 0) {
+			changeBodyCursor("pointer")
+		} else {
+			changeBodyCursor("auto")
 		}
 
 		// 记录组件内部维护的移动值
