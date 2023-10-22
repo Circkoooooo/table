@@ -184,8 +184,18 @@ const TableMain = () => {
 					extraWidth += value
 				})
 
-			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
-			property.offsetTop = startRowIndex * (logicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
+			/**
+			 * 计算出 线条尺寸lineWidth在dpr缩放下 与 非dpr缩放下 的差
+			 * 该差即为canvas绘制中取整后相对于原数据的偏移值。
+			 * 【该偏移值除以dpr来还原成css像素下的所需渲染的尺寸】
+			 *
+			 * 在计算css所需的offsetTop和left时候，每增加一个单元格都额外需要减去一个该偏移值。如果不减去这个偏移，则每多一个单元格都会
+			 * 积累更大的偏移量，导致高亮边框跑出所需渲染区域。
+			 */
+			const lineWidthDiffBacauseOfDpr = (Math.round(lineWidth * window.devicePixelRatio) - lineWidth * window.devicePixelRatio) / window.devicePixelRatio
+
+			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft + extraOffsetLeft
+			property.offsetTop = startRowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop + extraOffsetTop
 			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
 			property.height = columnCellCount * (logicHeight - lineWidth) + extraHeight
 		}
