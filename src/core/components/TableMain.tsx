@@ -138,13 +138,10 @@ const TableMain = () => {
 	 * 记录高亮边框所在位置和尺寸
 	 */
 	const highlightBorderProperty = useMemo<HighlightBorderProperty>(() => {
-		const lineWidth = 1
-		const borderWidth = 2
-
 		let property: HighlightBorderProperty = {
 			borderOffsetLeft: 0,
 			borderOffsetTop: 0,
-			borderWidth: 0,
+			borderWidth: 2,
 			offsetLeft: 0,
 			offsetTop: 0,
 			width: 0,
@@ -189,6 +186,7 @@ const TableMain = () => {
 
 			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
 			property.offsetTop = startRowIndex * (logicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
+
 			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
 			property.height = columnCellCount * (logicHeight - lineWidth) + extraHeight
 		}
@@ -196,11 +194,10 @@ const TableMain = () => {
 		const newProperty = Object.assign(property, {
 			borderOffsetLeft: logicWidth,
 			borderOffsetTop: logicHeight,
-			borderWidth: borderWidth,
 		})
 
 		return newProperty
-	}, [canvasStore, interactionStore, tableDataStore, logicHeight, logicWidth])
+	}, [canvasStore, interactionStore, tableDataStore, logicHeight, logicWidth, lineWidth])
 
 	return (
 		<>

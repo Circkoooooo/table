@@ -30,7 +30,7 @@ const InteractionPanel = () => {
 	const logicWidth = cellDefaultLogicSize.width
 	const logicHeight = cellDefaultLogicSize.height
 
-	const InteractionMousedown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+	const interactionMousedown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		e.preventDefault() //防止触发使输入框失焦
 
 		const containerTargetRect = (e.target as HTMLDivElement).getBoundingClientRect()
@@ -76,7 +76,7 @@ const InteractionPanel = () => {
 		)
 	}
 
-	const InteractionMousemove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+	const interactionMousemove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		const containerTargetRect = (e.target as HTMLDivElement).getBoundingClientRect()
 		const containerPositon = {
 			left: containerTargetRect.left,
@@ -117,7 +117,7 @@ const InteractionPanel = () => {
 		)
 	}
 
-	const InteractionMouseup = () => {
+	const interactionMouseup = () => {
 		interactionRecord.current = {
 			...interactionRecord.current,
 			isMosuedown: false,
@@ -127,7 +127,7 @@ const InteractionPanel = () => {
 	}
 
 	return (
-		<InteractionPanelContainer data-testid="interaction-panel" onMouseDown={(e) => InteractionMousedown(e)} onMouseMove={(e) => InteractionMousemove(e)} onMouseUp={() => InteractionMouseup()} />
+		<InteractionPanelContainer data-testid="interaction-panel" onMouseDown={(e) => interactionMousedown(e)} onMouseMove={(e) => interactionMousemove(e)} onMouseUp={() => interactionMouseup()} />
 	)
 }
 
