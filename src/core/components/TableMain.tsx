@@ -44,6 +44,10 @@ const TableMain = () => {
 	const flushTable = useCallback(() => {
 		if (!tableCanvasOperate.current || !tableMainContainerRef.current) return
 		const canvasOperate = tableCanvasOperate.current
+
+		const renderWidth = canvasStore.containerWidth
+		const renderHeight = canvasStore.containerHeight
+
 		const { drawAll } = canvasOperate.drawTableFrame(
 			cellWidth,
 			cellHeight,
@@ -51,6 +55,10 @@ const TableMain = () => {
 			tableDataStore.cellDataInfo,
 			canvasStore.tableStaticConfig,
 			canvasStore.tableRowColumnCellConfig,
+			{
+				renderWidth,
+				renderHeight,
+			},
 			{
 				lineWidth,
 				lineColor: "#bebfb9",
