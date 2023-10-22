@@ -5,6 +5,8 @@ import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/
 import isIndexEqual from "../tools/isIndexEqual"
 import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
 import changeBodyCursor from "../tools/changeBodyCursor"
+import { IndexType } from "../types/table.type"
+import changeBodyPointerByIndex from "../changeBodyPointerByIndex"
 
 /**
  * 尺寸和canvas画布容器尺寸一致，用来监听鼠标事件来更新边框的属性
@@ -59,6 +61,8 @@ const InteractionPanel = () => {
 			rowIndex: currentRowIndex,
 			columnIndex: currentColumnIndex,
 		}
+
+		changeBodyPointerByIndex("calc", index)
 
 		// 记录组件内部维护的点击值
 		interactionRecord.current.isMosuedown = true
@@ -127,7 +131,13 @@ const InteractionPanel = () => {
 	}
 
 	return (
-		<InteractionPanelContainer data-testid="interaction-panel" onMouseDown={(e) => interactionMousedown(e)} onMouseMove={(e) => interactionMousemove(e)} onMouseUp={() => interactionMouseup()} />
+		<InteractionPanelContainer
+			onMouseOut={() => changeBodyPointerByIndex("reset")}
+			data-testid="interaction-panel"
+			onMouseDown={(e) => interactionMousedown(e)}
+			onMouseMove={(e) => interactionMousemove(e)}
+			onMouseUp={() => interactionMouseup()}
+		/>
 	)
 }
 
