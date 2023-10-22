@@ -185,7 +185,12 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 
 			//渲染每一行
 			splitTextArr.forEach((text, index) => {
-				const textOffset = index * (2 + (measureFillText?.actualBoundingBoxAscent || 0) + (measureFillText?.actualBoundingBoxDescent || 0))
+				/**
+				 * (measureFillText?.actualBoundingBoxAscent || 0) + (measureFillText?.actualBoundingBoxDescent || 0) 计算出文字高度
+				 * 单纯用文字高度来做偏移，文字显示可能会重叠，所以增加2个像素的额外偏移
+				 */
+				const extraOffsetToPreLine = 2
+				const textOffset = index * (extraOffsetToPreLine + (measureFillText?.actualBoundingBoxAscent || 0) + (measureFillText?.actualBoundingBoxDescent || 0))
 				context.fillText(text, x + offset, y + offset + textOffset)
 			})
 		}
