@@ -186,7 +186,6 @@ const TableMain = () => {
 
 			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth) - canvasStore.containerOffsetLeft + extraOffsetLeft
 			property.offsetTop = startRowIndex * (logicHeight - lineWidth) - canvasStore.containerOffsetTop + extraOffsetTop
-
 			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
 			property.height = columnCellCount * (logicHeight - lineWidth) + extraHeight
 		}

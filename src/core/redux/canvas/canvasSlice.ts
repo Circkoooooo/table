@@ -27,26 +27,8 @@ const initialState: CanvasRecord = {
 		fontSize: 16,
 	},
 	tableRowColumnCellConfig: {
-		rowHeight: [
-			{
-				index: 0,
-				value: 10,
-			},
-			{
-				index: 4,
-				value: 60,
-			},
-		],
-		columnWidth: [
-			{
-				index: 0,
-				value: 100,
-			},
-			{
-				index: 4,
-				value: 60,
-			},
-		],
+		rowHeight: [],
+		columnWidth: [],
 	},
 }
 

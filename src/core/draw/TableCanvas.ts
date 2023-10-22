@@ -63,18 +63,18 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		/**
 		 * 线条宽度；适配dpr，整数
 		 */
-		const drawLineWidth = (drawLineProperty && drawLineProperty.lineWidth && Math.round(drawLineProperty.lineWidth * dpr)) || Math.round(dpr)
+		const drawLineWidth = (drawLineProperty && drawLineProperty.lineWidth && drawLineProperty.lineWidth * dpr) || Math.round(dpr)
 		drawLineProperty && (drawLineProperty.lineWidth = drawLineWidth)
 
 		// 获取配置中逻辑尺寸；适配dpr，整数
 		const _cellDefaultLogicSize = _staticConfig.cellDefaultLogicSize
-		const cellLogicWidth = Math.round(_cellDefaultLogicSize.width * dpr)
-		const cellLogicHeight = Math.round(_cellDefaultLogicSize.height * dpr)
+		const cellLogicWidth = _cellDefaultLogicSize.width * dpr
+		const cellLogicHeight = _cellDefaultLogicSize.height * dpr
 
 		/**
 		 * 对其起始位置；整数
 		 */
-		const offsetStart = Math.round(drawLineWidth / 2)
+		const offsetStart = drawLineWidth / 2
 
 		//最大渲染尺寸
 		const maxRenderRowCellCount = _drawLineProperty?.maxRenderRowCount ?? 0
@@ -130,8 +130,8 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		 */
 		const getOfs = () => {
 			return {
-				ofsLeft: Math.round((drawTableState.offsetLeft ?? 0) * dpr),
-				ofsTop: Math.round((drawTableState.offsetTop ?? 0) * dpr),
+				ofsLeft: (drawTableState.offsetLeft ?? 0) * dpr,
+				ofsTop: (drawTableState.offsetTop ?? 0) * dpr,
 			}
 		}
 
@@ -164,33 +164,35 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 					// 如果设置了行的额外高度配置，则计算额外的高度
 					if (currentConfig !== void 0) {
-						renderDiff = Math.round(currentConfig.value * dpr)
+						renderDiff = currentConfig.value * dpr
 						sumRenderDiff += renderDiff
 					}
 					// 最终计算应该渲染的Y
 					currentRenderY = lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop + sumRenderDiff
 					endLineOfCellIndex++
 
+					const positionY = Math.round(Math.max(cellLogicHeight, currentRenderY))
 					markLine(
 						{
 							x: offsetStart / 2,
-							y: Math.round(Math.max(cellLogicHeight, currentRenderY)), //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
+							y: positionY, //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
 						},
 						{
 							x: cellLogicWidth,
-							y: Math.round(Math.max(cellLogicHeight, currentRenderY)),
+							y: positionY,
 						}
 					)
 				} else {
+					const positionY = Math.round(lineIndex === 0 ? offsetStart : cellLogicHeight)
 					//线条索引为0和1的时候绘制，也就是第1，2条线
 					markLine(
 						{
 							x: offsetStart / 2,
-							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
+							y: positionY,
 						},
 						{
 							x: Math.max(cellLogicWidth, maxRenderWidth - ofsLeft + sumLeftExtra),
-							y: lineIndex === 0 ? offsetStart : cellLogicHeight,
+							y: positionY,
 						}
 					)
 				}
@@ -210,30 +212,33 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					const currentCellIndex = endLineOfCellIndex
 					const currentConfig = columnWidth.find((item) => item.index === currentCellIndex)
 					if (currentConfig !== void 0) {
-						renderDiff = Math.round(currentConfig.value * dpr)
+						renderDiff = currentConfig.value * dpr
 						sumRenderDiff += renderDiff
 					}
 					endLineOfCellIndex++
 
 					currentRenderX = lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff
+
+					const positionX = Math.round(Math.max(cellLogicWidth, currentRenderX))
 					markLine(
 						{
-							x: Math.max(cellLogicWidth, currentRenderX),
+							x: positionX,
 							y: offsetStart / 2,
 						},
 						{
-							x: Math.max(cellLogicWidth, currentRenderX),
+							x: positionX,
 							y: cellLogicHeight,
 						}
 					)
 				} else {
+					const positionX = Math.round(lineIndex === 0 ? offsetStart : cellLogicWidth)
 					markLine(
 						{
-							x: lineIndex === 0 ? offsetStart : cellLogicWidth,
+							x: positionX,
 							y: offsetStart / 2,
 						},
 						{
-							x: lineIndex === 0 ? offsetStart : cellLogicWidth,
+							x: positionX,
 							y: maxRenderHeight - offsetStart - ofsTop + sumTopExtra,
 						}
 					)
@@ -255,7 +260,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					const currentCellIndex = endLineOfCellIndex //当前绘制单元格的索引
 					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
 					if (currentConfig !== void 0) {
-						renderDiff = Math.round(currentConfig.value * dpr)
+						renderDiff = currentConfig.value * dpr
 						sumRenderDiff += renderDiff
 					}
 					currentRenderY = lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop + sumRenderDiff
@@ -267,11 +272,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				markLine(
 					{
 						x: cellLogicWidth + offsetStart,
-						y: currentRenderY,
+						y: Math.round(currentRenderY),
 					},
 					{
 						x: maxRenderWidth - offsetStart - ofsLeft + sumLeftExtra,
-						y: currentRenderY,
+						y: Math.round(currentRenderY),
 					}
 				)
 			}
@@ -288,10 +293,10 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					const currentCellIndex = endLineOfCellIndex
 					const currentConfig = columnWidth.find((item) => item.index === currentCellIndex)
 					if (currentConfig !== void 0) {
-						renderDiff = Math.round(currentConfig.value * dpr)
+						renderDiff = currentConfig.value * dpr
 						sumRenderDiff += renderDiff
 					}
-					currentRenderX = Math.round(lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff)
+					currentRenderX = lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff
 					endLineOfCellIndex++
 				}
 
@@ -299,11 +304,11 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 
 				markLine(
 					{
-						x: currentRenderX,
+						x: Math.round(currentRenderX),
 						y: offsetStart / 2 + cellLogicHeight,
 					},
 					{
-						x: currentRenderX,
+						x: Math.round(currentRenderX),
 						y: maxRenderHeight - offsetStart - ofsTop + sumTopExtra,
 					}
 				)
@@ -353,12 +358,12 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			let currentSumRenderLeft = 0
 			let currentSumRenderTop = 0
 			const leftOffsetArr: number[] = new Array(columnNum).fill(0).map((item, index) => {
-				currentSumRenderLeft += Math.round((columnWidth.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				currentSumRenderLeft += (columnWidth.find((item) => item.index === index - 1)?.value || 0) * dpr
 				return currentSumRenderLeft
 			})
 
 			const topOffsetArr: number[] = new Array(rowNum).fill(0).map((item, index) => {
-				currentSumRenderTop += Math.round((rowHeight.find((item) => item.index === index - 1)?.value || 0) * dpr)
+				currentSumRenderTop += (rowHeight.find((item) => item.index === index - 1)?.value || 0) * dpr
 				return currentSumRenderTop
 			})
 

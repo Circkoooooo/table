@@ -61,6 +61,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 	const getPixelOffset = (lineWidth: number) => {
 		const ctx = getCanvasContext()
 		if (!ctx) return null
+
 		return lineWidth % 2 === 0 ? 0 : 0.5
 	}
 
