@@ -44,8 +44,8 @@ const InteractionPanel = () => {
 		}
 
 		// 鼠标的偏移量。如果小于逻辑尺寸，则在头部，否则在body。如果在body上移动，则值需要加上滚动条偏移
-		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
-		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
+		const ofsLeft = mousePositon.left < logicWidth ? mousePositon.left : mousePositon.left + canvasStore.containerOffsetLeft
+		const ofsTop = mousePositon.top < logicHeight ? mousePositon.top : mousePositon.top + canvasStore.containerOffsetTop
 
 		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
 

@@ -60,16 +60,20 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			..._drawLineProperty,
 		}
 
-		// 线条宽度，适配dpr缩放
+		/**
+		 * 线条宽度；适配dpr，整数
+		 */
 		const drawLineWidth = (drawLineProperty && drawLineProperty.lineWidth && Math.round(drawLineProperty.lineWidth * dpr)) || Math.round(dpr)
 		drawLineProperty && (drawLineProperty.lineWidth = drawLineWidth)
 
-		// 获取配置中逻辑尺寸并适配dpr
+		// 获取配置中逻辑尺寸；适配dpr，整数
 		const _cellDefaultLogicSize = _staticConfig.cellDefaultLogicSize
-		const cellLogicWidth = _cellDefaultLogicSize.width * dpr
-		const cellLogicHeight = _cellDefaultLogicSize.height * dpr
+		const cellLogicWidth = Math.round(_cellDefaultLogicSize.width * dpr)
+		const cellLogicHeight = Math.round(_cellDefaultLogicSize.height * dpr)
 
-		// 对其起始位置
+		/**
+		 * 对其起始位置；整数
+		 */
 		const offsetStart = Math.round(drawLineWidth / 2)
 
 		//最大渲染尺寸
@@ -81,11 +85,16 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		// 可视区域渲染尺寸
 		const { renderWidth, renderHeight } = _canvasRenderProperty
 
-		//表格渲染主体部分需要偏移的量 = 头部行数或者列数
+		/**
+		 * 表格渲染主体部分需要偏移的量 = 头部行数或者列数。整数
+		 */
 		const startBodyOffset = {
 			headerLength: 1,
 		}
-		// canvas渲染的起始渲染位置偏移
+
+		/**
+		 * canvas渲染的起始渲染位置偏移;整数
+		 */
 		const startRenderPositionOffset = offsetStart + drawLineWidth
 
 		// table data的info
@@ -116,7 +125,7 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 		}
 
 		/**
-		 * 获取渲染偏移量，即滚动条滚动距离
+		 * 获取渲染偏移量，即滚动条滚动距离；适配dpr，整数
 		 * @returns
 		 */
 		const getOfs = () => {
@@ -152,21 +161,24 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					// 额外偏移
 					const currentCellIndex = endLineOfCellIndex
 					const currentConfig = rowHeight.find((item) => item.index === currentCellIndex)
+
+					// 如果设置了行的额外高度配置，则计算额外的高度
 					if (currentConfig !== void 0) {
 						renderDiff = Math.round(currentConfig.value * dpr)
 						sumRenderDiff += renderDiff
 					}
+					// 最终计算应该渲染的Y
 					currentRenderY = lineIndex * (cellLogicHeight - drawLineWidth) + offsetStart - ofsTop + sumRenderDiff
 					endLineOfCellIndex++
 
 					markLine(
 						{
 							x: offsetStart / 2,
-							y: Math.max(cellLogicHeight, currentRenderY), //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
+							y: Math.round(Math.max(cellLogicHeight, currentRenderY)), //2个盒子之间有重叠的边框，所以逻辑宽度还要减去1个边框
 						},
 						{
 							x: cellLogicWidth,
-							y: Math.max(cellLogicHeight, currentRenderY),
+							y: Math.round(Math.max(cellLogicHeight, currentRenderY)),
 						}
 					)
 				} else {
@@ -201,9 +213,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 						renderDiff = Math.round(currentConfig.value * dpr)
 						sumRenderDiff += renderDiff
 					}
-					currentRenderX = Math.round(lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff)
 					endLineOfCellIndex++
 
+					currentRenderX = lineIndex * (cellLogicWidth - drawLineWidth) + offsetStart - ofsLeft + sumRenderDiff
 					markLine(
 						{
 							x: Math.max(cellLogicWidth, currentRenderX),
@@ -359,9 +371,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 				//当前行在纵向距离上额外需要增加的偏移
 				const currentExtraY = (topOffsetArr[row + 1] === void 0 ? topOffsetArr[row] : topOffsetArr[row + 1]) - topOffsetArr[row]
 
-				const currentPositionY = Math.round(drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop)
+				const currentPositionY = drawLineWidth + diffYMultiple * diffY + topOffsetArr[row] - ofsTop
 				// 最终计算单元格高度
-				const currentCellHeight = Math.round(cellLogicHeight - startRenderPositionOffset + currentExtraY)
+				const currentCellHeight = cellLogicHeight - startRenderPositionOffset + currentExtraY
 
 				for (let column = 0; column < columnNum; column++) {
 					const diffX = cellLogicWidth - drawLineWidth
@@ -370,9 +382,9 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 					const currentExtraX = leftOffsetArr[column + 1] - leftOffsetArr[column]
 
 					//当前单元格渲染的起始x值
-					const currentPositionX = Math.round(diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft)
+					const currentPositionX = diffXMultiple * diffX + leftOffsetArr[column] - ofsLeft
 					// 最终计算单元格宽度
-					const currentCellWidth = Math.round(cellLogicWidth - startRenderPositionOffset + currentExtraX)
+					const currentCellWidth = cellLogicWidth - startRenderPositionOffset + currentExtraX
 
 					clipRect(currentPositionX, currentPositionY, currentCellWidth, currentCellHeight)
 					const currentValue = `${(cellData && cellData[row][column]) || ""}`

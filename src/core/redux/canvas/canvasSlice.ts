@@ -19,8 +19,8 @@ const initialState: CanvasRecord = {
 		},
 		cellDefaultLineWidth: 1,
 		cellDefaultLogicSize: {
-			width: 102,
-			height: 32,
+			width: 100 + 2 * 1,
+			height: 30 + 2 * 1,
 		},
 	},
 	drawConfig: {
