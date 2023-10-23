@@ -1,4 +1,4 @@
-import { IndexType } from "../types/table"
+import { IndexType } from "../types/table.types"
 
 const isIndexEqual = (index: IndexType | null, targetIndex: IndexType | null) => {
 	if (!index || !targetIndex) return false

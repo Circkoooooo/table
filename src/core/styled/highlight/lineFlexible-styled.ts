@@ -14,8 +14,7 @@ export const LineFlexiblePanel = styled.div`
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	backgorund: red;
-	z-index: 100;
+	z-index: 1;
 	pointer-events: none;
 `
 
@@ -25,13 +24,16 @@ export const LineFlexibleContainer = styled.div<LineFlexibleContainerProps>(({ $
 
 	return css`
 		position: absolute;
-		width: ${width}px;
+		width: 100%;
 		height: ${height}px;
 		transform: translate(${$rowIndex === 0 ? $ofsLeft : 0}px, ${$columnIndex === 0 ? $ofsTop : 0}px);
 	`
 })
 
-export const LineFlexibleItem = styled.div`
+/**
+ * 触发尺寸调整的交互控件
+ */
+export const LineFlexibleControls = styled.div`
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -48,3 +50,24 @@ export const LineFlexibleItem = styled.div`
 		cursor: row-resize;
 	}
 `
+
+interface LineFlexibleTipsBarProps {
+	$isTipsBarShow: boolean
+	$ofsLeft: number
+	$ofsTop: number
+}
+
+export const LineFlexibleTipsBar = styled.div<LineFlexibleTipsBarProps>(({ $isTipsBarShow, $ofsLeft, $ofsTop }) => {
+	return css`
+		position: absolute;
+		display: ${$isTipsBarShow ? "" : "none"};
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		left: 0;
+		top: 0;
+		border-top: 2px dotted red;
+		transform: translate(${$ofsLeft}px, ${$ofsTop}px);
+	`
+})

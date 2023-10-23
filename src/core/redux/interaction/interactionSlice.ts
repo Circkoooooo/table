@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { IndexType } from "../../types/table"
-import { DispatchMousedown, DispatchMousemove, DispatchMousemoveHeader } from "./interactionSlice.types"
+import { IndexType } from "../../types/table.types"
 import { isTableHeader } from "../../tools/isIndexHeader"
+import type { DispatchMousedown, DispatchMousemoveHeader, DispatchMousemove } from "./interactionSlice.types"
 
 export type InteractionRecord = {
 	isMousedown: boolean

@@ -9,6 +9,7 @@ import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
 import { parseInteractionIndex } from "../parseInteractionIndex"
 import { LineFlexible } from "./LineFlexible/LineFlexible"
+import { calcIndexExtraRenderSize } from "../calcIndexExtraRenderSize"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
@@ -170,20 +171,14 @@ const TableMain = () => {
 		const rowHeightArrs = canvasStore.tableRowColumnCellConfig.rowHeight
 		const columnWidthArrs = canvasStore.tableRowColumnCellConfig.columnWidth
 
+		let extraWidth = 0
+		let extraHeight = 0
 		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, tableDataStore.cellDataInfo.rowNum, tableDataStore.cellDataInfo.columnNum)
 		if (interactionIndex) {
 			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex
 
 			//额外的上方偏移。选中单元格上方非默认高度的额外高度之和。
-			let extraOffsetTop = rowHeightArrs
-				.filter(({ index }) => index < startRowIndex)
-				.map((item) => item.value)
-				.reduce((pre, cur) => pre + cur, 0)
-
-			let extraOffsetLeft = columnWidthArrs
-				.filter(({ index }) => index < startColumnIndex)
-				.map((item) => item.value)
-				.reduce((pre, cur) => pre + cur, 0)
+			const { extraOffsetLeft, extraOffsetTop } = calcIndexExtraRenderSize(rowHeightArrs, columnWidthArrs, startRowIndex, startColumnIndex)
 
 			rowHeightArrs
 				.filter(({ index }) => index >= startRowIndex && index < startRowIndex + columnCellCount)
@@ -197,8 +192,6 @@ const TableMain = () => {
 					extraWidth += value
 				})
 
-			let extraHeight = 0
-			let extraWidth = 0
 			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft + extraOffsetLeft
 			property.offsetTop = startRowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop + extraOffsetTop
 			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
@@ -208,8 +201,10 @@ const TableMain = () => {
 		/****************** mousemoveHeader处理逻辑***************8 */
 		if (interactionStore.mousemoveHeader) {
 			const { rowIndex, columnIndex } = interactionStore.mousemoveHeader
-			property.mousemoveHeaderOffsetLeft = columnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft
-			property.mousemoveHeaderOffsetTop = rowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop
+			const { extraOffsetLeft, extraOffsetTop } = calcIndexExtraRenderSize(rowHeightArrs, columnWidthArrs, rowIndex, columnIndex)
+
+			property.mousemoveHeaderOffsetLeft = columnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft + extraOffsetLeft
+			property.mousemoveHeaderOffsetTop = rowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop + extraOffsetTop
 		}
 
 		const newProperty = Object.assign(property, {

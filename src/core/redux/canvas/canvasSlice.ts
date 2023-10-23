@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
-import { CanvasRecord, DispatchUpdateContainerSize, DispatchUpdateDrawConfigFontSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize } from "./canvasSlice.types"
+import { CanvasRecord, DispatchUpdateContainerSize, DispatchUpdateDrawConfigFontSize, DispatchUpdateMaxSize, DispatchUpdateOffsetSize, DispatchUpdateRowColumnCellConfig } from "./canvasSlice.types"
 
 const initialState: CanvasRecord = {
 	containerWidth: 0,
@@ -73,9 +73,40 @@ const canvasSlice = createSlice({
 
 			state.drawConfig.fontSize = value
 		},
+		updateRowColumnCellConfigDispatch: (state, action: PayloadAction<DispatchUpdateRowColumnCellConfig>) => {
+			const { type, index, value } = action.payload
+
+			const rowHeight = state.tableRowColumnCellConfig.rowHeight
+			const columnWidth = state.tableRowColumnCellConfig.columnWidth
+
+			// 在原来数组中找是否有该索引，有则更新，无则添加
+			if (type === "row") {
+				const existRecord = rowHeight.find((item) => item.index === index)
+				if (existRecord) {
+					existRecord.value += value
+				} else {
+					rowHeight.push({
+						index,
+						value,
+					})
+				}
+				state.tableRowColumnCellConfig.rowHeight = rowHeight
+			} else {
+				const existRecord = columnWidth.find((item) => item.index === index)
+				if (existRecord) {
+					existRecord.value += value
+				} else {
+					columnWidth.push({
+						index,
+						value,
+					})
+				}
+				state.tableRowColumnCellConfig.columnWidth = columnWidth
+			}
+		},
 	},
 })
 
-export const { updateContainerSizeDispatch, updateContainerMaxSizeDispatch, updateContainerOffsetDispatch, updateDrawConfigFontSize } = canvasSlice.actions
+export const { updateContainerSizeDispatch, updateContainerMaxSizeDispatch, updateContainerOffsetDispatch, updateDrawConfigFontSize, updateRowColumnCellConfigDispatch } = canvasSlice.actions
 
 export default canvasSlice.reducer

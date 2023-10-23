@@ -1,5 +1,5 @@
 import { CellDataElement } from "../../cellDataHandler"
-import { IndexType } from "../../types/table"
+import { IndexType } from "../../types/table.types"
 
 export type DispatchMousedown = {
 	cellIndex: IndexType

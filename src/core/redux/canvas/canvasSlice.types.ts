@@ -17,6 +17,12 @@ export type DispatchUpdateDrawConfigFontSize = {
 	value: number
 }
 
+export type DispatchUpdateRowColumnCellConfig = {
+	type: "row" | "column",
+	index: number
+	value: number
+}
+
 /**
  * 表格绘制中动态修改的配置
  */
@@ -44,6 +50,7 @@ export type TableRowColumnCellConfigExtraSizeConfig = Array<{
 	index: number
 	value: number
 }>
+
 export type TableRowColumnCellConfig = {
 	rowHeight: TableRowColumnCellConfigExtraSizeConfig
 	columnWidth: TableRowColumnCellConfigExtraSizeConfig

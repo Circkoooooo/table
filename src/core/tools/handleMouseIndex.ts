@@ -1,4 +1,4 @@
-import { IndexType } from "../types/table"
+import { IndexType } from "../types/table.types"
 
 /**
  * Parse the start and end index from mousedownIndex and mousemoveIndex.

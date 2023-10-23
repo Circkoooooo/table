@@ -44,6 +44,7 @@ export const TableMenuScrollbarContainer = styled.div<Direcion>`
 	padding: 4px;
 	border-radius: 2px;
 	user-select: none;
+	z-index: 2;
 `
 
 type ScrollbarItem = {

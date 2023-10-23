@@ -1,5 +1,5 @@
 import changeBodyCursor from "./tools/changeBodyCursor"
-import { IndexType } from "./types/table"
+import { IndexType } from "./types/table.types"
 
 /**
  * type参数为reset则改变cursor为pointer；如果是calc，则提取第二个参数index，判断是否是pointer

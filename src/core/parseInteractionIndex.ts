@@ -1,6 +1,6 @@
 import isIndexEqual from "./tools/isIndexEqual"
 import { isTableHeader } from "./tools/isIndexHeader"
-import { IndexType } from "./types/table"
+import { IndexType } from "./types/table.types"
 
 /**
  *
