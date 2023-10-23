@@ -1,5 +1,5 @@
 import { CellDataElement } from "../../cellDataHandler"
-import { IndexType } from "../../types/table.type"
+import { IndexType } from "../../types/table"
 
 export type DispatchInput = {
 	cellIndex: IndexType

@@ -1,4 +1,4 @@
-import { HighlightBorderContainer, HighlightBorderItem } from "../../styled/HighlightBorder-styled"
+import { HighlightBorderContainer, HighlightBorderItem } from "../../styled/highlight/HighlightBorder-styled"
 
 interface HighlightBorderProps {
 	highlightBorderProperty: HighlightBorderProperty

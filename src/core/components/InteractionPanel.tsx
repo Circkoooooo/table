@@ -1,6 +1,6 @@
 import { useRef } from "react"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { InteractionPanelContainer } from "../styled/InteractionPanel-styled"
+import { InteractionPanelContainer } from "../styled/interaction/InteractionPanel-styled"
 import { mousedownDispatch, mousemoveDispatch, mousemoveHeaderDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
 import { getIndexByOffsetStart } from "../getIndexByOffsetStart"

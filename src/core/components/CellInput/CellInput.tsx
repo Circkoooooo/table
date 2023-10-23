@@ -3,7 +3,7 @@ import { CellInputItem } from "../../styled/CellInput-styled"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { cancelEditDispatch } from "../../redux/interaction/interactionSlice"
 import { HighlightBorderProperty } from "../HighlightBorder/HighlightBorder"
-import { IndexType } from "../../types/table.type"
+import { IndexType } from "../../types/table"
 import { inputDispatch } from "../../redux/table-data/tableDataSlice"
 import { CellDataElement } from "../../cellDataHandler"
 
