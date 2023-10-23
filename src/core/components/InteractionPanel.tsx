@@ -1,11 +1,10 @@
 import { useRef } from "react"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { InteractionPanelContainer } from "../styled/InteractionPanel-styled"
-import { mousedownDispatch, mousemoveDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
+import { mousedownDispatch, mousemoveDispatch, mousemoveHeaderDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
 import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
 import changeBodyCursor from "../tools/changeBodyCursor"
-import { IndexType } from "../types/table.type"
 import changeBodyPointerByIndex from "../changeBodyPointerByIndex"
 
 /**
@@ -100,25 +99,38 @@ const InteractionPanel = () => {
 			columnIndex: Math.min(getIndexByOffsetStart(ofsLeft, lineWidth, logicWidth, columnWidth), tableDataStore.cellDataInfo.columnNum),
 		}
 
+		//mousemoveDispatch 当鼠标按下时候记录的索引
+		function dispatchMove() {
+			dispatch(
+				mousemoveDispatch({
+					cellIndex: {
+						rowIndex: index.rowIndex,
+						columnIndex: index.columnIndex,
+					},
+				})
+			)
+		}
+		/****************************鼠标在头部时，直接记录move索引。在非头部时候，mousedown的时候记录move索引*********************************************** */
+		//只要鼠标在头部,就会记录mousemoveHeader索引,不在头部的时候就会记录为null
+		dispatch(
+			mousemoveHeaderDispatch({
+				cellIndex: index,
+			})
+		)
+
 		// 鼠标在头部索引时的交互事件
 		if (index.columnIndex === 0 || index.rowIndex === 0) {
 			changeBodyCursor("pointer")
+			dispatchMove()
 		} else {
 			changeBodyCursor("auto")
 		}
 
 		// 记录组件内部维护的移动值
-		interactionRecord.current.isMousemove = true
+		// interactionRecord.current.isMousemove = true
 
 		if (!interactionRecord.current.isMosuedown) return
-		dispatch(
-			mousemoveDispatch({
-				cellIndex: {
-					rowIndex: index.rowIndex,
-					columnIndex: index.columnIndex,
-				},
-			})
-		)
+		dispatchMove()
 	}
 
 	const interactionMouseup = () => {
@@ -130,9 +142,13 @@ const InteractionPanel = () => {
 		dispatch(mouseupDispatch())
 	}
 
+	const interactionMouseout = () => {
+		changeBodyPointerByIndex("reset")
+	}
+
 	return (
 		<InteractionPanelContainer
-			onMouseOut={() => changeBodyPointerByIndex("reset")}
+			onMouseOut={() => interactionMouseout()}
 			data-testid="interaction-panel"
 			onMouseDown={(e) => interactionMousedown(e)}
 			onMouseMove={(e) => interactionMousemove(e)}

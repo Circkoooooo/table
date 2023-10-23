@@ -15,3 +15,7 @@ export type DispatchInput = {
 	cellIndex: IndexType
 	newValue: CellDataElement
 }
+
+export type DispatchMousemoveHeader = {
+	cellIndex: IndexType | null
+}

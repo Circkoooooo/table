@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { IndexType } from "../../types/table.type"
-import { DispatchMousedown, DispatchMousemove } from "./interactionSlice.types"
+import { DispatchMousedown, DispatchMousemove, DispatchMousemoveHeader } from "./interactionSlice.types"
 import { isTableHeader } from "../../tools/isIndexHeader"
 
 export type InteractionRecord = {
@@ -9,6 +9,7 @@ export type InteractionRecord = {
 	isEdit: boolean
 	mousedownIndex: IndexType | null
 	mousemoveIndex: IndexType | null
+	mousemoveHeader: IndexType | null //区别于MousemoveIndex,此变量在鼠标在头部的时候都会记录,用来获取鼠标悬浮的头部单元格
 	editIndex: IndexType | null
 }
 
@@ -18,6 +19,7 @@ const initialState: InteractionRecord = {
 	isEdit: false,
 	mousedownIndex: null,
 	mousemoveIndex: null,
+	mousemoveHeader: null,
 	editIndex: null,
 }
 
@@ -61,6 +63,23 @@ const interactionSlice = createSlice({
 
 			return tempInteractionInfo
 		},
+		mousemoveHeaderDispatch: (state, action: PayloadAction<DispatchMousemoveHeader>) => {
+			const { cellIndex } = action.payload
+
+			if (!cellIndex) return
+			const { rowIndex, columnIndex } = cellIndex
+
+			//位于头部索引的时候
+			if (rowIndex === 0 || columnIndex === 0) {
+				state.mousemoveHeader = cellIndex
+				return
+			}
+
+			// 不位于头部的时候
+			if (state.mousemoveHeader !== null) {
+				state.mousemoveHeader = null
+			}
+		},
 		mousemoveDispatch: (state, action: PayloadAction<DispatchMousemove>) => {
 			const { cellIndex } = action.payload
 			const { isMousedown, editIndex } = state
@@ -68,15 +87,7 @@ const interactionSlice = createSlice({
 			if (!isMousedown) return
 			if (editIndex !== null) return
 
-			const tempInteractionInfo: typeof state = {
-				...state,
-				mousemoveIndex: {
-					rowIndex: cellIndex.rowIndex,
-					columnIndex: cellIndex.columnIndex,
-				},
-			}
-
-			return tempInteractionInfo
+			state.mousemoveIndex = cellIndex
 		},
 		mouseupDispatch: (state) => {
 			const tempInteractionInfo = {
@@ -93,6 +104,6 @@ const interactionSlice = createSlice({
 	},
 })
 
-export const { mousedownDispatch, mousemoveDispatch, mouseupDispatch, cancelEditDispatch } = interactionSlice.actions
+export const { mousedownDispatch, mousemoveDispatch, mouseupDispatch, cancelEditDispatch, mousemoveHeaderDispatch } = interactionSlice.actions
 
 export default interactionSlice.reducer
