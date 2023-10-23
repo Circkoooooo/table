@@ -120,14 +120,14 @@ const InteractionPanel = () => {
 
 		// 鼠标在头部索引时的交互事件
 		if (index.columnIndex === 0 || index.rowIndex === 0) {
-			changeBodyCursor("pointer")
+			changeBodyPointerByIndex("calc", index)
 			dispatchMove()
 		} else {
-			changeBodyCursor("auto")
+			changeBodyPointerByIndex("reset")
 		}
 
 		// 记录组件内部维护的移动值
-		// interactionRecord.current.isMousemove = true
+		interactionRecord.current.isMousemove = true
 
 		if (!interactionRecord.current.isMosuedown) return
 		dispatchMove()

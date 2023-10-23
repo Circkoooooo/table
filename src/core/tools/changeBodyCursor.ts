@@ -1,4 +1,4 @@
-type Cursor = "auto" | "pointer" | "crosshair"
+type Cursor = "auto" | "pointer" | "crosshair" | "row-resize"
 
 const changeBodyCursor = (cursor: Cursor) => {
 	const body = document.querySelector("body")

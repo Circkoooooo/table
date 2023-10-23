@@ -43,7 +43,6 @@ export const TableMenuScrollbarContainer = styled.div<Direcion>`
 	bottom: 0;
 	padding: 4px;
 	border-radius: 2px;
-	cursor: pointer;
 	user-select: none;
 `
 

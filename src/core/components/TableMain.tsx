@@ -8,6 +8,7 @@ import { HighlightBorder, HighlightBorderProperty } from "./HighlightBorder/High
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
 import { parseInteractionIndex } from "../parseInteractionIndex"
+import { LineFlexibleHighlight } from "./HighlightBorder/HighlightLineFlexible"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
@@ -146,20 +147,32 @@ const TableMain = () => {
 			offsetTop: 0,
 			width: 0,
 			height: 0,
+			mousemoveHeaderOffsetTop: 0,
+			mousemoveHeaderOffsetLeft: 0,
 		}
 
 		const { mousedownIndex, mousemoveIndex } = interactionStore
 
-		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, tableDataStore.cellDataInfo.rowNum, tableDataStore.cellDataInfo.columnNum)
+		/*************************产生高亮点击交互时触发的逻辑***********************/
 
+		/**
+		 * 计算出 线条尺寸lineWidth在dpr缩放下 与 非dpr缩放下 的差
+		 * 该差即为canvas绘制中取整后相对于原数据的偏移值。
+		 * 【该偏移值除以dpr来还原成css像素下的所需渲染的尺寸】
+		 *
+		 * 在计算css所需的offsetTop和left时候，每增加一个单元格都额外需要减去一个该偏移值。如果不减去这个偏移，则每多一个单元格都会
+		 * 积累更大的偏移量，导致高亮边框跑出所需渲染区域。
+		 */
+
+		const lineWidthDiffBacauseOfDpr = (Math.round(lineWidth * window.devicePixelRatio) - lineWidth * window.devicePixelRatio) / window.devicePixelRatio
+
+		/****** 根据索引获取额外的尺寸和偏移 ******/
+		const rowHeightArrs = canvasStore.tableRowColumnCellConfig.rowHeight
+		const columnWidthArrs = canvasStore.tableRowColumnCellConfig.columnWidth
+
+		const interactionIndex = parseInteractionIndex(mousedownIndex, mousemoveIndex, tableDataStore.cellDataInfo.rowNum, tableDataStore.cellDataInfo.columnNum)
 		if (interactionIndex) {
 			const { startRowIndex, startColumnIndex, rowCellCount, columnCellCount } = interactionIndex
-
-			/****** 根据索引获取额外的尺寸和偏移 ******/
-			const rowHeightArrs = canvasStore.tableRowColumnCellConfig.rowHeight
-			const columnWidthArrs = canvasStore.tableRowColumnCellConfig.columnWidth
-			let extraHeight = 0
-			let extraWidth = 0
 
 			//额外的上方偏移。选中单元格上方非默认高度的额外高度之和。
 			let extraOffsetTop = rowHeightArrs
@@ -184,20 +197,19 @@ const TableMain = () => {
 					extraWidth += value
 				})
 
-			/**
-			 * 计算出 线条尺寸lineWidth在dpr缩放下 与 非dpr缩放下 的差
-			 * 该差即为canvas绘制中取整后相对于原数据的偏移值。
-			 * 【该偏移值除以dpr来还原成css像素下的所需渲染的尺寸】
-			 *
-			 * 在计算css所需的offsetTop和left时候，每增加一个单元格都额外需要减去一个该偏移值。如果不减去这个偏移，则每多一个单元格都会
-			 * 积累更大的偏移量，导致高亮边框跑出所需渲染区域。
-			 */
-			const lineWidthDiffBacauseOfDpr = (Math.round(lineWidth * window.devicePixelRatio) - lineWidth * window.devicePixelRatio) / window.devicePixelRatio
-
+			let extraHeight = 0
+			let extraWidth = 0
 			property.offsetLeft = startColumnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft + extraOffsetLeft
 			property.offsetTop = startRowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop + extraOffsetTop
 			property.width = rowCellCount * (logicWidth - lineWidth) + extraWidth
 			property.height = columnCellCount * (logicHeight - lineWidth) + extraHeight
+		}
+
+		/****************** mousemoveHeader处理逻辑***************8 */
+		if (interactionStore.mousemoveHeader) {
+			const { rowIndex, columnIndex } = interactionStore.mousemoveHeader
+			property.mousemoveHeaderOffsetLeft = columnIndex * (logicWidth - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetLeft
+			property.mousemoveHeaderOffsetTop = rowIndex * (logicHeight - lineWidth - lineWidthDiffBacauseOfDpr) - canvasStore.containerOffsetTop
 		}
 
 		const newProperty = Object.assign(property, {
@@ -219,6 +231,16 @@ const TableMain = () => {
 							highlightBorderProperty={highlightBorderProperty}
 							fontSize={canvasStore.drawConfig.fontSize}
 							initialValue={cellInputCurrentValue}
+						/>
+						<LineFlexibleHighlight
+							{...{
+								index: interactionStore.mousemoveHeader,
+								cellLogicHeight: logicHeight,
+								cellLogicWidth: logicWidth,
+								borderWidth: lineWidth,
+								ofsLeft: highlightBorderProperty.mousemoveHeaderOffsetLeft,
+								ofsTop: highlightBorderProperty.mousemoveHeaderOffsetTop,
+							}}
 						/>
 					</HighlightBorder>
 

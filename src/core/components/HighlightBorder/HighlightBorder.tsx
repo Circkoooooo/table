@@ -16,6 +16,8 @@ export type HighlightBorderProperty = {
 	offsetTop: number
 	width: number
 	height: number
+	mousemoveHeaderOffsetTop: number
+	mousemoveHeaderOffsetLeft: number
 }
 
 const HighlightBorder: React.FC<HighlightBorderProps> = ({ cellLogicHeight, cellLogicWidth, isRender, highlightBorderProperty: { borderWidth, offsetLeft, offsetTop, width, height }, children }) => {

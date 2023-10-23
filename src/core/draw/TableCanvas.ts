@@ -60,7 +60,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 			..._drawLineProperty,
 		}
 
-		drawLineProperty && drawLineProperty.lineWidth && console.log(Math.round(drawLineProperty.lineWidth * dpr), drawLineProperty.lineWidth * dpr)
 		/**
 		 * 线条宽度；适配dpr，整数
 		 */
