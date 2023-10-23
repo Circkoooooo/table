@@ -8,7 +8,7 @@ import { HighlightBorder, HighlightBorderProperty } from "./HighlightBorder/High
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
 import { parseInteractionIndex } from "../parseInteractionIndex"
-import { LineFlexibleHighlight } from "./HighlightBorder/HighlightLineFlexible"
+import { LineFlexible } from "./LineFlexible/LineFlexible"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
@@ -232,17 +232,18 @@ const TableMain = () => {
 							fontSize={canvasStore.drawConfig.fontSize}
 							initialValue={cellInputCurrentValue}
 						/>
-						<LineFlexibleHighlight
-							{...{
-								index: interactionStore.mousemoveHeader,
-								cellLogicHeight: logicHeight,
-								cellLogicWidth: logicWidth,
-								borderWidth: lineWidth,
-								ofsLeft: highlightBorderProperty.mousemoveHeaderOffsetLeft,
-								ofsTop: highlightBorderProperty.mousemoveHeaderOffsetTop,
-							}}
-						/>
 					</HighlightBorder>
+
+					<LineFlexible
+						{...{
+							index: interactionStore.mousemoveHeader,
+							cellLogicHeight: logicHeight,
+							cellLogicWidth: logicWidth,
+							borderWidth: lineWidth,
+							ofsLeft: highlightBorderProperty.mousemoveHeaderOffsetLeft,
+							ofsTop: highlightBorderProperty.mousemoveHeaderOffsetTop,
+						}}
+					/>
 
 					<TableCanvasContainer ref={tableMainContainerRef}>
 						<InteractionPanel />

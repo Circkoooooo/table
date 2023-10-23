@@ -1,8 +1,8 @@
 import React from "react"
-import { HighlightLineFlexibleContainer, HighlightLineFlexibleItem } from "../../styled/highlight/HighlightLineFlexible-styled"
+import { LineFlexibleContainer, LineFlexibleItem, LineFlexiblePanel } from "../../styled/highlight/lineFlexible-styled"
 import { IndexType } from "../../types/table"
 
-interface LineFlexibleHighLightProps {
+interface LineFlexibleProps {
 	index: IndexType | null
 	cellLogicWidth: number
 	cellLogicHeight: number
@@ -11,11 +11,11 @@ interface LineFlexibleHighLightProps {
 	borderWidth: number
 }
 
-const LineFlexibleHighlight: React.FC<LineFlexibleHighLightProps> = ({ index, cellLogicHeight, cellLogicWidth, ofsLeft, ofsTop, borderWidth }) => {
+const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cellLogicWidth, ofsLeft, ofsTop, borderWidth }) => {
 	return (
-		<>
+		<LineFlexiblePanel data-testid="lineflexible">
 			{index && (
-				<HighlightLineFlexibleContainer
+				<LineFlexibleContainer
 					{...{
 						$rowIndex: index.rowIndex,
 						$columnIndex: index.columnIndex,
@@ -26,11 +26,11 @@ const LineFlexibleHighlight: React.FC<LineFlexibleHighLightProps> = ({ index, ce
 						$ofsTop: ofsTop,
 					}}
 				>
-					<HighlightLineFlexibleItem />
-				</HighlightLineFlexibleContainer>
+					<LineFlexibleItem />
+				</LineFlexibleContainer>
 			)}
-		</>
+		</LineFlexiblePanel>
 	)
 }
 
-export { LineFlexibleHighlight }
+export { LineFlexible }
