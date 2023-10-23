@@ -27,7 +27,7 @@ export const LineFlexibleContainer = styled.div<LineFlexibleContainerProps>(({ $
 		position: absolute;
 		width: ${width}px;
 		height: ${height}px;
-		transform: translate(${$ofsLeft}px, ${$ofsTop}px);
+		transform: translate(${$columnIndex === 0 ? 0 : $ofsLeft}px, ${$rowIndex === 0 ? $ofsTop : 0}px);
 	`
 })
 
@@ -40,8 +40,9 @@ export const LineFlexibleItem = styled.div`
 	height: 18%;
 	border-width: 0 0 2px 0;
 	background: linear-gradient(#fff, #9999ff);
-	pointer-events: all;
 
+	pointer-events: all;
+	user-select: none;
 	/* 配合上面pointer-event,面案在最顶层,但其他所有地方的交互时间都要隐藏,除了这个拖动条 */
 	&:hover {
 		cursor: row-resize;
