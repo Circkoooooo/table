@@ -39,9 +39,10 @@ export const LineFlexibleControls = styled.div`
 	bottom: 0;
 	box-sizing: border-box;
 	width: calc(100% - 1px);
-	height: 18%;
+	height: 14%;
 	border-width: 0 0 2px 0;
 	background: linear-gradient(#fff, #9999ff);
+	opacity: 0.4;
 
 	pointer-events: all;
 	user-select: none;
