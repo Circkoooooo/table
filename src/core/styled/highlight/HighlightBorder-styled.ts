@@ -22,6 +22,7 @@ export const HighlightBorderContainer = styled.div<{
 		width: calc(100% - 18px - ${$offsetLeft}px);
 		height: calc(100% - ${$offsetTop}px);
 		transform: translate(${$offsetLeft}px, ${$offsetTop}px);
+		overflow: hidden;
 	`
 })
 

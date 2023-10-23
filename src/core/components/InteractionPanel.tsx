@@ -4,7 +4,6 @@ import { InteractionPanelContainer } from "../styled/interaction/InteractionPane
 import { mousedownDispatch, mousemoveDispatch, mousemoveHeaderDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
 import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
-import changeBodyCursor from "../tools/changeBodyCursor"
 import changeBodyPointerByIndex from "../changeBodyPointerByIndex"
 
 /**

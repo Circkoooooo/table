@@ -14,9 +14,6 @@ const HighlightLineFlexibleContainer = styled.div<HighlightLineFlexibleContainer
 	const baseTranslateX = -($cellLogicWidth - $borderWidth)
 	const baseTranslateY = -$cellLogicHeight
 
-	const multipleTranslateX = $cellLogicWidth - $borderWidth
-	const multipleTranslateY = $cellLogicHeight
-
 	const width = $cellLogicWidth
 	const height = $cellLogicHeight
 
