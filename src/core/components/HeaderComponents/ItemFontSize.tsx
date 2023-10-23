@@ -1,8 +1,8 @@
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "../../redux/hooks"
-import { HeaderItem } from "../../styled/header/Header-styled"
 import { Select } from "antd"
 import { updateDrawConfigFontSize } from "../../redux/canvas/canvasSlice"
+import { HeaderItem } from "../../styled/Header/Header-styled"
 
 const options = () => {
 	const value: number[] = []

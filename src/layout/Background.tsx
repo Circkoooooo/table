@@ -1,6 +1,6 @@
 import React from "react"
 import { Header, Main, Body, Content } from "./Background-styled"
-import { HeaderItemContainer } from "../core/styled/header/Header-styled"
+import { HeaderItemContainer } from "../core/styled/Header/Header-styled"
 import { ItemFontsize } from "../core/components/HeaderComponents/ItemFontSize"
 import { ConfigProvider } from "antd"
 import { ANTD_THEME } from "../configs/antd-theme"
