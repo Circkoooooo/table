@@ -80,6 +80,7 @@ const InteractionPanel = () => {
 
 	const interactionMousemove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		const containerTargetRect = (e.target as HTMLDivElement).getBoundingClientRect()
+
 		const containerPositon = {
 			left: containerTargetRect.left,
 			top: containerTargetRect.top,
@@ -89,8 +90,9 @@ const InteractionPanel = () => {
 			top: e.clientY - containerPositon.top,
 		}
 
-		const ofsLeft = Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
-		const ofsTop = Math.round(mousePositon.top + canvasStore.containerOffsetTop)
+		// 在滚动后，鼠标放在头部的偏移不增加滚动值
+		const ofsLeft = mousePositon.left <= logicWidth ? Math.round(mousePositon.left) : Math.round(mousePositon.left + canvasStore.containerOffsetLeft)
+		const ofsTop = mousePositon.top < logicHeight ? Math.round(mousePositon.top) : Math.round(mousePositon.top + canvasStore.containerOffsetTop)
 
 		const { rowHeight, columnWidth } = canvasStore.tableRowColumnCellConfig
 		const index = {
