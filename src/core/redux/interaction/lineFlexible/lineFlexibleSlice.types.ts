@@ -14,3 +14,10 @@ export type DispatchLineFlexibleCurrentOffset = {
 		offsetTop: number
 	}
 }
+
+export type DispatchLineFlexibleActiveOffect = {
+	offset: {
+		offsetLeft?: number
+		offsetTop?: number
+	}
+}
