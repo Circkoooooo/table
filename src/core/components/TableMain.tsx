@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
-import TableCanvas, { TableCanvasType } from "../draw/TableCanvas"
+import tableCanvas, { TableCanvasType } from "../draw/tableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
@@ -32,7 +32,7 @@ const TableMain = () => {
 	// 初始化画布
 	const initTableCanvas = () => {
 		if (tableMainContainerRef.current === null || canvasRef.current === null) return
-		tableCanvasOperate.current = TableCanvas(canvasRef.current)
+		tableCanvasOperate.current = tableCanvas(canvasRef.current)
 	}
 
 	// 更新画布尺寸

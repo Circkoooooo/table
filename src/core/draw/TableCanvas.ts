@@ -7,7 +7,7 @@ import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
 import { CanvasRenderProperty } from "./types/tableCanvas"
 
-const TableCanvas = (canvas: HTMLCanvasElement) => {
+const tableCanvas = (canvas: HTMLCanvasElement) => {
 	const canvasState = {
 		currentCanvasSize: {
 			width: 0,
@@ -454,6 +454,6 @@ const TableCanvas = (canvas: HTMLCanvasElement) => {
 	}
 }
 
-export type TableCanvasType = ReturnType<typeof TableCanvas>
+export type TableCanvasType = ReturnType<typeof tableCanvas>
 
-export default TableCanvas
+export default tableCanvas
