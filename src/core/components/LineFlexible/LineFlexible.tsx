@@ -19,6 +19,46 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 	const lineFlexibleStore = useAppSelector((state) => state.lineFlexible)
 	const canvasStore = useAppSelector((state) => state.canvas)
 
+	// 当前的flexible激活态的索引记录
+	const flexibleActiveIndexType = useMemo(() => {
+		let indexMouseOnType: "row" | "column" | null = null //鼠标所处行还是列
+
+		const currentIndex = lineFlexibleStore.lineFlexibleCurrentIndex
+		// 如果当前索引没有记录，则为null
+		if (!currentIndex) {
+			indexMouseOnType = null
+			return indexMouseOnType
+		}
+
+		const { rowIndex, columnIndex } = currentIndex
+		//如果行列都为0，则不记录
+		if (rowIndex === 0 && columnIndex === 0) {
+			indexMouseOnType = null
+			return indexMouseOnType
+		}
+
+		if (rowIndex === 0) {
+			indexMouseOnType = "row"
+		} else if (columnIndex === 0) indexMouseOnType = "column"
+
+		return indexMouseOnType
+	}, [lineFlexibleStore.lineFlexibleCurrentIndex])
+
+	// 处于头部区域，记录索引是处于行还是列
+	const currentFlexibleHoverIndexType = useMemo(() => {
+		if (!index) return null
+		let indexMouseOnType: "row" | "column" | null = null
+
+		const { rowIndex, columnIndex } = index
+		if (rowIndex === 0) {
+			indexMouseOnType = "row"
+		} else if (columnIndex === 0) {
+			indexMouseOnType = "column"
+		}
+
+		return indexMouseOnType
+	}, [index])
+
 	// 记录滑块拖动的偏移量
 	const currentOfs = useRef({
 		ofsLeft: 0,
@@ -75,6 +115,7 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 				index,
 			})
 		)
+
 		clearCurrentRecord()
 	}
 
@@ -84,20 +125,33 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 	const onItemMouseCancel = useCallback(() => {
 		// 执行伸缩记录
 		const currentIndex = lineFlexibleStore.lineFlexibleCurrentIndex
+
 		if (currentIndex) {
-			dispatch(
-				updateRowColumnCellConfigDispatch({
-					type: "row",
-					index: currentIndex.rowIndex - 1,
-					value: flexRecord.current.currentTopFlex,
-				})
-			)
+			const { rowIndex, columnIndex } = currentIndex
+			if (rowIndex === 0) {
+				dispatch(
+					updateRowColumnCellConfigDispatch({
+						type: "column",
+						index: currentIndex.columnIndex - 1,
+						value: flexRecord.current.currentLeftFlex,
+					})
+				)
+			} else if (columnIndex === 0) {
+				dispatch(
+					updateRowColumnCellConfigDispatch({
+						type: "row",
+						index: currentIndex.rowIndex - 1,
+						value: flexRecord.current.currentTopFlex,
+					})
+				)
+			}
 		}
 
 		const mouseScreenPosition = {
 			screenX: 0,
 			screenY: 0,
 		}
+
 		const offset = {
 			offsetLeft: 0,
 			offsetTop: 0,
@@ -120,16 +174,31 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 
 	const onMousemove = useCallback(
 		(e: MouseEvent) => {
+			if (!flexibleActiveIndexType) return
+
 			const startMouseScreenX = lineFlexibleStore.lineFlexibleCurrentScreenPosition.screenX
 			const startMouseScreenY = lineFlexibleStore.lineFlexibleCurrentScreenPosition.screenY
 
-			currentOfs.current.ofsLeft = e.screenY - startMouseScreenX
 			currentOfs.current.ofsTop = e.screenY - startMouseScreenY
+			currentOfs.current.ofsLeft = e.screenX - startMouseScreenX
+
+			const lineFlexCurrentRowIndex = lineFlexibleStore.lineFlexibleCurrentIndex?.rowIndex || 0
+			const lineFlexCurrentColumnIndex = lineFlexibleStore.lineFlexibleCurrentIndex?.columnIndex || 0
+
+			const currentRowHeight = canvasStore.tableRowColumnCellConfig.rowHeight.find((item) => item.index === lineFlexCurrentRowIndex - 1)?.value || 0
+			const currentColumnWidth = canvasStore.tableRowColumnCellConfig.columnWidth.find((item) => item.index === lineFlexCurrentColumnIndex - 1)?.value || 0
 
 			// 记录执行flex
-			flexRecord.current.currentTopFlex = currentOfs.current.ofsTop <= 1 ? 1 : currentOfs.current.ofsTop
+			if (flexibleActiveIndexType === "row") {
+				const flexMin = -currentColumnWidth - cellLogicWidth + canvasStore.drawConfig.fontSize
+				flexRecord.current.currentLeftFlex = currentOfs.current.ofsLeft <= flexMin ? flexMin : currentOfs.current.ofsLeft
+			} else if (flexibleActiveIndexType === "column") {
+				const flexMin = -currentRowHeight - cellLogicHeight + canvasStore.drawConfig.fontSize
+
+				flexRecord.current.currentTopFlex = currentOfs.current.ofsTop <= flexMin ? flexMin : currentOfs.current.ofsTop
+			}
 		},
-		[lineFlexibleStore]
+		[lineFlexibleStore, canvasStore, flexibleActiveIndexType, cellLogicHeight, cellLogicWidth]
 	)
 
 	/**
@@ -158,14 +227,15 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 	}, [onItemMouseCancel, ofsLeft, ofsTop, onMousemove])
 
 	const offsetTopAfterFlex = cellLogicHeight + lineFlexibleStore.lineFlexibleCurrentOffset.offsetTop + flexRecord.current.currentTopFlex
-	const offsetLeftAfterFlex = cellLogicHeight + lineFlexibleStore.lineFlexibleCurrentOffset.offsetTop + flexRecord.current.currentLeftFlex
+	const offsetLeftAfterFlex = cellLogicWidth + lineFlexibleStore.lineFlexibleCurrentOffset.offsetLeft + flexRecord.current.currentLeftFlex
 
 	return (
 		<LineFlexiblePanel data-testid="lineflexible">
-			<LineFlexibleTipsBar $isTipsBarShow={isTipsBarShow} $ofsLeft={lineFlexibleStore.lineFlexibleCurrentOffset.offsetLeft} $ofsTop={offsetTopAfterFlex}>
-				{flexRecord.current.currentTopFlex}
-			</LineFlexibleTipsBar>
-
+			{flexibleActiveIndexType && isTipsBarShow && (
+				<LineFlexibleTipsBar $ofsLeft={offsetLeftAfterFlex} $ofsTop={offsetTopAfterFlex} $flexibleActiveIndexType={flexibleActiveIndexType}>
+					<span>{flexibleActiveIndexType === "column" ? flexRecord.current.currentTopFlex : flexibleActiveIndexType === "row" ? flexRecord.current.currentLeftFlex : null}</span>
+				</LineFlexibleTipsBar>
+			)}
 			{index && (
 				<LineFlexibleContainer
 					{...{
@@ -178,7 +248,9 @@ const LineFlexible: React.FC<LineFlexibleProps> = ({ index, cellLogicHeight, cel
 						$ofsTop: ofsTop,
 					}}
 				>
-					{!isTipsBarShow && !(index.rowIndex === 0 && index.columnIndex === 0) && <LineFlexibleControls onMouseDown={(e) => onItemMousedown(e)} />}
+					{!isTipsBarShow && !(index.rowIndex === 0 && index.columnIndex === 0) && (
+						<LineFlexibleControls $currentIndexType={currentFlexibleHoverIndexType} onMouseDown={(e) => onItemMousedown(e)} />
+					)}
 				</LineFlexibleContainer>
 			)}
 		</LineFlexiblePanel>
