@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { TableCanvasContainer, TableRowContainer, TableMenu, TableVerticalScrollbarContainer, TableMainContainer } from "../styled/TableMain-styled"
-import tableCanvas, { TableCanvasType } from "../draw/tableCanvas"
 import TableMenuScrollbar from "./TableMenuScrollbar"
 import { updateContainerMaxSizeDispatch, updateContainerSizeDispatch } from "../redux/canvas/canvasSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
@@ -10,6 +9,7 @@ import { CellInput } from "./CellInput/CellInput"
 import { parseInteractionIndex } from "../parseInteractionIndex"
 import { LineFlexible } from "./LineFlexible/LineFlexible"
 import { calcIndexExtraRenderSize } from "../calcIndexExtraRenderSize"
+import tableCanvas, { TableCanvasType } from "../draw/tableCanvas"
 
 const TableMain = () => {
 	const tableMainContainerRef = useRef<HTMLDivElement>(null)
