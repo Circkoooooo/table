@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
-import { CellData, createEmptyCellData } from "../../cellDataHandler"
+import { createEmptyCellData } from "../../tools/cellDataHandler"
 import { DispatchCellData, DispatchInput } from "./tableDataSlice.types"
+import { CellData } from "../../tools/types"
 
 export type CellDataInfoNumConfig = {
 	rowNum: number

@@ -3,8 +3,8 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { InteractionPanelContainer } from "../styled/interaction/InteractionPanel-styled"
 import { mousedownDispatch, mousemoveDispatch, mousemoveHeaderDispatch, mouseupDispatch } from "../redux/interaction/interactionSlice"
 import isIndexEqual from "../tools/isIndexEqual"
-import { getIndexByOffsetStart } from "../getIndexByOffsetStart"
-import changeBodyPointerByIndex from "../changeBodyPointerByIndex"
+import { getIndexByOffsetStart } from "../tools/getIndexByOffsetStart"
+import changeBodyPointerByIndex from "../tools/changeBodyPointerByIndex"
 
 /**
  * 尺寸和canvas画布容器尺寸一致，用来监听鼠标事件来更新边框的属性

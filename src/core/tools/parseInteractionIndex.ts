@@ -1,6 +1,7 @@
-import isIndexEqual from "./tools/isIndexEqual"
-import { isTableHeader } from "./tools/isIndexHeader"
-import { IndexType } from "./types/table.types"
+import isIndexEqual from "./isIndexEqual"
+import { isTableHeader } from "./isIndexHeader"
+import { IndexType } from "../types/table.types"
+import { ParseInteractionIndex } from "./types"
 
 /**
  *
@@ -12,7 +13,7 @@ import { IndexType } from "./types/table.types"
  * @param cellLogicHeight
  * @returns
  */
-export const parseInteractionIndex = (mousedownIndex: IndexType | null, mousemoveIndex: IndexType | null, rowNumber: number, columnNumber: number) => {
+export const parseInteractionIndex: ParseInteractionIndex = (mousedownIndex: IndexType | null, mousemoveIndex: IndexType | null, rowNumber: number, columnNumber: number) => {
 	if (!mousedownIndex || !mousemoveIndex) return null
 
 	//记录的初始的点击索引

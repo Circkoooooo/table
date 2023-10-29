@@ -6,9 +6,9 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { HighlightBorder, HighlightBorderProperty } from "./HighlightBorder/HighlightBorder"
 import { InteractionPanel } from "./InteractionPanel"
 import { CellInput } from "./CellInput/CellInput"
-import { parseInteractionIndex } from "../parseInteractionIndex"
+import { parseInteractionIndex } from "../tools/parseInteractionIndex"
 import { LineFlexible } from "./LineFlexible/LineFlexible"
-import { calcIndexExtraRenderSize } from "../calcIndexExtraRenderSize"
+import { calcIndexExtraRenderSize } from "../tools/calcIndexExtraRenderSize"
 import tableCanvas, { TableCanvasType } from "../draw/tableCanvas"
 
 const TableMain = () => {

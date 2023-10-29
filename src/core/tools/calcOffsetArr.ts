@@ -1,5 +1,6 @@
-import { TableRowColumnCellConfig } from "./redux/canvas/canvasSlice.types"
-import { CellDataInfoNumConfig } from "./redux/table-data/tableDataSlice"
+import { TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
+import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
+import { CalcOffsetArr } from "./types"
 
 /**
  * 获取当前渲染body部分所需要进行的偏移
@@ -7,7 +8,7 @@ import { CellDataInfoNumConfig } from "./redux/table-data/tableDataSlice"
  * @param cellConfig
  * @param dpr
  */
-export const calcOffsetArr = (numConfig: CellDataInfoNumConfig, cellConfig: TableRowColumnCellConfig, dpr: number) => {
+export const calcOffsetArr: CalcOffsetArr = (numConfig: CellDataInfoNumConfig, cellConfig: TableRowColumnCellConfig, dpr: number) => {
 	const { rowNum, columnNum } = numConfig
 	const { columnWidth, rowHeight } = cellConfig
 

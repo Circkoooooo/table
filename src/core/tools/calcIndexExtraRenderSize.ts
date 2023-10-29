@@ -1,10 +1,11 @@
-import { TableRowColumnCellConfigExtraSizeConfig } from "./redux/canvas/canvasSlice.types"
+import { TableRowColumnCellConfigExtraSizeConfig } from "../redux/canvas/canvasSlice.types"
+import { CalcIndexExtraRenderSize } from "./types"
 
 /**
  * 根据每行和列的额外渲染尺寸，以及当前单元格的索引，
  * 获取当前索引前方所有行或者列的额外渲染尺寸总和
  */
-export const calcIndexExtraRenderSize = (
+export const calcIndexExtraRenderSize: CalcIndexExtraRenderSize = (
 	rowHeightArrs: TableRowColumnCellConfigExtraSizeConfig,
 	columnWidthArrs: TableRowColumnCellConfigExtraSizeConfig,
 	startRowIndex: number,

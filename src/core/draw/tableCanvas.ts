@@ -1,11 +1,11 @@
 import { customCanvas } from "."
-import { calcOffsetArr } from "../calcOffsetArr"
-import { calcSumExtraSize } from "../calcSumExtraSize"
-import { CellData } from "../cellDataHandler"
+import { calcOffsetArr } from "../tools/calcOffsetArr"
+import { calcSumExtraSize } from "../tools/calcSumExtraSize"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
-import { getColumnLabel, getRowLabel } from "../ruler"
+import { getColumnLabel, getRowLabel } from "../tools/ruler"
 import { CanvasRenderProperty, DrawLineProperty, TableCanvas } from "./types"
+import { CellData } from "../tools/types"
 
 const tableCanvas: TableCanvas = (canvas: HTMLCanvasElement) => {
 	const canvasState = {

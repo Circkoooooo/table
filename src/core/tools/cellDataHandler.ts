@@ -1,22 +1,6 @@
-import deepClone from "../tools/deepClone"
+import deepClone from "../../tools/deepClone"
 import { getColumnLabel, getRowLabel } from "./ruler"
-
-interface FullTableEmptyDataParams {
-	rowNum: number
-	columnNum: number
-}
-
-export type CellDataElement = string | null
-
-export type CellData = CellDataElement[][]
-
-export interface WithRulerCellData {
-	data: CellData
-	info: {
-		rowLength: number
-		columnLength: number
-	}
-}
+import { CellData, FullTableEmptyDataParams, WithRulerCellData } from "./types"
 
 /**
  * 根据row column数目返回一个矩阵 r * c

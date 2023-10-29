@@ -1,4 +1,5 @@
-import deepClone from "../tools/deepClone"
+import deepClone from "../../tools/deepClone"
+import { GetColumnLabel, PickValidTypeAsciiCode, ResolvePrefixArray } from "./types"
 
 /**
  * 对数组中的值从后往前进行自增进位
@@ -16,8 +17,8 @@ import deepClone from "../tools/deepClone"
  * @param minPrefixCode
  * @param maxPrefixCode
  */
-export function resolvePrefixArray(prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) {
-	const resultPrefixArray = deepClone(prefixArray)
+export const resolvePrefixArray: ResolvePrefixArray = (prefixArray: number[], minPrefixCode: number, maxPrefixCode: number) => {
+	const resultPrefixArray: number[] = deepClone(prefixArray)
 
 	if (prefixArray.length === 0) {
 		resultPrefixArray[0] = minPrefixCode
@@ -62,7 +63,7 @@ export function resolvePrefixArray(prefixArray: number[], minPrefixCode: number,
 	return resultPrefixArray
 }
 
-function pickValidTypeAsciiCode(asciiCode: number | string): number {
+const pickValidTypeAsciiCode: PickValidTypeAsciiCode = (asciiCode: number | string) => {
 	if (typeof asciiCode === "number") {
 		return asciiCode
 	}
@@ -74,7 +75,7 @@ function pickValidTypeAsciiCode(asciiCode: number | string): number {
  * 生成ascii码区间内符合A - Z .. AA - AZ .. AAA AAB - ZZZ ...规则的取值数组
  *
  */
-export const getColumnLabel = (columnCount: number, asciiMin: number | string = 65, asciiMax: number | string = 90): string[] => {
+export const getColumnLabel: GetColumnLabel = (columnCount: number, asciiMin: number | string = 65, asciiMax: number | string = 90) => {
 	const asciiLimit: number[] = []
 	const result: string[] = []
 

@@ -1,12 +1,13 @@
 import { IndexType } from "../types/table.types"
+import { CalcIndexFromMouseIndex } from "./types"
 
 /**
- * Parse the start and end index from mousedownIndex and mousemoveIndex.
+ * 根据点击的索引和鼠标移动到的索引，来计算形成的矩形行列开始索引。
  * @param mousedownIndex
  * @param mousemoveIndex
  * @returns
  */
-export const calcIndexFromMouseIndex = (mousedownIndex: IndexType, mousemoveIndex: IndexType) => {
+export const calcIndexFromMouseIndex: CalcIndexFromMouseIndex = (mousedownIndex: IndexType, mousemoveIndex: IndexType) => {
 	const { rowIndex: mousedownRowIndex, columnIndex: mousedownColumnIndex } = mousedownIndex
 	const { rowIndex: mousemoveRowIndex, columnIndex: mousemoveColumnIndex } = mousemoveIndex
 

@@ -1,6 +1,6 @@
-import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
+import { CellData } from "../tools/types"
 
 /**
  * 坐标

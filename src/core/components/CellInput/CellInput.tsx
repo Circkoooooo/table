@@ -5,7 +5,7 @@ import { cancelEditDispatch } from "../../redux/interaction/interactionSlice"
 import { HighlightBorderProperty } from "../HighlightBorder/HighlightBorder"
 import { IndexType } from "../../types/table.types"
 import { inputDispatch } from "../../redux/table-data/tableDataSlice"
-import { CellDataElement } from "../../cellDataHandler"
+import { CellDataElement } from "../../tools/types"
 
 interface CellInputProps {
 	isRender: boolean

@@ -3,7 +3,7 @@ import { TableMenuScrollbarContainer, TableMenuScrollbarItem } from "../styled/T
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { updateContainerOffsetDispatch } from "../redux/canvas/canvasSlice"
 import useDebounce from "../../hooks/useDebounce"
-import { calcSumExtraSize } from "../calcSumExtraSize"
+import { calcSumExtraSize } from "../tools/calcSumExtraSize"
 
 type ScrollbarRecord = {
 	isMouseDown: boolean
