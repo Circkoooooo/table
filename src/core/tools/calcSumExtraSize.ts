@@ -2,7 +2,7 @@ import { TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { CalcSumExtraSize } from "./types"
 
 /**
- *根据rowColumnExtraSize的config数组，来分别输出row和column的额外渲染尺寸
+ * 根据rowColumnExtraSize的config数组，来分别输出row和column的额外渲染尺寸
  */
 export const calcSumExtraSize: CalcSumExtraSize = (extraSizeConfig: TableRowColumnCellConfig, dpr: number) => {
 	const { rowHeight, columnWidth } = extraSizeConfig

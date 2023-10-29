@@ -3,7 +3,7 @@ import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { CalcOffsetArr } from "./types"
 
 /**
- * 获取当前渲染body部分所需要进行的偏移
+ * 获取行和列索引，每个索引的单元格相对于canvas起始渲染需要的偏移。每个索引的偏移 为 自己的当前偏移和前面叠加的偏移之和。
  * @param numConfig
  * @param cellConfig
  * @param dpr

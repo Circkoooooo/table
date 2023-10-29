@@ -63,6 +63,7 @@ export const resolvePrefixArray: ResolvePrefixArray = (prefixArray: number[], mi
 	return resultPrefixArray
 }
 
+/** 根据传入值为数字或者字母，来进行不同规则的转化成ascii*/
 const pickValidTypeAsciiCode: PickValidTypeAsciiCode = (asciiCode: number | string) => {
 	if (typeof asciiCode === "number") {
 		return asciiCode

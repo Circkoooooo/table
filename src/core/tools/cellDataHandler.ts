@@ -1,12 +1,12 @@
 import deepClone from "../../tools/deepClone"
 import { getColumnLabel, getRowLabel } from "./ruler"
-import { CellData, FullTableEmptyDataParams, WithRulerCellData } from "./types"
+import { CellData, CreateEmptyCellData, CreateRulerCellData, FullTableEmptyDataParams } from "./types"
 
 /**
  * 根据row column数目返回一个矩阵 r * c
  * @param params
  */
-export const createEmptyCellData = (params: FullTableEmptyDataParams): CellData => {
+export const createEmptyCellData: CreateEmptyCellData = (params: FullTableEmptyDataParams) => {
 	const { rowNum, columnNum } = params
 
 	return Array.from(Array(rowNum), () => new Array(columnNum).fill(null))
@@ -16,7 +16,7 @@ export const createEmptyCellData = (params: FullTableEmptyDataParams): CellData 
  * 在空二维数组的基础上添加行标和列标（深克隆）
  * @param emptyRulerCellData
  */
-export const createRulerCellData = (emptyRulerCellData: CellData): WithRulerCellData => {
+export const createRulerCellData: CreateRulerCellData = (emptyRulerCellData: CellData) => {
 	const tempEmptyRulerCellData = deepClone(emptyRulerCellData)
 
 	const result = {

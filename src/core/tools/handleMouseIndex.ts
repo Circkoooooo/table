@@ -2,7 +2,7 @@ import { IndexType } from "../types/table.types"
 import { CalcIndexFromMouseIndex } from "./types"
 
 /**
- * 根据点击的索引和鼠标移动到的索引，来计算形成的矩形行列开始索引。
+ * 根据点击的索引和鼠标移动到的索引，来计算形成的矩形行列开始结束索引。
  * @param mousedownIndex
  * @param mousemoveIndex
  * @returns
