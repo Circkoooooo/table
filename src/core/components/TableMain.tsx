@@ -110,9 +110,12 @@ const TableMain = () => {
 		}
 	}, [handleResize])
 
-	//初始化，渲染初始页面
 	useEffect(() => {
 		initTableCanvas()
+	})
+
+	//初始化，渲染初始页面
+	useEffect(() => {
 		updateTableCanvasSize()
 		handleResize()
 		flushTable()
