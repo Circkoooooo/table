@@ -1,4 +1,4 @@
-import { Coordinate, DrawLineProperty } from "./types"
+import { Coordinate, CustomCanvas, DrawLineProperty } from "./types"
 
 /**
  *
@@ -7,7 +7,7 @@ import { Coordinate, DrawLineProperty } from "./types"
  * @param initialHeight canvas height the first render
  * @returns
  */
-const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
+const customCanvas: CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 	const canvasState = {
 		canvasTarget: _canvasTarget,
 		_canvasContext: _canvasTarget.getContext("2d"),
@@ -22,7 +22,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		return canvasState._canvasContext
 	}
 
-	const updateStrokeColor = (lineColor?: DrawLineProperty["lineColor"]) => {
+	const updateCanvasStrokeColor = (lineColor?: DrawLineProperty["lineColor"]) => {
 		if (!lineColor || lineColor === canvasState.canvasStrokeColor) return
 		const ctx = getCanvasContext()
 		ctx && (ctx.strokeStyle = lineColor)
@@ -40,7 +40,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		return canvasState.canvasLineWidth
 	}
 
-	const recordDpr = () => {
+	const _recordDpr = () => {
 		canvasState.devicePixelRatio = window.devicePixelRatio
 		return canvasState.devicePixelRatio
 	}
@@ -49,7 +49,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		return canvasState.devicePixelRatio
 	}
 
-	const getPixelOffset = (lineWidth: number) => {
+	const _getPixelOffset = (lineWidth: number) => {
 		const ctx = getCanvasContext()
 		if (!ctx) return null
 
@@ -97,7 +97,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		const markLine = (start: Coordinate, end: Coordinate) => {
 			if (!context) return
 
-			const offset = getPixelOffset(canvasState.canvasLineWidth) ?? 0
+			const offset = _getPixelOffset(canvasState.canvasLineWidth) ?? 0
 			context.moveTo(start.x + offset, start.y + offset)
 			context.lineTo(end.x + offset, end.y + offset)
 		}
@@ -140,7 +140,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		) => {
 			if (!context) return
 
-			const offset = getPixelOffset(canvasState.canvasLineWidth) ?? 0
+			const offset = _getPixelOffset(canvasState.canvasLineWidth) ?? 0
 			context.font = `${fontSize}px Microsoft Yahei`
 			context.textAlign = textAlign
 			context.textBaseline = textBaseline
@@ -231,7 +231,7 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		const ctx = getCanvasContext()
 		if (!canvas || !ctx) return
 
-		const dpr = recordDpr()
+		const dpr = _recordDpr()
 
 		canvas.style.width = `${initialWidth / dpr}px`
 		canvas.style.height = `${initialHeight / dpr}px`
@@ -242,16 +242,17 @@ const CustomCanvas = (_canvasTarget: HTMLCanvasElement) => {
 		drawText,
 		updateSize,
 		getDpr,
-		getPixelOffset,
+		_getPixelOffset,
 		measureText,
 		getTextHeight,
-		updateStrokeColor,
+		updateCanvasStrokeColor,
 		updateCanvasLineWidth,
 		clipRect,
 		restoreClip,
 		fillRect,
+		_recordDpr,
 	}
 }
 
-export { CustomCanvas }
-export type CustomCanvasType = ReturnType<typeof CustomCanvas>
+export { customCanvas }
+export type CustomCanvasType = ReturnType<typeof customCanvas>

@@ -1,4 +1,4 @@
-import { CustomCanvas } from "."
+import { customCanvas } from "."
 import { calcOffsetArr } from "../calcOffsetArr"
 import { calcSumExtraSize } from "../calcSumExtraSize"
 import { CellData } from "../cellDataHandler"
@@ -15,7 +15,7 @@ const tableCanvas: TableCanvas = (canvas: HTMLCanvasElement) => {
 		},
 	}
 
-	const { drawLine, updateSize, drawText, getDpr, updateStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = CustomCanvas(canvas)
+	const { drawLine, updateSize, drawText, getDpr, updateCanvasStrokeColor, updateCanvasLineWidth, clipRect, restoreClip, fillRect } = customCanvas(canvas)
 
 	// 更新画布尺寸
 	const updateCanvasSize = (width: number, height: number) => {
@@ -423,13 +423,13 @@ const tableCanvas: TableCanvas = (canvas: HTMLCanvasElement) => {
 			drawHeaderText()
 
 			startMark()
-			updateStrokeColor("#E0E0E0")
+			updateCanvasStrokeColor("#E0E0E0")
 			drawBodyHorizontal()
 			drawBodyVertical()
 			closeMarkAndDraw()
 
 			startMark()
-			updateStrokeColor(drawLineProperty.lineColor)
+			updateCanvasStrokeColor(drawLineProperty.lineColor)
 			drawHorizontalHeader()
 			drawVerticalHeader()
 			closeMarkAndDraw()
