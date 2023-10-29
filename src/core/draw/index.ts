@@ -1,14 +1,5 @@
-export type Coordinate = {
-	x: number
-	y: number
-}
+import { Coordinate, DrawLineProperty } from "./types"
 
-export type DrawLineProperty = {
-	lineColor?: string
-	lineWidth?: number
-	maxRenderRowCount?: number
-	maxRenderColumnCount?: number
-}
 /**
  *
  * @param canvasId id of canvas target

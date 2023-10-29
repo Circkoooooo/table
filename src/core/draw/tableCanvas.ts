@@ -1,13 +1,13 @@
-import { CustomCanvas, DrawLineProperty } from "."
+import { CustomCanvas } from "."
 import { calcOffsetArr } from "../calcOffsetArr"
 import { calcSumExtraSize } from "../calcSumExtraSize"
 import { CellData } from "../cellDataHandler"
 import { CanvasDrawConfig, CanvasStaticConfig, TableRowColumnCellConfig } from "../redux/canvas/canvasSlice.types"
 import { CellDataInfoNumConfig } from "../redux/table-data/tableDataSlice"
 import { getColumnLabel, getRowLabel } from "../ruler"
-import { CanvasRenderProperty } from "./types/tableCanvas"
+import { CanvasRenderProperty, DrawLineProperty, TableCanvas } from "./types"
 
-const tableCanvas = (canvas: HTMLCanvasElement) => {
+const tableCanvas: TableCanvas = (canvas: HTMLCanvasElement) => {
 	const canvasState = {
 		currentCanvasSize: {
 			width: 0,
@@ -42,13 +42,12 @@ const tableCanvas = (canvas: HTMLCanvasElement) => {
 		_canvasRenderProperty: CanvasRenderProperty,
 		_drawLineProperty?: DrawLineProperty
 	) => {
-		let dpr = getDpr()
 		const { width, height } = canvasState.currentCanvasSize
-		const { beginPath, markLine, strokeLine, closePath } = drawLine()
-
 		const { headerFontSize } = _staticConfig
-
 		const { rowHeight, columnWidth } = _tableRowColumnCellConfig
+
+		let dpr = getDpr()
+		const { beginPath, markLine, strokeLine, closePath } = drawLine()
 
 		const drawTableState = {
 			offsetTop: 0,
@@ -108,6 +107,7 @@ const tableCanvas = (canvas: HTMLCanvasElement) => {
 			},
 			dpr
 		)
+
 		const { leftOffsetArr, topOffsetArr } = calcOffsetArr(
 			{
 				rowNum,
